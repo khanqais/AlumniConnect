@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { student_logo } from '../assets/images';
+import student_logo from '../assets/images/student_logo.png';
 
 type FormData = {
   name: string;

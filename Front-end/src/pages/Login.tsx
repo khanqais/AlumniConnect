@@ -37,8 +37,9 @@ const Login = () => {
         // Redirect to dashboard
         navigate('/dashboard'); // Changed from '/'
         
-    } catch (err: any) {
-        setError(err.response?.data?.message || 'Invalid credentials');
+    } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error.response?.data?.message || 'Invalid credentials');
     } finally {
         setLoading(false);
     }

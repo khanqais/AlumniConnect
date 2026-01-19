@@ -6,7 +6,12 @@ const {
     getApprovedUsers,
     getUserById,
     updateUserStatus,
-    getAdminStats
+    getAdminStats,
+    getPendingResources,      // Add
+    getApprovedResources,     // Add
+    updateResourceStatus,     // Add
+    deleteResourceAdmin,      // Add
+
 } = require('../controllers/adminController');
 
 // Admin login route (no authentication needed)
@@ -18,5 +23,11 @@ router.get('/approved', getApprovedUsers);
 router.get('/user/:id', getUserById);
 router.put('/status/:id', updateUserStatus);
 router.get('/stats', getAdminStats);
+
+router.get('/resources/pending', getPendingResources);
+router.get('/resources/approved', getApprovedResources);
+router.put('/resources/status/:id', updateResourceStatus);
+router.delete('/resources/:id', deleteResourceAdmin);
+
 
 module.exports = router;

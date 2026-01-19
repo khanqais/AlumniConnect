@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 
 dotenv.config();
@@ -16,16 +17,34 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Static folder for uploads
+// Create uploads folder if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('✅ Uploads folder created');
+}
+
+// Static folder for uploads with error handling
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/resources', require('./routes/resourceRoutes'));
+app.use('/api/blogs', require('./routes/blogRoutes'));
+app.use('/api/questions', require('./routes/questionRoutes'));
 
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Handle 404 for missing files
+app.use((req, res, next) => {
+    if (req.path.startsWith('/uploads/')) {
+        return res.status(404).json({ message: 'File not found' });
+    }
+    next();
 });
 
 // Error handling middleware

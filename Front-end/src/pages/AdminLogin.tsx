@@ -40,9 +40,10 @@ const AdminLogin = () => {
                 // Navigate to admin dashboard
                 navigate('/admin/dashboard', { replace: true });
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('❌ Admin Login Error:', err);
-            setError(err.response?.data?.message || 'Invalid admin credentials');
+            const error = err as { response?: { data?: { message?: string } } };
+            setError(error.response?.data?.message || 'Invalid admin credentials');
         } finally {
             setLoading(false);
         }

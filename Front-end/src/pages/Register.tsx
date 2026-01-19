@@ -74,8 +74,9 @@ const Register = () => {
 
             alert('Registration successful! Please wait for admin approval.');
             navigate('/login');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Something went wrong');
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setError(error.response?.data?.message || 'Something went wrong');
         } finally {
             setLoading(false);
         }

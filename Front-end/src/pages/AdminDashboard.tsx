@@ -14,6 +14,26 @@ interface User {
     createdAt: string;
 }
 
+interface Resource {
+    _id: string;
+    title: string;
+    description: string;
+    category: string;
+    file: string;
+    uploadedBy: {
+        _id: string;
+        name: string;
+        email: string;
+        role: string;
+        collegeName: string;
+    };
+    uploaderName: string;
+    uploaderRole: string;
+    tags: string[];
+    isApproved: boolean;
+    createdAt: string;
+}
+
 interface Stats {
     totalUsers: number;
     pendingUsers: number;
@@ -26,9 +46,11 @@ interface Stats {
 const AdminDashboard = () => {
     const [pendingUsers, setPendingUsers] = useState<User[]>([]);
     const [approvedUsers, setApprovedUsers] = useState<User[]>([]);
+    const [pendingResources, setPendingResources] = useState<Resource[]>([]);
+    const [approvedResources, setApprovedResources] = useState<Resource[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending');
+    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'pendingResources' | 'approvedResources'>('pending');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -55,15 +77,19 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [pendingRes, approvedRes, statsRes] = await Promise.all([
+            const [pendingRes, approvedRes, statsRes, pendingResourcesRes, approvedResourcesRes] = await Promise.all([
                 axios.get('http://localhost:5000/api/admin/pending'),
                 axios.get('http://localhost:5000/api/admin/approved'),
                 axios.get('http://localhost:5000/api/admin/stats'),
+                axios.get('http://localhost:5000/api/admin/resources/pending'),
+                axios.get('http://localhost:5000/api/admin/resources/approved'),
             ]);
             
             setPendingUsers(pendingRes.data);
             setApprovedUsers(approvedRes.data);
             setStats(statsRes.data);
+            setPendingResources(pendingResourcesRes.data);
+            setApprovedResources(approvedResourcesRes.data);
         } catch (err) {
             console.error(err);
             alert('Failed to fetch data');
@@ -111,6 +137,38 @@ const AdminDashboard = () => {
     const openRejectModal = (user: User) => {
         setUserToReject(user);
         setShowRejectModal(true);
+    };
+
+    const handleApproveResource = async (id: string, title: string) => {
+        if (!window.confirm(`Are you sure you want to approve "${title}"?`)) return;
+
+        try {
+            await axios.put(`http://localhost:5000/api/admin/resources/status/${id}`, {
+                status: 'approved'
+            });
+            
+            alert(`"${title}" has been approved successfully!`);
+            fetchData();
+        } catch (err) {
+            console.error(err);
+            alert('Resource approval failed. Please try again.');
+        }
+    };
+
+    const handleRejectResource = async (id: string, title: string) => {
+        if (!window.confirm(`Are you sure you want to reject and delete "${title}"?`)) return;
+
+        try {
+            await axios.put(`http://localhost:5000/api/admin/resources/status/${id}`, {
+                status: 'rejected'
+            });
+            
+            alert(`"${title}" has been rejected and deleted.`);
+            fetchData();
+        } catch (err) {
+            console.error(err);
+            alert('Resource rejection failed. Please try again.');
+        }
     };
 
     const viewUserDetails = (user: User) => {
@@ -247,7 +305,7 @@ const AdminDashboard = () => {
                                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                 }`}
                             >
-                                Pending Applications ({pendingUsers.length})
+                                Pending Users ({pendingUsers.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('approved')}
@@ -259,11 +317,32 @@ const AdminDashboard = () => {
                             >
                                 Approved Users ({approvedUsers.length})
                             </button>
+                            <button
+                                onClick={() => setActiveTab('pendingResources')}
+                                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                                    activeTab === 'pendingResources'
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Pending Resources ({pendingResources.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('approvedResources')}
+                                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                                    activeTab === 'approvedResources'
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Approved Resources ({approvedResources.length})
+                            </button>
                         </nav>
                     </div>
                 </div>
 
                 {/* Users Table */}
+                {(activeTab === 'pending' || activeTab === 'approved') && (
                 <div className="overflow-hidden rounded-lg bg-white shadow">
                     {displayUsers.length === 0 ? (
                         <div className="px-6 py-16 text-center">
@@ -371,6 +450,106 @@ const AdminDashboard = () => {
                         </div>
                     )}
                 </div>
+                )}
+
+                {/* Resources Table */}
+                {(activeTab === 'pendingResources' || activeTab === 'approvedResources') && (
+                <div className="overflow-hidden rounded-lg bg-white shadow">
+                    {((activeTab === 'pendingResources' && pendingResources.length === 0) || 
+                      (activeTab === 'approvedResources' && approvedResources.length === 0)) ? (
+                        <div className="px-6 py-16 text-center">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p className="mt-4 text-lg font-medium text-gray-900">
+                                {activeTab === 'pendingResources' ? 'No pending resources' : 'No approved resources yet'}
+                            </p>
+                            <p className="mt-2 text-sm text-gray-500">
+                                {activeTab === 'pendingResources'
+                                    ? 'All resources have been processed'
+                                    : 'Approved resources will appear here'}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Resource</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Uploaded By</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tags</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 bg-white">
+                                    {(activeTab === 'pendingResources' ? pendingResources : approvedResources).map((resource) => (
+                                        <tr key={resource._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900">{resource.title}</div>
+                                                <div className="text-sm text-gray-500">{resource.description}</div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4">
+                                                <span className="inline-flex rounded-full bg-purple-100 px-2 py-1 text-xs font-semibold text-purple-800">
+                                                    {resource.category}
+                                                </span>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4">
+                                                <div className="text-sm text-gray-900">{resource.uploaderName}</div>
+                                                <div className="text-xs text-gray-500 capitalize">{resource.uploaderRole}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {resource.tags?.slice(0, 2).map((tag, idx) => (
+                                                        <span key={idx} className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                    {resource.tags?.length > 2 && (
+                                                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                                                            +{resource.tags.length - 2}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                                {new Date(resource.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openDocument(resource.file)}
+                                                        className="rounded-md bg-indigo-50 px-3 py-1 text-indigo-600 hover:bg-indigo-100"
+                                                    >
+                                                        View File
+                                                    </button>
+                                                    {activeTab === 'pendingResources' && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleApproveResource(resource._id, resource.title)}
+                                                                className="rounded-md bg-green-50 px-3 py-1 text-green-600 hover:bg-green-100"
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleRejectResource(resource._id, resource.title)}
+                                                                className="rounded-md bg-red-50 px-3 py-1 text-red-600 hover:bg-red-100"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+                )}
             </main>
 
             {/* User Details Modal */}

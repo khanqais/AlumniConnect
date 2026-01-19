@@ -35,4 +35,12 @@ const admin = (req, res, next) => {
     }
 };
 
-module.exports = { protect, admin };
+const alumniOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'alumni') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Only alumni can perform this action' });
+    }
+};
+
+module.exports = { protect, admin, alumniOnly };

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Resource = require('../models/Resource');
 
 // @desc Admin login (check against .env)
 // @route POST /api/admin/login
@@ -89,6 +90,7 @@ const getUserById = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 // @desc Update user approval status (approve/reject)
 // @route PUT /api/admin/status/:id
@@ -200,6 +202,95 @@ const getAdminStats = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+const getPendingResources = async (req, res) => {
+    try {
+        const resources = await Resource.find({ isApproved: false })
+            .populate('uploadedBy', 'name email role collegeName')
+            .sort({ createdAt: -1 });
+
+        res.json(resources);
+    } catch (error) {
+        console.error('Get pending resources error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Get all approved resources
+// @route GET /api/admin/resources/approved
+// @access Private/Admin
+const getApprovedResources = async (req, res) => {
+    try {
+        const resources = await Resource.find({ isApproved: true })
+            .populate('uploadedBy', 'name email role collegeName')
+            .sort({ createdAt: -1 });
+
+        res.json(resources);
+    } catch (error) {
+        console.error('Get approved resources error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Approve or reject resource
+// @route PUT /api/admin/resources/status/:id
+// @access Private/Admin
+const updateResourceStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const resource = await Resource.findById(req.params.id);
+
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        if (status === 'approved') {
+            resource.isApproved = true;
+            await resource.save();
+
+            res.json({
+                success: true,
+                message: 'Resource approved successfully',
+                resource,
+            });
+        } else if (status === 'rejected') {
+            await Resource.findByIdAndDelete(req.params.id);
+
+            res.json({
+                success: true,
+                message: 'Resource rejected and deleted',
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid status. Use "approved" or "rejected"',
+            });
+        }
+    } catch (error) {
+        console.error('Update resource status error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Delete any resource (admin)
+// @route DELETE /api/admin/resources/:id
+// @access Private/Admin
+const deleteResourceAdmin = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        await Resource.findByIdAndDelete(req.params.id);
+
+        res.json({ success: true, message: 'Resource deleted successfully' });
+    } catch (error) {
+        console.error('Delete resource error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 
 module.exports = {
     adminLogin,
@@ -208,4 +299,9 @@ module.exports = {
     getUserById,
     updateUserStatus,
     getAdminStats,
+    getPendingResources,
+    getApprovedResources,
+    updateResourceStatus,
+    deleteResourceAdmin,
+
 };

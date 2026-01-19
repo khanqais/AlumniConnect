@@ -6,10 +6,14 @@ import Register from './pages/Register';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
+import Resources from './pages/Resources';
+import Blogs from './pages/Blogs';
+import BlogDetail from './pages/BlogDetail';
+import type { ReactElement } from 'react';
 import './App.css';
 
 // Admin Route Protection
-const AdminRoute = ({ children }: { children: JSX.Element }) => {
+const AdminRoute = ({ children }: { children: ReactElement }) => {
   const isAdmin = localStorage.getItem('adminAuth') === 'true';
   
   if (!isAdmin) {
@@ -20,7 +24,7 @@ const AdminRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 // User Route Protection
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+const ProtectedRoute = ({ children }: { children: ReactElement }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -42,7 +46,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 // Public Route (redirect if already logged in)
-const PublicRoute = ({ children }: { children: JSX.Element }) => {
+const PublicRoute = ({ children }: { children: ReactElement }) => {
   const { user } = useAuth();
   
   if (user) {
@@ -76,6 +80,30 @@ function App() {
                 <Login />
               </PublicRoute>
             } 
+          />
+          <Route
+            path="/resources"
+            element={
+              <ProtectedRoute>
+                <Resources />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/blogs"
+            element={
+              <ProtectedRoute>
+                <Blogs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/blogs/:id"
+            element={
+              <ProtectedRoute>
+                <BlogDetail />
+              </ProtectedRoute>
+            }
           />
           
           {/* Admin Routes (separate from user auth) */}

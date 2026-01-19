@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Resource = require('../models/Resource');
+const Blog = require('../models/Blog');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -14,13 +16,32 @@ const generateToken = (id) => {
 // @access Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, role, university, graduationYear, skills } = req.body;
+        const { name, email, password, role, collegeName, graduationYear, skills, experience } = req.body;
+
+        // Validation
+        if (!name || !email || !password || !collegeName) {
+            return res.status(400).json({ message: 'Please fill all required fields' });
+        }
 
         // Check if user exists
         const userExists = await User.findOne({ email });
 
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Alumni-specific validation
+        if (role === 'alumni') {
+            if (!graduationYear || !experience) {
+                return res.status(400).json({ 
+                    message: 'Alumni must provide graduation year and experience' 
+                });
+            }
+        }
+
+        // Document validation
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please upload a verification document' });
         }
 
         // Hash password
@@ -36,10 +57,11 @@ const registerUser = async (req, res) => {
             email,
             password: hashedPassword,
             role,
-            university,
+            collegeName,
             graduationYear: role === 'alumni' ? graduationYear : undefined,
+            experience: role === 'alumni' ? experience : undefined,
             skills: skillsArray,
-            document: req.file ? req.file.path : '',
+            document: req.file.path,
             isApproved: false,
         });
 
@@ -55,7 +77,7 @@ const registerUser = async (req, res) => {
             res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
-        console.error(error);
+        console.error('Registration error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -103,7 +125,49 @@ const loginUser = async (req, res) => {
     }
 };
 
+// @desc Get user stats
+// @route GET /api/auth/stats
+// @access Private
+const getUserStats = async (req, res) => {
+    try {
+        // Get approved resource count
+        const resourcesApproved = await Resource.countDocuments({ 
+            uploadedBy: req.user._id,
+            isApproved: true 
+        });
+
+        // Get pending resource count
+        const resourcesPending = await Resource.countDocuments({ 
+            uploadedBy: req.user._id,
+            isApproved: false 
+        });
+
+        // Get blog count (all blogs since they auto-publish for alumni)
+        const blogsPublished = await Blog.countDocuments({ 
+            author: req.user._id,
+            isPublished: true 
+        });
+
+        // For now, questions count is 0 (will be implemented later)
+        const questionsAsked = 0;
+
+        res.json({
+            success: true,
+            stats: {
+                resourcesShared: resourcesApproved,
+                resourcesPending: resourcesPending,
+                blogsPublished,
+                questionsAsked,
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
+    getUserStats,
 };

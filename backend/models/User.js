@@ -20,11 +20,21 @@ const userSchema = mongoose.Schema(
             enum: ['student', 'alumni', 'admin'],
             default: 'student',
         },
-        university: {
+        collegeName: {
             type: String,
+            required: [true, 'Please add college name'],
         },
         graduationYear: {
             type: Number,
+            required: function() {
+                return this.role === 'alumni';
+            }
+        },
+        experience: {
+            type: String,
+            required: function() {
+                return this.role === 'alumni';
+            }
         },
         skills: {
             type: [String],
@@ -32,6 +42,7 @@ const userSchema = mongoose.Schema(
         },
         document: {
             type: String,
+            required: [true, 'Please upload a document'],
         },
         isApproved: {
             type: Boolean,
