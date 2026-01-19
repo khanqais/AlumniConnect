@@ -29,12 +29,14 @@ const Login = () => {
 
         try {
             const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+            
+            console.log('✅ User Login Response:', res.data);
+            
             login(res.data);
-            if (res.data.role === 'admin') {
-                navigate('/admin');
-            } else {
-                navigate('/');
-            }
+
+            // ONLY redirect to user dashboard (no admin check here)
+            navigate('/');
+            
         } catch (err: any) {
             setError(err.response?.data?.message || 'Invalid credentials');
         } finally {
@@ -54,6 +56,7 @@ const Login = () => {
                 {/* Login Card */}
                 <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 shadow-2xl backdrop-blur-xl">
                     <div className="px-8 py-10">
+                        {/* Header */}
                         <div className="mb-8 text-center">
                             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600">
                                 <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,6 +67,7 @@ const Login = () => {
                             <p className="mt-2 text-gray-400">Sign in to continue to your account</p>
                         </div>
 
+                        {/* Error Message */}
                         {error && (
                             <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-500/50 bg-red-500/10 p-4">
                                 <svg className="h-5 w-5 flex-shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +77,9 @@ const Login = () => {
                             </div>
                         )}
 
+                        {/* Login Form */}
                         <form onSubmit={onSubmit} className="space-y-5">
+                            {/* Email */}
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-gray-300">Email Address</label>
                                 <div className="relative">
@@ -94,6 +100,7 @@ const Login = () => {
                                 </div>
                             </div>
 
+                            {/* Password */}
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-gray-300">Password</label>
                                 <div className="relative">
@@ -114,6 +121,7 @@ const Login = () => {
                                 </div>
                             </div>
 
+                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 disabled={loading}
@@ -140,6 +148,7 @@ const Login = () => {
                             </button>
                         </form>
 
+                        {/* Sign Up Link */}
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-400">
                                 Don't have an account?{' '}
@@ -151,8 +160,26 @@ const Login = () => {
                     </div>
                 </div>
 
+                {/* Admin Login Link */}
+                <div className="mt-6 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4 backdrop-blur-sm">
+                    <div className="flex items-start gap-3">
+                        <svg className="h-5 w-5 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <h3 className="text-sm font-semibold text-blue-300">Admin Access</h3>
+                            <p className="mt-1 text-xs text-blue-200/80">
+                                Administrators should{' '}
+                                <Link to="/admin" className="font-semibold text-blue-300 underline hover:text-blue-200">
+                                    login here
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Trust Badge */}
-                <div className="mt-8 text-center">
+                <div className="mt-6 text-center">
                     <p className="text-sm text-gray-500">🔒 Your information is secure and encrypted</p>
                 </div>
             </div>
