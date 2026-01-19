@@ -23,26 +23,27 @@ const Login = () => {
     };
 
     const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-        try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', formData);
-            
-            console.log('✅ User Login Response:', res.data);
-            
-            login(res.data);
+    try {
+        const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+        
+        console.log('✅ User Login Response:', res.data);
+        
+        login(res.data);
 
-            // ONLY redirect to user dashboard (no admin check here)
-            navigate('/');
-            
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Invalid credentials');
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Redirect to dashboard
+        navigate('/dashboard'); // Changed from '/'
+        
+    } catch (err: any) {
+        setError(err.response?.data?.message || 'Invalid credentials');
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
