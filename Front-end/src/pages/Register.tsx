@@ -13,7 +13,6 @@ const Register = () => {
         skills: '',
         experience: '',
     });
-    const [document, setDocument] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -28,16 +27,18 @@ const Register = () => {
         }));
     };
 
-    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setDocument(e.target.files[0]);
-        }
-    };
-
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // Email domain validation
+        const emailDomain = email.split('@')[1];
+        if (!emailDomain || emailDomain !== 'tsecedu.org') {
+            setError('Please use your institute email (e.g., yourname@tsecedu.org)');
+            setLoading(false);
+            return;
+        }
 
         // Validation
         if (role === 'alumni' && (!graduationYear || !experience)) {
@@ -46,33 +47,25 @@ const Register = () => {
             return;
         }
 
-        if (!document) {
-            setError('Please upload a verification document');
-            setLoading(false);
-            return;
-        }
-
         try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('name', name);
-            formDataToSend.append('email', email);
-            formDataToSend.append('password', password);
-            formDataToSend.append('role', role);
-            formDataToSend.append('collegeName', collegeName);
-            if (role === 'alumni') {
-                formDataToSend.append('graduationYear', graduationYear);
-                formDataToSend.append('experience', experience);
-            }
-            formDataToSend.append('skills', skills);
-            formDataToSend.append('document', document);
+            const dataToSend = {
+                name,
+                email,
+                password,
+                role,
+                collegeName,
+                graduationYear: role === 'alumni' ? graduationYear : undefined,
+                experience: role === 'alumni' ? experience : undefined,
+                skills,
+            };
 
-            await axios.post('http://localhost:5000/api/auth/register', formDataToSend, {
+            await axios.post('http://localhost:5000/api/auth/register', dataToSend, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                 },
             });
 
-            alert('Registration successful! Please wait for admin approval.');
+            alert('Registration successful! Please check your Outlook email (@tsecol.onmicrosoft.com) to verify your account.');
             navigate('/login');
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
@@ -89,6 +82,16 @@ const Register = () => {
                 <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
                 <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
             </div>
+
+            {/* Home Link */}
+            <Link to="/" className="absolute left-6 top-6 z-20 flex items-center gap-2 transition-opacity hover:opacity-80">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <span className="text-xl font-bold text-white">AlumniConnect</span>
+            </Link>
 
             <div className="relative w-full max-w-2xl">
                 {/* Register Card */}
@@ -152,7 +155,7 @@ const Register = () => {
                             {/* Email */}
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-gray-300">
-                                    Email Address <span className="text-red-400">*</span>
+                                    Institute Email <span className="text-red-400">*</span>
                                 </label>
                                 <div className="relative">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -167,9 +170,10 @@ const Register = () => {
                                         onChange={onChange}
                                         required
                                         className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 pr-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                        placeholder="you@university.edu"
+                                        placeholder="yourname@tsecedu.org"
                                     />
                                 </div>
+                                <p className="mt-1 text-xs text-gray-500">Only institute email (@tsecedu.org) is accepted</p>
                             </div>
 
                             {/* Password */}
@@ -267,42 +271,6 @@ const Register = () => {
                                 <p className="mt-1 text-xs text-gray-500">Separate multiple skills with commas</p>
                             </div>
 
-                            {/* Document Upload */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">
-                                    Verification Document <span className="text-red-400">*</span>
-                                </label>
-                                <div className="mt-1 flex justify-center rounded-lg border-2 border-dashed border-white/20 bg-white/5 px-6 py-8 transition-all hover:border-purple-500/50">
-                                    <div className="space-y-2 text-center">
-                                        <svg className="mx-auto h-12 w-12 text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                        <div className="flex text-sm text-gray-400">
-                                            <label htmlFor="document-upload" className="relative cursor-pointer rounded-md font-medium text-purple-400 transition-colors hover:text-purple-300">
-                                                <span>Upload a file</span>
-                                                <input
-                                                    id="document-upload"
-                                                    name="document-upload"
-                                                    type="file"
-                                                    className="sr-only"
-                                                    onChange={onFileChange}
-                                                    required
-                                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                                />
-                                            </label>
-                                            <p className="pl-1">or drag and drop</p>
-                                        </div>
-                                        <p className="text-xs text-gray-500">
-                                            {document ? (
-                                                <span className="font-medium text-purple-400">✓ {document.name}</span>
-                                            ) : (
-                                                'ID Card or Marksheet (PDF, JPG, PNG up to 10MB)'
-                                            )}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* Submit Button */}
                             <button
                                 type="submit"
@@ -351,8 +319,8 @@ const Register = () => {
                         <div>
                             <h3 className="text-sm font-semibold text-blue-300">Registration Process</h3>
                             <p className="mt-1 text-xs text-blue-200/80">
-                                After submitting, an admin will review your application and uploaded document. 
-                                You'll be notified once your account is approved.
+                                After submitting, you'll receive a verification email at your Outlook address (@tsecol.onmicrosoft.com). 
+                                Click the verification link to activate your account instantly - no admin approval needed!
                             </p>
                         </div>
                     </div>

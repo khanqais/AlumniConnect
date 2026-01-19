@@ -13,8 +13,8 @@ const uploadResource = async (req, res) => {
 
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
 
-        // Auto-approve for alumni, require approval for students
-        const isApproved = req.user.role === 'alumni' ? true : false;
+        // Auto-approve all resources (no admin approval needed)
+        const isApproved = true;
 
         const resource = await Resource.create({
             title,
@@ -25,14 +25,12 @@ const uploadResource = async (req, res) => {
             uploaderName: req.user.name,
             uploaderRole: req.user.role,
             tags: tagsArray,
-            isApproved: isApproved, // Auto-approve for alumni
+            isApproved: isApproved,
         });
 
         res.status(201).json({
             success: true,
-            message: req.user.role === 'alumni' 
-                ? 'Resource uploaded and published successfully!' 
-                : 'Resource uploaded successfully! Waiting for admin approval.',
+            message: 'Resource uploaded and published successfully!',
             resource,
         });
     } catch (error) {
@@ -59,7 +57,7 @@ const getResources = async (req, res) => {
         }
 
         const resources = await Resource.find(query)
-            .populate('uploadedBy', 'name role collegeName')
+            .populate('uploadedBy', 'name email role collegeName avatar bio company jobTitle')
             .sort({ createdAt: -1 });
 
         res.json(resources);
@@ -73,7 +71,7 @@ const getResources = async (req, res) => {
 const getResourceById = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id)
-            .populate('uploadedBy', 'name role collegeName graduationYear');
+            .populate('uploadedBy', 'name email role collegeName graduationYear avatar bio company jobTitle');
 
         if (!resource) {
             return res.status(404).json({ message: 'Resource not found' });

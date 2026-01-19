@@ -71,7 +71,10 @@ const Dashboard = () => {
 
                         {/* User Menu */}
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => navigate('/profile')}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-white/10"
+                            >
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 font-bold text-white">
                                     {user?.name.charAt(0).toUpperCase()}
                                 </div>
@@ -79,7 +82,7 @@ const Dashboard = () => {
                                     <h2 className="text-sm font-semibold text-white">{user?.name}</h2>
                                     <p className="text-xs capitalize text-gray-400">{user?.role}</p>
                                 </div>
-                            </div>
+                            </button>
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition-all hover:bg-red-500/20"

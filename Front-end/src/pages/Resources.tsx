@@ -11,6 +11,16 @@ interface Resource {
     file: string;
     uploaderName: string;
     uploaderRole: string;
+    uploadedBy: {
+        _id: string;
+        name: string;
+        email: string;
+        role: string;
+        avatar?: string;
+        bio?: string;
+        company?: string;
+        jobTitle?: string;
+    };
     tags: string[];
     downloads: number;
     likes: number;
@@ -137,12 +147,7 @@ const Resources = () => {
                 },
             });
 
-            if (user?.role === 'alumni') {
-                alert('Resource uploaded and published successfully! Everyone can see it now.');
-            } else {
-                alert('Resource uploaded! It will be visible after admin approval.');
-            }
-
+            
             setShowUploadModal(false);
             setUploadForm({ title: '', description: '', category: 'resume', tags: '' });
             setUploadFile(null);
@@ -224,12 +229,21 @@ const Resources = () => {
                                 >
                                     Events
                                 </button>
+                                <button
+                                    onClick={() => navigate('/profile')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                >
+                                    Profile
+                                </button>
                             </nav>
                         </div>
 
                         {/* User Menu */}
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => navigate('/profile')}
+                            >
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 font-bold text-white">
                                     {user?.name.charAt(0).toUpperCase()}
                                 </div>
@@ -442,9 +456,33 @@ const Resources = () => {
                                             </div>
 
                                             <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                                                <div className="text-xs text-gray-400">
-                                                    <p className="font-medium text-gray-300">{resource.uploaderName}</p>
-                                                    <p>📥 {resource.downloads} downloads</p>
+                                                <div 
+                                                    className="flex items-center gap-3 cursor-pointer group/author"
+                                                    onClick={() => navigate(`/profile/${resource.uploadedBy._id}`)}
+                                                >
+                                                    {resource.uploadedBy.avatar ? (
+                                                        <img
+                                                            src={`http://localhost:5000/${resource.uploadedBy.avatar}`}
+                                                            alt={resource.uploadedBy.name}
+                                                            className="h-10 w-10 rounded-full object-cover ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-sm font-bold text-white ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all">
+                                                            {resource.uploadedBy.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium text-gray-300 group-hover/author:text-purple-300 transition-colors truncate">
+                                                            {resource.uploadedBy.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {resource.uploadedBy.company && resource.uploadedBy.jobTitle 
+                                                                ? `${resource.uploadedBy.jobTitle} at ${resource.uploadedBy.company}`
+                                                                : resource.uploadedBy.role === 'alumni' ? 'Alumni' : 'Student'
+                                                            }
+                                                        </p>
+                                                        <p className="text-xs text-gray-600">📥 {resource.downloads} downloads</p>
+                                                    </div>
                                                 </div>
                                                 <button
                                                     onClick={() => handleDownload(resource._id, resource.file)}
@@ -478,7 +516,7 @@ const Resources = () => {
                             </button>
                         </div>
 
-                        {/* Info Banner */}
+                        {/* Info Banner
                         <div className={`mb-6 rounded-lg p-4 ${
                             user?.role === 'alumni' 
                                 ? 'border border-green-500/30 bg-green-500/10'
@@ -508,7 +546,7 @@ const Resources = () => {
                                     )}
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         <form onSubmit={handleUpload} className="space-y-4">
                             <div>

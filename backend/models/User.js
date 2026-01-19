@@ -40,13 +40,52 @@ const userSchema = mongoose.Schema(
             type: [String],
             default: [],
         },
-        document: {
+        bio: {
             type: String,
-            required: [true, 'Please upload a document'],
+            default: '',
+            maxlength: 500,
+        },
+        avatar: {
+            type: String,
+            default: '',
+        },
+        linkedin: {
+            type: String,
+            default: '',
+        },
+        github: {
+            type: String,
+            default: '',
+        },
+        twitter: {
+            type: String,
+            default: '',
+        },
+        website: {
+            type: String,
+            default: '',
+        },
+        company: {
+            type: String,
+            default: '',
+        },
+        jobTitle: {
+            type: String,
+            default: '',
         },
         isApproved: {
             type: Boolean,
             default: false,
+        },
+        isEmailVerified: {
+            type: Boolean,
+            default: false,
+        },
+        emailVerificationToken: {
+            type: String,
+        },
+        emailVerificationExpires: {
+            type: Date,
         },
     },
     {

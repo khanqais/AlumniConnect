@@ -11,8 +11,8 @@ const createBlog = async (req, res) => {
         const wordCount = content.split(' ').length;
         const readTime = Math.ceil(wordCount / 200);
 
-        // Auto-publish for alumni, require approval for students
-        const isPublished = req.user.role === 'alumni' ? true : false;
+        // Auto-publish all blogs (no admin approval needed)
+        const isPublished = true;
 
         const blog = await Blog.create({
             title,
@@ -29,9 +29,7 @@ const createBlog = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: req.user.role === 'alumni' 
-                ? 'Blog published successfully!' 
-                : 'Blog submitted successfully! Waiting for admin approval.',
+            message: 'Blog published successfully!',
             blog,
         });
     } catch (error) {
@@ -58,7 +56,7 @@ const getBlogs = async (req, res) => {
         }
 
         const blogs = await Blog.find(query)
-            .populate('author', 'name role collegeName')
+            .populate('author', 'name email role collegeName avatar bio company jobTitle linkedin github twitter website')
             .sort({ createdAt: -1 });
 
         res.json(blogs);
@@ -72,7 +70,7 @@ const getBlogs = async (req, res) => {
 const getBlogById = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id)
-            .populate('author', 'name role collegeName graduationYear')
+            .populate('author', 'name email role collegeName graduationYear avatar bio company jobTitle linkedin github twitter website')
             .populate('comments.user', 'name role');
 
         if (!blog) {

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Resource = require('../models/Resource');
 const Blog = require('../models/Blog');
+const { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, convertToOutlookEmail } = require('../utils/emailService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -23,6 +24,14 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Please fill all required fields' });
         }
 
+        // Email domain validation - only allow institute email
+        const emailDomain = email.split('@')[1];
+        if (!emailDomain || emailDomain !== 'tsecedu.org') {
+            return res.status(400).json({ 
+                message: 'Please use your institute email (e.g., yourname@tsecedu.org)' 
+            });
+        }
+
         // Check if user exists
         const userExists = await User.findOne({ email });
 
@@ -39,17 +48,16 @@ const registerUser = async (req, res) => {
             }
         }
 
-        // Document validation
-        if (!req.file) {
-            return res.status(400).json({ message: 'Please upload a verification document' });
-        }
-
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Parse skills (comma-separated string to array)
         const skillsArray = skills ? skills.split(',').map(skill => skill.trim()) : [];
+
+        // Generate email verification token
+        const verificationToken = generateVerificationToken();
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
         // Create user
         const user = await User.create({
@@ -61,17 +69,28 @@ const registerUser = async (req, res) => {
             graduationYear: role === 'alumni' ? graduationYear : undefined,
             experience: role === 'alumni' ? experience : undefined,
             skills: skillsArray,
-            document: req.file.path,
             isApproved: false,
+            isEmailVerified: false,
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: verificationExpires,
         });
 
         if (user) {
+            // Send verification email
+            try {
+                const emailResult = await sendVerificationEmail(user, verificationToken);
+                console.log(`📧 Verification email sent to ${emailResult.sentTo}`);
+            } catch (emailError) {
+                console.error('Failed to send verification email:', emailError);
+                // Don't fail registration if email fails
+            }
+
             res.status(201).json({
                 _id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                message: 'Registration successful! Please wait for admin approval.',
+                message: 'Registration successful! Please check your email to verify your account.',
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
@@ -100,7 +119,14 @@ const loginUser = async (req, res) => {
                 });
             }
 
-            // Check if user is approved
+            // Check if email is verified
+            if (!user.isEmailVerified) {
+                return res.status(403).json({ 
+                    message: 'Please verify your email before logging in. Check your inbox for the verification link.' 
+                });
+            }
+
+            // Check if user is approved (auto-approved after email verification, but keeping this check)
             if (!user.isApproved) {
                 return res.status(403).json({ 
                     message: 'Your account is pending approval by admin. Please check back later.' 
@@ -166,8 +192,60 @@ const getUserStats = async (req, res) => {
     }
 };
 
+// @desc Verify email
+// @route GET /api/auth/verify-email/:token
+// @access Public
+const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        // Find user with this token
+        const user = await User.findOne({
+            emailVerificationToken: token,
+            emailVerificationExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ 
+                message: 'Invalid or expired verification link. Please register again or contact support.' 
+            });
+        }
+
+        // Update user - verify email and auto-approve
+        user.isEmailVerified = true;
+        user.isApproved = true; // Auto-approve after email verification
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpires = undefined;
+        await user.save();
+
+        console.log(`✅ Email verified for user: ${user.email}`);
+
+        // Send welcome email
+        try {
+            await sendWelcomeEmail(user);
+        } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+            // Don't fail verification if welcome email fails
+        }
+
+        res.json({
+            success: true,
+            message: 'Email verified successfully! You can now login to your account.',
+            user: {
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500).json({ message: 'Server error during email verification' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getUserStats,
+    verifyEmail,
 };

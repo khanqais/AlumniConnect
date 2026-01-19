@@ -12,8 +12,13 @@ interface Blog {
     author: {
         _id: string;
         name: string;
+        email: string;
         role: string;
         collegeName: string;
+        avatar?: string;
+        bio?: string;
+        company?: string;
+        jobTitle?: string;
     };
     authorName: string;
     tags: string[];
@@ -157,12 +162,21 @@ const Blogs = () => {
                                 >
                                     Events
                                 </button>
+                                <button
+                                    onClick={() => navigate('/profile')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                >
+                                    Profile
+                                </button>
                             </nav>
                         </div>
 
                         {/* User Menu */}
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => navigate('/profile')}
+                            >
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 font-bold text-white">
                                     {user?.name.charAt(0).toUpperCase()}
                                 </div>
@@ -382,13 +396,32 @@ const BlogCard = ({ blog, onLike }: { blog: Blog; onLike: (id: string) => void }
             )}
 
             <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-sm font-bold text-white">
-                        {blog.authorName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-300">{blog.authorName}</p>
-                        <p className="text-xs text-gray-500">
+                <div 
+                    className="flex items-center gap-3 cursor-pointer group/author flex-1"
+                    onClick={() => navigate(`/profile/${blog.author._id}`)}
+                >
+                    {blog.author.avatar ? (
+                        <img
+                            src={`http://localhost:5000/${blog.author.avatar}`}
+                            alt={blog.authorName}
+                            className="h-10 w-10 rounded-full object-cover ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all"
+                        />
+                    ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-sm font-bold text-white ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all">
+                            {blog.authorName.charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-300 group-hover/author:text-purple-300 transition-colors truncate">
+                            {blog.authorName}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                            {blog.author.company && blog.author.jobTitle 
+                                ? `${blog.author.jobTitle} at ${blog.author.company}`
+                                : `${blog.author.role === 'alumni' ? 'Alumni' : 'Student'} • ${blog.author.collegeName}`
+                            }
+                        </p>
+                        <p className="text-xs text-gray-600">
                             {new Date(blog.createdAt).toLocaleDateString('en-US', { 
                                 month: 'short', 
                                 day: 'numeric',

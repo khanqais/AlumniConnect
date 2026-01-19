@@ -23,27 +23,27 @@ const Login = () => {
     };
 
     const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+        e.preventDefault();
+        setLoading(true);
+        setError('');
 
-    try {
-        const res = await axios.post('http://localhost:5000/api/auth/login', formData);
-        
-        console.log('✅ User Login Response:', res.data);
-        
-        login(res.data);
+        try {
+            const res = await axios.post('http://localhost:5000/api/auth/login', formData);
 
-        // Redirect to dashboard
-        navigate('/dashboard'); // Changed from '/'
-        
-    } catch (err: unknown) {
-        const error = err as { response?: { data?: { message?: string } } };
-        setError(error.response?.data?.message || 'Invalid credentials');
-    } finally {
-        setLoading(false);
-    }
-};
+            console.log('✅ User Login Response:', res.data);
+
+            login(res.data);
+
+            // Redirect to dashboard
+            navigate('/dashboard'); // Changed from '/'
+
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setError(error.response?.data?.message || 'Invalid credentials');
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     return (
@@ -53,6 +53,16 @@ const Login = () => {
                 <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
                 <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
             </div>
+
+            {/* Home Link */}
+            <Link to="/" className="absolute left-6 top-6 z-20 flex items-center gap-2 transition-opacity hover:opacity-80">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <span className="text-xl font-bold text-white">AlumniConnect</span>
+            </Link>
 
             <div className="relative w-full max-w-md">
                 {/* Login Card */}

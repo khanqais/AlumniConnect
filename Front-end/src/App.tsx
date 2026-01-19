@@ -3,12 +3,14 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
 import Resources from './pages/Resources';
 import Blogs from './pages/Blogs';
 import BlogDetail from './pages/BlogDetail';
+import Profile from './pages/Profile';
 import type { ReactElement } from 'react';
 import './App.css';
 
@@ -81,6 +83,10 @@ function App() {
               </PublicRoute>
             } 
           />
+          
+          {/* Email Verification Route */}
+          <Route path="/verify-email/:token" element={<VerifyEmail />} />
+          
           <Route
             path="/resources"
             element={
@@ -123,6 +129,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profile Routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />
