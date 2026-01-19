@@ -11,6 +11,9 @@ const createBlog = async (req, res) => {
         const wordCount = content.split(' ').length;
         const readTime = Math.ceil(wordCount / 200);
 
+        // Auto-publish for alumni, require approval for students
+        const isPublished = req.user.role === 'alumni' ? true : false;
+
         const blog = await Blog.create({
             title,
             content,
@@ -21,11 +24,14 @@ const createBlog = async (req, res) => {
             authorName: req.user.name,
             coverImage: req.file ? req.file.path : null,
             readTime,
+            isPublished,
         });
 
         res.status(201).json({
             success: true,
-            message: 'Blog published successfully!',
+            message: req.user.role === 'alumni' 
+                ? 'Blog published successfully!' 
+                : 'Blog submitted successfully! Waiting for admin approval.',
             blog,
         });
     } catch (error) {

@@ -11,6 +11,10 @@ const {
     getApprovedResources,     // Add
     updateResourceStatus,     // Add
     deleteResourceAdmin,      // Add
+    getPendingBlogs,          // Add
+    getPublishedBlogs,        // Add
+    updateBlogStatus,         // Add
+    deleteBlogAdmin,          // Add
 
 } = require('../controllers/adminController');
 
@@ -28,6 +32,11 @@ router.get('/resources/pending', getPendingResources);
 router.get('/resources/approved', getApprovedResources);
 router.put('/resources/status/:id', updateResourceStatus);
 router.delete('/resources/:id', deleteResourceAdmin);
+
+router.get('/blogs/pending', getPendingBlogs);
+router.get('/blogs/published', getPublishedBlogs);
+router.put('/blogs/status/:id', updateBlogStatus);
+router.delete('/blogs/:id', deleteBlogAdmin);
 
 
 module.exports = router;

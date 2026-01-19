@@ -1,54 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-interface UserStats {
-    resourcesShared: number;
-    resourcesPending?: number;
-    blogsPublished: number;
-    questionsAsked: number;
-}
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const [stats, setStats] = useState<UserStats>({
-        resourcesShared: 0,
-        resourcesPending: 0,
-        blogsPublished: 0,
-        questionsAsked: 0,
-    });
-    const [loading, setLoading] = useState(true);
-
-    const fetchUserStats = useCallback(async () => {
-        try {
-            // Fetch user stats from the dedicated stats endpoint
-            const statsRes = await axios.get('http://localhost:5000/api/auth/stats', {
-                headers: {
-                    Authorization: `Bearer ${user?.token}`,
-                },
-            });
-
-            console.log('📊 Stats received:', statsRes.data.stats);
-            setStats(statsRes.data.stats);
-        } catch (error) {
-            console.error('Error fetching stats:', error);
-            // Fallback to zeros if API fails
-            setStats({
-                resourcesShared: 0,
-                resourcesPending: 0,
-                blogsPublished: 0,
-                questionsAsked: 0,
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, [user?.token]);
-
-    useEffect(() => {
-        fetchUserStats();
-    }, [fetchUserStats]);
 
     const handleLogout = () => {
         logout();
@@ -146,9 +102,9 @@ const Dashboard = () => {
                     <p className="mt-2 text-lg text-gray-300">Your mentorship journey starts here</p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                {/* Profile Card */}
+                <div className="mb-8">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl max-w-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-400">Your Profile</p>
@@ -157,66 +113,6 @@ const Dashboard = () => {
                             <div className="rounded-xl bg-purple-500/20 p-3">
                                 <svg className="h-6 w-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-400">Resources Shared</p>
-                                <p className="mt-2 text-2xl font-bold text-white">
-                                    {loading ? (
-                                        <span className="inline-block h-8 w-12 animate-pulse rounded bg-white/10"></span>
-                                    ) : (
-                                        (stats.resourcesShared || 0) + (stats.resourcesPending || 0)
-                                    )}
-                                </p>
-                            </div>
-                            <div className="rounded-xl bg-green-500/20 p-3">
-                                <svg className="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-400">Blogs Published</p>
-                                <p className="mt-2 text-2xl font-bold text-white">
-                                    {loading ? (
-                                        <span className="inline-block h-8 w-12 animate-pulse rounded bg-white/10"></span>
-                                    ) : (
-                                        stats.blogsPublished
-                                    )}
-                                </p>
-                            </div>
-                            <div className="rounded-xl bg-blue-500/20 p-3">
-                                <svg className="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-400">Questions Asked</p>
-                                <p className="mt-2 text-2xl font-bold text-white">
-                                    {loading ? (
-                                        <span className="inline-block h-8 w-12 animate-pulse rounded bg-white/10"></span>
-                                    ) : (
-                                        stats.questionsAsked
-                                    )}
-                                </p>
-                            </div>
-                            <div className="rounded-xl bg-pink-500/20 p-3">
-                                <svg className="h-6 w-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                         </div>

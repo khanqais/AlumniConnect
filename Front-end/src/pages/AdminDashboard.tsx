@@ -34,6 +34,29 @@ interface Resource {
     createdAt: string;
 }
 
+interface Blog {
+    _id: string;
+    title: string;
+    content: string;
+    excerpt: string;
+    category: string;
+    coverImage?: string;
+    author: {
+        _id: string;
+        name: string;
+        email: string;
+        role: string;
+        collegeName: string;
+    };
+    authorName: string;
+    tags: string[];
+    isPublished: boolean;
+    readTime: number;
+    views: number;
+    likes: number;
+    createdAt: string;
+}
+
 interface Stats {
     totalUsers: number;
     pendingUsers: number;
@@ -48,9 +71,11 @@ const AdminDashboard = () => {
     const [approvedUsers, setApprovedUsers] = useState<User[]>([]);
     const [pendingResources, setPendingResources] = useState<Resource[]>([]);
     const [approvedResources, setApprovedResources] = useState<Resource[]>([]);
+    const [pendingBlogs, setPendingBlogs] = useState<Blog[]>([]);
+    const [publishedBlogs, setPublishedBlogs] = useState<Blog[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'pendingResources' | 'approvedResources'>('pending');
+    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'pendingResources' | 'approvedResources' | 'pendingBlogs' | 'publishedBlogs'>('pending');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -77,12 +102,14 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [pendingRes, approvedRes, statsRes, pendingResourcesRes, approvedResourcesRes] = await Promise.all([
+            const [pendingRes, approvedRes, statsRes, pendingResourcesRes, approvedResourcesRes, pendingBlogsRes, publishedBlogsRes] = await Promise.all([
                 axios.get('http://localhost:5000/api/admin/pending'),
                 axios.get('http://localhost:5000/api/admin/approved'),
                 axios.get('http://localhost:5000/api/admin/stats'),
                 axios.get('http://localhost:5000/api/admin/resources/pending'),
                 axios.get('http://localhost:5000/api/admin/resources/approved'),
+                axios.get('http://localhost:5000/api/admin/blogs/pending'),
+                axios.get('http://localhost:5000/api/admin/blogs/published'),
             ]);
             
             setPendingUsers(pendingRes.data);
@@ -90,6 +117,8 @@ const AdminDashboard = () => {
             setStats(statsRes.data);
             setPendingResources(pendingResourcesRes.data);
             setApprovedResources(approvedResourcesRes.data);
+            setPendingBlogs(pendingBlogsRes.data);
+            setPublishedBlogs(publishedBlogsRes.data);
         } catch (err) {
             console.error(err);
             alert('Failed to fetch data');
@@ -143,14 +172,16 @@ const AdminDashboard = () => {
         if (!window.confirm(`Are you sure you want to approve "${title}"?`)) return;
 
         try {
-            await axios.put(`http://localhost:5000/api/admin/resources/status/${id}`, {
+            console.log('Approving resource:', id);
+            const response = await axios.put(`http://localhost:5000/api/admin/resources/status/${id}`, {
                 status: 'approved'
             });
             
+            console.log('Approval response:', response.data);
             alert(`"${title}" has been approved successfully!`);
             fetchData();
         } catch (err) {
-            console.error(err);
+            console.error('Approval error:', err);
             alert('Resource approval failed. Please try again.');
         }
     };
@@ -159,15 +190,53 @@ const AdminDashboard = () => {
         if (!window.confirm(`Are you sure you want to reject and delete "${title}"?`)) return;
 
         try {
-            await axios.put(`http://localhost:5000/api/admin/resources/status/${id}`, {
+            console.log('Rejecting resource:', id);
+            const response = await axios.put(`http://localhost:5000/api/admin/resources/status/${id}`, {
                 status: 'rejected'
             });
             
+            console.log('Rejection response:', response.data);
             alert(`"${title}" has been rejected and deleted.`);
             fetchData();
         } catch (err) {
-            console.error(err);
+            console.error('Rejection error:', err);
             alert('Resource rejection failed. Please try again.');
+        }
+    };
+
+    const handleApproveBlog = async (id: string, title: string) => {
+        if (!window.confirm(`Are you sure you want to publish "${title}"?`)) return;
+
+        try {
+            console.log('Approving blog:', id);
+            const response = await axios.put(`http://localhost:5000/api/admin/blogs/status/${id}`, {
+                status: 'approved'
+            });
+            
+            console.log('Approval response:', response.data);
+            alert(`"${title}" has been published successfully!`);
+            fetchData();
+        } catch (err) {
+            console.error('Blog approval error:', err);
+            alert('Blog approval failed. Please try again.');
+        }
+    };
+
+    const handleRejectBlog = async (id: string, title: string) => {
+        if (!window.confirm(`Are you sure you want to reject and delete "${title}"?`)) return;
+
+        try {
+            console.log('Rejecting blog:', id);
+            const response = await axios.put(`http://localhost:5000/api/admin/blogs/status/${id}`, {
+                status: 'rejected'
+            });
+            
+            console.log('Blog rejection response:', response.data);
+            alert(`"${title}" has been rejected and deleted.`);
+            fetchData();
+        } catch (err) {
+            console.error('Blog rejection error:', err);
+            alert('Blog rejection failed. Please try again.');
         }
     };
 
@@ -336,6 +405,26 @@ const AdminDashboard = () => {
                                 }`}
                             >
                                 Approved Resources ({approvedResources.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('pendingBlogs')}
+                                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                                    activeTab === 'pendingBlogs'
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Pending Blogs ({pendingBlogs.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('publishedBlogs')}
+                                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                                    activeTab === 'publishedBlogs'
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Published Blogs ({publishedBlogs.length})
                             </button>
                         </nav>
                     </div>
@@ -534,6 +623,89 @@ const AdminDashboard = () => {
                                                             </button>
                                                             <button
                                                                 onClick={() => handleRejectResource(resource._id, resource.title)}
+                                                                className="rounded-md bg-red-50 px-3 py-1 text-red-600 hover:bg-red-100"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+                )}
+
+                {/* Blogs Table */}
+                {(activeTab === 'pendingBlogs' || activeTab === 'publishedBlogs') && (
+                <div className="overflow-hidden rounded-lg bg-white shadow">
+                    {((activeTab === 'pendingBlogs' && pendingBlogs.length === 0) || 
+                      (activeTab === 'publishedBlogs' && publishedBlogs.length === 0)) ? (
+                        <div className="px-6 py-16 text-center">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <p className="mt-4 text-lg font-medium text-gray-900">
+                                {activeTab === 'pendingBlogs' ? 'No pending blogs' : 'No published blogs yet'}
+                            </p>
+                            <p className="mt-2 text-sm text-gray-500">
+                                {activeTab === 'pendingBlogs'
+                                    ? 'All blogs have been processed'
+                                    : 'Published blogs will appear here'}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Blog</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Author</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Stats</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 bg-white">
+                                    {(activeTab === 'pendingBlogs' ? pendingBlogs : publishedBlogs).map((blog) => (
+                                        <tr key={blog._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900">{blog.title}</div>
+                                                <div className="text-sm text-gray-500 line-clamp-2">{blog.excerpt}</div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4">
+                                                <span className="inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">
+                                                    {blog.category}
+                                                </span>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4">
+                                                <div className="text-sm text-gray-900">{blog.authorName}</div>
+                                                <div className="text-xs text-gray-500 capitalize">{blog.author?.role || 'N/A'}</div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4">
+                                                <div className="text-sm text-gray-900">{blog.views} views</div>
+                                                <div className="text-xs text-gray-500">{blog.likes} likes · {blog.readTime} min read</div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                                {new Date(blog.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                                <div className="flex justify-end gap-2">
+                                                    {activeTab === 'pendingBlogs' && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleApproveBlog(blog._id, blog.title)}
+                                                                className="rounded-md bg-green-50 px-3 py-1 text-green-600 hover:bg-green-100"
+                                                            >
+                                                                Publish
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleRejectBlog(blog._id, blog.title)}
                                                                 className="rounded-md bg-red-50 px-3 py-1 text-red-600 hover:bg-red-100"
                                                             >
                                                                 Reject

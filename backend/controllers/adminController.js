@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Resource = require('../models/Resource');
+const Blog = require('../models/Blog');
 
 // @desc Admin login (check against .env)
 // @route POST /api/admin/login
@@ -291,6 +292,98 @@ const deleteResourceAdmin = async (req, res) => {
     }
 };
 
+// @desc Get all pending blogs
+// @route GET /api/admin/blogs/pending
+// @access Private/Admin
+const getPendingBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find({ isPublished: false })
+            .populate('author', 'name email role collegeName')
+            .sort({ createdAt: -1 });
+
+        res.json(blogs);
+    } catch (error) {
+        console.error('Get pending blogs error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Get all published blogs
+// @route GET /api/admin/blogs/published
+// @access Private/Admin
+const getPublishedBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find({ isPublished: true })
+            .populate('author', 'name email role collegeName')
+            .sort({ createdAt: -1 });
+
+        res.json(blogs);
+    } catch (error) {
+        console.error('Get published blogs error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Approve or reject blog
+// @route PUT /api/admin/blogs/status/:id
+// @access Private/Admin
+const updateBlogStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog not found' });
+        }
+
+        if (status === 'approved') {
+            blog.isPublished = true;
+            await blog.save();
+
+            res.json({
+                success: true,
+                message: 'Blog published successfully',
+                blog,
+            });
+        } else if (status === 'rejected') {
+            await Blog.findByIdAndDelete(req.params.id);
+
+            res.json({
+                success: true,
+                message: 'Blog rejected and deleted',
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid status. Use "approved" or "rejected"',
+            });
+        }
+    } catch (error) {
+        console.error('Update blog status error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Delete any blog (admin)
+// @route DELETE /api/admin/blogs/:id
+// @access Private/Admin
+const deleteBlogAdmin = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog not found' });
+        }
+
+        await Blog.findByIdAndDelete(req.params.id);
+
+        res.json({ success: true, message: 'Blog deleted successfully' });
+    } catch (error) {
+        console.error('Delete blog error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 
 module.exports = {
     adminLogin,
@@ -303,5 +396,9 @@ module.exports = {
     getApprovedResources,
     updateResourceStatus,
     deleteResourceAdmin,
+    getPendingBlogs,
+    getPublishedBlogs,
+    updateBlogStatus,
+    deleteBlogAdmin,
 
 };

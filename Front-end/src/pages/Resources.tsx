@@ -35,7 +35,7 @@ const Resources = () => {
     const [uploadFile, setUploadFile] = useState<File | null>(null);
     const [uploadLoading, setUploadLoading] = useState(false);
 
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     const fetchResources = useCallback(async () => {
@@ -67,7 +67,6 @@ const Resources = () => {
         }
     }, [user?.token]);
 
-    // Fetch resources when component mounts or dependencies change
     useEffect(() => {
         if (user?.token) {
             fetchResources();
@@ -75,7 +74,6 @@ const Resources = () => {
         }
     }, [user?.token, fetchResources, fetchMyResources]);
 
-    // Also fetch when tab changes
     useEffect(() => {
         if (user?.token && activeTab === 'my') {
             fetchMyResources();
@@ -111,7 +109,6 @@ const Resources = () => {
                     Authorization: `Bearer ${user?.token}`,
                 },
             });
-            // Refresh both lists after liking
             await fetchResources();
             await fetchMyResources();
         } catch (error) {
@@ -140,7 +137,6 @@ const Resources = () => {
                 },
             });
 
-            // Show different message based on user role
             if (user?.role === 'alumni') {
                 alert('Resource uploaded and published successfully! Everyone can see it now.');
             } else {
@@ -151,11 +147,9 @@ const Resources = () => {
             setUploadForm({ title: '', description: '', category: 'resume', tags: '' });
             setUploadFile(null);
             
-            // Refresh both lists after upload
             await fetchResources();
             await fetchMyResources();
             
-            // Switch to "My Uploads" tab to see the newly uploaded resource
             setActiveTab('my');
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
@@ -165,10 +159,14 @@ const Resources = () => {
         }
     };
 
-    // Manual refresh button
     const handleRefresh = () => {
         fetchResources();
         fetchMyResources();
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
     };
 
     return (
@@ -179,37 +177,75 @@ const Resources = () => {
                 <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
             </div>
 
-            {/* Header */}
+            {/* Header with Full Navigation */}
             <header className="relative z-10 border-b border-white/10 bg-slate-900/50 backdrop-blur-xl">
                 <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate('/dashboard')}
-                                className="text-gray-400 hover:text-white"
-                            >
-                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                            </button>
-                            <h1 className="text-2xl font-bold text-white">Resource Library</h1>
+                        <div className="flex items-center gap-6">
+                            {/* Logo/Brand */}
+                            <div className="flex items-center gap-2">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
+                                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </div>
+                                <span className="hidden text-lg font-bold text-white sm:block">AlumniConnect</span>
+                            </div>
+
+                            {/* Navigation */}
+                            <nav className="hidden md:flex items-center gap-1">
+                                <button
+                                    onClick={() => navigate('/dashboard')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                >
+                                    Dashboard
+                                </button>
+                                <button
+                                    onClick={() => navigate('/resources')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-white bg-white/10"
+                                >
+                                    Resources
+                                </button>
+                                <button
+                                    onClick={() => navigate('/blogs')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                >
+                                    Blogs
+                                </button>
+                                <button
+                                    onClick={() => navigate('/community')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                >
+                                    Community
+                                </button>
+                                <button
+                                    onClick={() => navigate('/events')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                >
+                                    Events
+                                </button>
+                            </nav>
                         </div>
+
+                        {/* User Menu */}
                         <div className="flex items-center gap-3">
-                            {/* Refresh Button */}
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 font-bold text-white">
+                                    {user?.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="hidden sm:block">
+                                    <h2 className="text-sm font-semibold text-white">{user?.name}</h2>
+                                    <p className="text-xs capitalize text-gray-400">{user?.role}</p>
+                                </div>
+                            </div>
                             <button
-                                onClick={handleRefresh}
-                                className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white hover:bg-white/10"
-                                title="Refresh"
+                                onClick={handleLogout}
+                                className="flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition-all hover:bg-red-500/20"
                             >
-                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
-                            </button>
-                            <button
-                                onClick={() => setShowUploadModal(true)}
-                                className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
-                            >
-                                Upload Resource
+                                <span className="hidden sm:inline">Logout</span>
                             </button>
                         </div>
                     </div>
@@ -218,6 +254,29 @@ const Resources = () => {
 
             {/* Main Content */}
             <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                {/* Page Title & Actions */}
+                <div className="mb-8 flex items-center justify-between">
+                    <h1 className="text-3xl font-bold text-white">Resource Library</h1>
+                    <div className="flex items-center gap-3">
+                        {/* Refresh Button */}
+                        <button
+                            onClick={handleRefresh}
+                            className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white hover:bg-white/10"
+                            title="Refresh"
+                        >
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setShowUploadModal(true)}
+                            className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                        >
+                            Upload Resource
+                        </button>
+                    </div>
+                </div>
+
                 {/* Tabs */}
                 <div className="mb-6 flex gap-2 border-b border-white/10">
                     <button
@@ -278,7 +337,6 @@ const Resources = () => {
                     </div>
                 ) : (
                     <>
-                        {/* Show based on active tab */}
                         {activeTab === 'my' ? (
                             // My Resources
                             myResources.length === 0 ? (
@@ -404,7 +462,7 @@ const Resources = () => {
                 )}
             </main>
 
-            {/* Upload Modal - Same as before */}
+            {/* Upload Modal */}
             {showUploadModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
                     <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-8">
