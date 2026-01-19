@@ -8,9 +8,10 @@ const Register = () => {
         email: '',
         password: '',
         role: 'student',
-        university: '',
+        collegeName: '',
         graduationYear: '',
         skills: '',
+        experience: '',
     });
     const [document, setDocument] = useState<File | null>(null);
     const [error, setError] = useState('');
@@ -18,9 +19,9 @@ const Register = () => {
 
     const navigate = useNavigate();
 
-    const { name, email, password, role, university, graduationYear, skills } = formData;
+    const { name, email, password, role, collegeName, graduationYear, skills, experience } = formData;
 
-    const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData((prevState) => ({
             ...prevState,
             [e.target.name]: e.target.value,
@@ -38,20 +39,32 @@ const Register = () => {
         setLoading(true);
         setError('');
 
+        // Validation
+        if (role === 'alumni' && (!graduationYear || !experience)) {
+            setError('Alumni must provide graduation year and experience');
+            setLoading(false);
+            return;
+        }
+
+        if (!document) {
+            setError('Please upload a verification document');
+            setLoading(false);
+            return;
+        }
+
         try {
             const formDataToSend = new FormData();
             formDataToSend.append('name', name);
             formDataToSend.append('email', email);
             formDataToSend.append('password', password);
             formDataToSend.append('role', role);
-            formDataToSend.append('university', university);
+            formDataToSend.append('collegeName', collegeName);
             if (role === 'alumni') {
                 formDataToSend.append('graduationYear', graduationYear);
+                formDataToSend.append('experience', experience);
             }
             formDataToSend.append('skills', skills);
-            if (document) {
-                formDataToSend.append('document', document);
-            }
+            formDataToSend.append('document', document);
 
             await axios.post('http://localhost:5000/api/auth/register', formDataToSend, {
                 headers: {
@@ -182,45 +195,71 @@ const Register = () => {
                                 <p className="mt-1 text-xs text-gray-500">Minimum 8 characters recommended</p>
                             </div>
 
-                            {/* University and Graduation Year */}
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-300">University</label>
-                                    <input
-                                        type="text"
-                                        name="university"
-                                        value={university}
-                                        onChange={onChange}
-                                        className="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                        placeholder="University Name"
-                                    />
-                                </div>
-
-                                {role === 'alumni' && (
-                                    <div>
-                                        <label className="mb-2 block text-sm font-medium text-gray-300">Graduation Year</label>
-                                        <input
-                                            type="number"
-                                            name="graduationYear"
-                                            value={graduationYear}
-                                            onChange={onChange}
-                                            min="1950"
-                                            max="2030"
-                                            className="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                            placeholder="2024"
-                                        />
-                                    </div>
-                                )}
+                            {/* College Name (Required for both) */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-gray-300">
+                                    College Name <span className="text-red-400">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="collegeName"
+                                    value={collegeName}
+                                    onChange={onChange}
+                                    required
+                                    className="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                    placeholder="e.g., Thadomal Shahani Engineering College"
+                                />
                             </div>
 
-                            {/* Skills */}
+                            {/* Alumni-specific fields */}
+                            {role === 'alumni' && (
+                                <>
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-gray-300">
+                                                Graduation Year <span className="text-red-400">*</span>
+                                            </label>
+                                            <input
+                                                type="number"
+                                                name="graduationYear"
+                                                value={graduationYear}
+                                                onChange={onChange}
+                                                required={role === 'alumni'}
+                                                min="1950"
+                                                max="2030"
+                                                className="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                                placeholder="2024"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-gray-300">
+                                                Experience (Years) <span className="text-red-400">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="experience"
+                                                value={experience}
+                                                onChange={onChange}
+                                                required={role === 'alumni'}
+                                                className="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                                placeholder="e.g., 3 years"
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Skills (Required for both) */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">Skills</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-300">
+                                    Skills <span className="text-red-400">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="skills"
                                     value={skills}
                                     onChange={onChange}
+                                    required
                                     className="block w-full rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                                     placeholder="e.g., Java, Python, Leadership"
                                 />
