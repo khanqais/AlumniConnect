@@ -14,6 +14,8 @@ import Profile from './pages/Profile';
 import VideoCall from "./pages/VideoCall";
 import type { ReactElement } from 'react';
 import './App.css';
+import CareerPathVisualizer from './pages/CareerPathVisualizer';
+import Recommendation from './pages/Recommendation';
 
 // Admin Route Protection
 const AdminRoute = ({ children }: { children: ReactElement }) => {
@@ -84,7 +86,7 @@ function App() {
               </PublicRoute>
             } 
           />
-          
+         
           {/* Email Verification Route */}
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           
@@ -104,6 +106,22 @@ function App() {
                 <Blogs />
               </ProtectedRoute>
             }
+          />
+           <Route 
+            path="/career-path" 
+            element={
+              <ProtectedRoute>
+                <CareerPathVisualizer/>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/recommendations" 
+            element={
+              <ProtectedRoute>
+                <Recommendation/>
+              </ProtectedRoute>
+            } 
           />
           <Route
             path="/blogs/:id"
