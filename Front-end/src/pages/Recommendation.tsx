@@ -19,30 +19,17 @@ import {
 } from 'lucide-react';
 import './Recommendation.css';
 
-// interface AlumniRecommendation {
-//   alumniId: string;
-//   name: string;
-//   currentRole: string;
-//   company: string;
-//   skills: string[];
-//   matchPercent: number;
-//   experience: number;
-//   availability: string;
-//   lastActive: string;
-//   bio: string;
-//   profileImage?: string;
-// }
 interface AlumniRecommendation {
-  alumniId: string;      // backend alumniId
+  alumniId: string;
   name: string;
   currentRole: string;
   company: string;
   skills: string[];
-  score: number;         // number of matched skills
-  matchPercent: number;  // 0.xxx from backend
+  score: number;
+  matchPercent: number;
   reason: string;
   availability?: string;
-  experience: number;   // optional
+  experience: number;
   lastActive?: string;
   bio?: string;
 }
@@ -56,127 +43,42 @@ const Recommendation: React.FC = () => {
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [selectedAlumni, setSelectedAlumni] = useState<AlumniRecommendation | null>(null);
 
-  // Mock user data
   const user = {
     name: 'John Student',
     role: 'student',
     skills: ['React', 'TypeScript', 'Node.js', 'MongoDB', 'AWS']
   };
 
-  // Fetch alumni recommendations (mock data)
-  // useEffect(() => {
-  //   const fetchRecommendations = async () => {
-  //     setLoading(true);
-  //     // Simulate API call
-  //     setTimeout(() => {
-  //       const mockAlumni: AlumniRecommendation[] = [
-  //         {
-  //           alumniId: '1',
-  //           name: 'Sarah Johnson',
-  //           currentRole: 'Senior Software Engineer',
-  //           company: 'Google',
-  //           skills: ['React', 'TypeScript', 'Next.js', 'GraphQL', 'AWS'],
-  //           matchPercent: 95,
-  //           experience: 8,
-  //           availability: 'Available',
-  //           lastActive: '2 days ago',
-  //           bio: 'Passionate about mentoring students and helping them land their first tech job.'
-  //         },
-  //         {
-  //           alumniId: '2',
-  //           name: 'Michael Chen',
-  //           currentRole: 'Lead Frontend Developer',
-  //           company: 'Microsoft',
-  //           skills: ['React', 'TypeScript', 'Redux', 'Jest', 'Webpack'],
-  //           matchPercent: 88,
-  //           experience: 6,
-  //           availability: 'Limited',
-  //           lastActive: '1 week ago',
-  //           bio: 'Expert in frontend architecture and performance optimization.'
-  //         },
-  //         {
-  //           alumniId: '3',
-  //           name: 'Emma Wilson',
-  //           currentRole: 'Full Stack Developer',
-  //           company: 'Amazon',
-  //           skills: ['Node.js', 'Express', 'MongoDB', 'Docker', 'AWS'],
-  //           matchPercent: 82,
-  //           experience: 5,
-  //           availability: 'Available',
-  //           lastActive: '3 days ago',
-  //           bio: 'Loves working on scalable backend systems and mentoring new developers.'
-  //         },
-  //         {
-  //           alumniId: '4',
-  //           name: 'DavalumniId Lee',
-  //           currentRole: 'DevOps Engineer',
-  //           company: 'Netflix',
-  //           skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Python'],
-  //           matchPercent: 75,
-  //           experience: 7,
-  //           availability: 'Busy',
-  //           lastActive: '2 weeks ago',
-  //           bio: 'Infrastructure specialist focused on cloud-native applications.'
-  //         },
-  //         {
-  //           alumniId: '5',
-  //           name: 'Lisa Taylor',
-  //           currentRole: 'Product Manager',
-  //           company: 'Meta',
-  //           skills: ['Product Strategy', 'Agile', 'Data Analysis', 'User Research'],
-  //           matchPercent: 65,
-  //           experience: 9,
-  //           availability: 'Available',
-  //           lastActive: '4 days ago',
-  //           bio: 'Helps teams build successful products through user-centric design.'
-  //         }
-  //       ];
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/recommendations/mentorship');
+        const data: AlumniRecommendation[] = await res.json();
 
-  //       setAlumniList(mockAlumni);
-        
-  //       // Extract all unique skills
-  //       const allSkills = Array.from(new Set(
-  //         mockAlumni.flatMap(alumni => alumni.skills)
-  //       ));
-  //       setAvailableSkills(['all', ...allSkills]);
-        
-  //       setLoading(false);
-  //     }, 1000);
-  //   };
+        setAlumniList(data);
 
-  //   fetchRecommendations();
-  // }, []);
-useEffect(() => {
-  const fetchRecommendations = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/recommendations/mentorship'); // new API
-      const data: AlumniRecommendation[] = await res.json();
+        const allSkills = Array.from(new Set(data.flatMap(a => a.skills)));
+        setAvailableSkills(['all', ...allSkills]);
 
-      setAlumniList(data);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to fetch recommendations');
+      }
+      setLoading(false);
+    };
 
-      // Extract skills from backend
-      const allSkills = Array.from(new Set(data.flatMap(a => a.skills)));
-      setAvailableSkills(['all', ...allSkills]);
-
-    } catch (err) {
-      console.error(err);
-      alert('Failed to fetch recommendations');
-    }
-    setLoading(false);
-  };
-
-  fetchRecommendations();
-}, []);
+    fetchRecommendations();
+  }, []);
 
   const handleRefresh = () => {
     setLoading(true);
     setTimeout(() => setLoading(false), 800);
   };
 
-  // const handleConnect = (alumniId: string) => {
-  //   alert(`Connection request sent to alumni!`);
-  // };
+  const handleConnect = (alumniId: string) => {
+    alert(`Connection request sent to alumni!`);
+  };
 
   const handleViewProfile = (alumni: AlumniRecommendation) => {
     setSelectedAlumni(alumni);
@@ -215,54 +117,80 @@ useEffect(() => {
         <div className="effect-circle effect-circle-2"></div>
       </div>
 
-      {/* Header Navigation */}
+      {/* Updated Header */}
       <header className="recommendation-header">
         <div className="header-container">
-          <div className="header-left">
+          <div className="flex items-center gap-6">
+            {/* Logo/Brand */}
             <Link to="/" className="logo-link">
-              <div className="logo-icon-container">
-                <Users className="logo-icon" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
+                <Users className="h-6 w-6 text-white" />
               </div>
-              <span className="logo-text">AlumniConnect</span>
+              <span className="hidden text-lg font-bold text-gray-900 sm:block">
+                AlumniConnect
+              </span>
             </Link>
             
-            <nav className="nav-links">
-              <button onClick={() => navigate('/dashboard')} className="nav-button">
-                <Home className="nav-button-icon" />
-                <span>Dashboard</span>
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+              >
+                <Home className="w-4 h-4" />
+                Dashboard
               </button>
-              <button onClick={() => navigate('/resources')} className="nav-button">
-                <FileText className="nav-button-icon" />
-                <span>Resources</span>
+              <button
+                onClick={() => navigate('/resources')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Resources
               </button>
-              <button onClick={() => navigate('/recommendations')} className="nav-button active">
-                <TrendingUp className="nav-button-icon" />
-                <span>Recommendations</span>
+              <button
+                onClick={() => navigate('/recommendations')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Recommendations
               </button>
-              <button onClick={() => navigate('/community')} className="nav-button">
-                <Users className="nav-button-icon" />
-                <span>Community</span>
+              <button
+                onClick={() => navigate('/community')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <Users className="w-4 h-4" />
+                Community
               </button>
-              <button onClick={() => navigate('/profile')} className="nav-button">
-                <User className="nav-button-icon" />
-                <span>Profile</span>
+              <button
+                onClick={() => navigate('/profile')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <User className="w-4 h-4" />
+                Profile
               </button>
             </nav>
           </div>
 
-          <div className="header-right">
-            <div className="user-profile" onClick={() => navigate('/profile')}>
-              <div className="user-avatar">
+          {/* User Menu */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              <div className="user-info">
-                <h2 className="user-name">{user.name}</h2>
-                <p className="user-role">{user.role}</p>
+              <div className="hidden sm:block">
+                <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
+                <p className="text-xs capitalize text-gray-600">{user.role}</p>
               </div>
-            </div>
-            <button onClick={handleLogout} className="logout-button">
-              <LogOut className="logout-icon" />
-              <span>Logout</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
@@ -357,7 +285,6 @@ useEffect(() => {
                     <th className="table-header">Skills Match</th>
                     <th className="table-header">Match Score</th>
                     <th className="table-header">Experience</th>
-                    {/* <th className="table-header">Availability</th> */}
                     <th className="table-header">Actions</th>
                   </tr>
                 </thead>
@@ -411,12 +338,6 @@ useEffect(() => {
                           <span className="experience-years">{alumni.experience} years</span>
                         </div>
                       </td>
-                      {/* <td className="table-cell">
-                        <div className={`availability-cell ${alumni.availability.toLowerCase()}`}>
-                          <div className="availability-dot"></div>
-                          <span>{alumni.availability}</span>
-                        </div>
-                      </td> */}
                       <td className="table-cell">
                         <div className="actions-cell">
                           <button 
@@ -499,7 +420,7 @@ useEffect(() => {
         {/* How It Works */}
         <div className="how-it-works">
           <h2 className="how-it-works-title">How Our Matching Works</h2>
-          <div className="how-it-works-gralumniId">
+          <div className="how-it-works-grid">
             <div className="step-card">
               <div className="step-number">1</div>
               <h3 className="step-title">Skill Analysis</h3>
@@ -574,17 +495,11 @@ useEffect(() => {
               
               <div className="profile-section">
                 <h4 className="section-title">Details</h4>
-                <div className="details-gralumniId">
+                <div className="details-grid">
                   <div className="detail-item">
                     <span className="detail-label">Experience:</span>
                     <span className="detail-value">{selectedAlumni.experience} years</span>
                   </div>
-                  {/* <div className="detail-item">
-                    <span className="detail-label">Availability:</span>
-                    <span className={`detail-value ${selectedAlumni.availability.toLowerCase()}`}>
-                      {selectedAlumni.availability}
-                    </span>
-                  </div> */}
                   <div className="detail-item">
                     <span className="detail-label">Last Active:</span>
                     <span className="detail-value">{selectedAlumni.lastActive}</span>

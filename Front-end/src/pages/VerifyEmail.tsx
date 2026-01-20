@@ -35,52 +35,52 @@ const VerifyEmail = () => {
     }, [token, navigate]);
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
-                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
+                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-blue-100 blur-3xl"></div>
+                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-indigo-100 blur-3xl"></div>
             </div>
 
             <div className="relative w-full max-w-md">
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 shadow-2xl backdrop-blur-xl">
+                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
                     <div className="px-8 py-10">
                         {/* Loading State */}
                         {status === 'loading' && (
                             <div className="text-center">
-                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600">
+                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700">
                                     <svg className="h-8 w-8 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Verifying Your Email</h2>
-                                <p className="mt-2 text-gray-400">Please wait while we verify your email address...</p>
+                                <h2 className="text-2xl font-bold text-gray-900">Verifying Your Email</h2>
+                                <p className="mt-2 text-gray-600">Please wait while we verify your email address...</p>
                             </div>
                         )}
 
                         {/* Success State */}
                         {status === 'success' && (
                             <div className="text-center">
-                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-600">
+                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
                                     <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Email Verified!</h2>
+                                <h2 className="text-2xl font-bold text-gray-900">Email Verified!</h2>
                                 {userName && (
-                                    <p className="mt-2 text-lg text-gray-300">Welcome, {userName}!</p>
+                                    <p className="mt-2 text-lg text-gray-800">Welcome, {userName}!</p>
                                 )}
-                                <p className="mt-4 text-gray-400">{message}</p>
+                                <p className="mt-4 text-gray-700">{message}</p>
                                 
-                                <div className="mt-8 rounded-lg border border-green-500/30 bg-green-500/10 p-4">
+                                <div className="mt-8 rounded-lg border border-green-200 bg-green-50 p-4">
                                     <div className="flex items-start gap-3">
-                                        <svg className="h-5 w-5 flex-shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="h-5 w-5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div className="text-left">
-                                            <h3 className="text-sm font-semibold text-green-300">Account Activated</h3>
-                                            <p className="mt-1 text-xs text-green-200/80">
+                                            <h3 className="text-sm font-semibold text-green-800">Account Activated</h3>
+                                            <p className="mt-1 text-xs text-green-700">
                                                 Your account has been automatically approved. You can now access all platform features!
                                             </p>
                                         </div>
@@ -90,7 +90,7 @@ const VerifyEmail = () => {
                                 <div className="mt-6">
                                     <Link
                                         to="/login"
-                                        className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white transition-all hover:from-purple-700 hover:to-pink-700"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-800"
                                     >
                                         Continue to Login
                                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,22 +108,22 @@ const VerifyEmail = () => {
                         {/* Error State */}
                         {status === 'error' && (
                             <div className="text-center">
-                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-600">
+                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-red-600">
                                     <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Verification Failed</h2>
-                                <p className="mt-4 text-gray-400">{message}</p>
+                                <h2 className="text-2xl font-bold text-gray-900">Verification Failed</h2>
+                                <p className="mt-4 text-gray-700">{message}</p>
                                 
-                                <div className="mt-8 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+                                <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4">
                                     <div className="flex items-start gap-3">
-                                        <svg className="h-5 w-5 flex-shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="h-5 w-5 flex-shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div className="text-left">
-                                            <h3 className="text-sm font-semibold text-red-300">What to do?</h3>
-                                            <ul className="mt-1 list-inside list-disc text-xs text-red-200/80">
+                                            <h3 className="text-sm font-semibold text-red-800">What to do?</h3>
+                                            <ul className="mt-1 list-inside list-disc text-xs text-red-700">
                                                 <li>Check if you used the correct verification link</li>
                                                 <li>The link may have expired (valid for 24 hours)</li>
                                                 <li>Try registering again or contact support</li>
@@ -135,13 +135,13 @@ const VerifyEmail = () => {
                                 <div className="mt-6 flex flex-col gap-3">
                                     <Link
                                         to="/register"
-                                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white transition-all hover:from-purple-700 hover:to-pink-700"
+                                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-800"
                                     >
                                         Register Again
                                     </Link>
                                     <Link
                                         to="/login"
-                                        className="text-sm text-gray-400 hover:text-gray-300"
+                                        className="text-sm text-gray-600 hover:text-gray-900"
                                     >
                                         Back to Login
                                     </Link>
