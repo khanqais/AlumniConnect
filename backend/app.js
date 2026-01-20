@@ -272,6 +272,7 @@ app.use("/api/questions", require("./routes/questionRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/follow", require("./routes/followRoutes"));
 
+app.use("/api/recommend", require("./routes/recommendationRoutes"));
 /* ============================
    HEALTH CHECK
 ============================ */
