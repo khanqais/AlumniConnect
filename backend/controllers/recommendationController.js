@@ -1,37 +1,62 @@
-const User = require("../models/User");
-const careerPathRecommend = require("../services/careerPathRecommender.service");
-const mentorshipRecommend = require("../services/mentorshipRecommender.service");
+const User = require('../models/User');
+const axios = require('axios');
 
-// Career Path endpoint
-const careerPath = async (req, res) => {
-  try {
-    const student = await User.findById(req.params.studentId);
-    if (!student || student.role !== "student") {
-      return res.status(400).json({ message: "Invalid student" });
+// ----------------------------------------
+// 1️⃣ CAREER PATH (CURRENT SKILLS)
+// ----------------------------------------
+exports.getCareerPathRecommendations = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+
+        // Get student
+        const student = await User.findById(studentId).lean();
+        if (!student || student.role !== 'student') {
+            return res.status(400).json({ message: 'Invalid student ID' });
+        }
+
+        // Get alumni
+        const alumni = await User.find({ role: 'alumni' }).lean();
+
+        // Call ML service
+        const mlResponse = await axios.post(
+            'http://127.0.0.1:5001/career-path',
+            { student, alumni }
+        );
+
+        res.json(mlResponse.data);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Career path recommendation failed' });
     }
-
-    const alumniList = await User.find({ role: "alumni", isApproved: true });
-
-    res.json(careerPathRecommend(student, alumniList));
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
 };
 
-// Mentorship endpoint
-const mentorship = async (req, res) => {
-  try {
-    const student = await User.findById(req.params.studentId);
-    if (!student || student.role !== "student") {
-      return res.status(400).json({ message: "Invalid student" });
+// ----------------------------------------
+// 2️⃣ TARGET SKILLS
+// ----------------------------------------
+exports.getTargetSkillRecommendations = async (req, res) => {
+    try {
+        const studentId = req.params.id;
+
+        // Get student
+        const student = await User.findById(studentId).lean();
+        if (!student || student.role !== 'student') {
+            return res.status(400).json({ message: 'Invalid student ID' });
+        }
+
+        // Get alumni
+        const alumni = await User.find({ role: 'alumni' }).lean();
+
+        // Call ML service
+        const mlResponse = await axios.post(
+            'http://127.0.0.1:5001/target-skills',
+            { student, alumni }
+        );
+
+        res.json(mlResponse.data);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Target skill recommendation failed' });
     }
-
-    const alumniList = await User.find({ role: "alumni", isApproved: true });
-
-    res.json(mentorshipRecommend(student, alumniList));
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
 };
-
-module.exports = { careerPath, mentorship };
