@@ -5,6 +5,13 @@ const fs = require('fs');
 // Upload resource
 const uploadResource = async (req, res) => {
     try {
+        // Check if user is alumni
+        if (req.user.role !== 'alumni') {
+            return res.status(403).json({ 
+                message: 'Only alumni can upload resources' 
+            });
+        }
+
         const { title, description, category, tags } = req.body;
 
         if (!req.file) {
