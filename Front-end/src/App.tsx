@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -11,8 +11,11 @@ import Resources from './pages/Resources';
 import Blogs from './pages/Blogs';
 import BlogDetail from './pages/BlogDetail';
 import Profile from './pages/Profile';
+import VideoCall from "./pages/VideoCall";
 import type { ReactElement } from 'react';
 import './App.css';
+import CareerPathVisualizer from './pages/CareerPathVisualizer';
+import Recommendation from './pages/Recommendation';
 
 // Admin Route Protection
 const AdminRoute = ({ children }: { children: ReactElement }) => {
@@ -83,7 +86,7 @@ function App() {
               </PublicRoute>
             } 
           />
-          
+         
           {/* Email Verification Route */}
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           
@@ -95,6 +98,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/videocall/:roomId" element={<VideoCallWrapper />}/>
           <Route
             path="/blogs"
             element={
@@ -102,6 +106,22 @@ function App() {
                 <Blogs />
               </ProtectedRoute>
             }
+          />
+           <Route 
+            path="/career-path" 
+            element={
+              <ProtectedRoute>
+                <CareerPathVisualizer/>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/recommendations" 
+            element={
+              <ProtectedRoute>
+                <Recommendation/>
+              </ProtectedRoute>
+            } 
           />
           <Route
             path="/blogs/:id"
@@ -158,5 +178,5 @@ function App() {
     </Router>
   );
 }
-
+function VideoCallWrapper() {useParams(); return <VideoCall/>; }
 export default App;

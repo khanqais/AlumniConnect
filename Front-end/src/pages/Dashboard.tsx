@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -10,7 +11,9 @@ const Dashboard = () => {
         logout();
         navigate('/login');
     };
-
+    const startVideoCall = () => { 
+        const newRoomId = uuidv4(); 
+  navigate(`/videocall/${newRoomId}`); }
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             {/* Background Effects */}
@@ -186,18 +189,33 @@ const Dashboard = () => {
                 <div className="mb-8">
                     <h2 className="mb-4 text-2xl font-bold text-white">Explore Features</h2>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {/* Find Mentors */}
+                        {/* Find Mentors for career path*/}
                         <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all hover:border-purple-500/50 hover:bg-white/10">
                             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/20">
                                 <svg className="h-6 w-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-semibold text-white">Find Mentors</h3>
+                            <h3 className="text-lg font-semibold text-white">Find Mentors with similar interests</h3>
                             <p className="mt-2 text-sm text-gray-400">
                                 Connect with experienced alumni in your field of interest
                             </p>
-                            <button className="mt-4 text-sm font-medium text-purple-400 hover:text-purple-300">
+                            <button className="mt-4 text-sm font-medium text-purple-400 hover:text-purple-300" onClick={() => navigate('/career-path')}>
+                                Explore →
+                            </button>
+                        </div>
+                         {/* Find Mentors for learning*/}
+                        <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all hover:border-purple-500/50 hover:bg-white/10">
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/20">
+                                <svg className="h-6 w-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-semibold text-white">Find Mentors for learning new things</h3>
+                            <p className="mt-2 text-sm text-gray-400">
+                                Connect with experienced alumni to learn
+                            </p>
+                            <button className="mt-4 text-sm font-medium text-purple-400 hover:text-purple-300" onClick={() => navigate('/recommendations')}>
                                 Explore →
                             </button>
                         </div>
@@ -213,7 +231,7 @@ const Dashboard = () => {
                             <p className="mt-2 text-sm text-gray-400">
                                 Upload your resume, notes, or projects to help others
                             </p>
-                            <button 
+                            <button
                                 onClick={() => navigate('/resources')}
                                 className="mt-4 text-sm font-medium text-blue-400 hover:text-blue-300"
                             >
@@ -232,7 +250,7 @@ const Dashboard = () => {
                             <p className="mt-2 text-sm text-gray-400">
                                 Share your journey, tips, and insights with the community
                             </p>
-                            <button 
+                            <button
                                 onClick={() => navigate('/blogs')}
                                 className="mt-4 text-sm font-medium text-green-400 hover:text-green-300"
                             >
@@ -255,10 +273,10 @@ const Dashboard = () => {
                         <div className="flex-1">
                             <h3 className="text-lg font-semibold text-white">Getting Started</h3>
                             <p className="mt-2 text-sm text-gray-300">
-                                Welcome to AlumniConnect! Explore our resource library, read blogs from alumni, ask questions in the community, 
+                                Welcome to AlumniConnect! Explore our resource library, read blogs from alumni, ask questions in the community,
                                 or attend upcoming events. Your journey starts here!
                             </p>
-                            <button 
+                            <button
                                 onClick={() => navigate('/resources')}
                                 className="mt-4 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:from-purple-700 hover:to-pink-700"
                             >
@@ -267,9 +285,12 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
+              <button onClick={startVideoCall}>Start Video Call</button>
             </main>
         </div>
     );
 };
 
 export default Dashboard;
+
+
