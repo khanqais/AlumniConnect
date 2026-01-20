@@ -29,6 +29,7 @@ export default function VideoCall() {
     const [isVideoOff, setIsVideoOff] = useState(false);
     const [showChat, setShowChat] = useState(true);
     const [copied, setCopied] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState<string>('Connecting...');
 
     useEffect(() => {
         if (!roomId) return;
@@ -40,10 +41,14 @@ export default function VideoCall() {
             transports: ['websocket'],
         });
 
-        socketRef.current.on('connect', () => console.log('✅ Socket connected'));
-        socketRef.current.on('connect_error', (err) =>
-            console.error('❌ Socket error:', err.message)
-        );
+        socketRef.current.on('connect', () => {
+            console.log('✅ Socket connected');
+            setConnectionStatus('Waiting for others to join...');
+        });
+        socketRef.current.on('connect_error', (err) => {
+            console.error('❌ Socket error:', err.message);
+            setConnectionStatus('Connection error. Please refresh.');
+        });
 
         pcRef.current = new RTCPeerConnection({
             iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -62,7 +67,12 @@ export default function VideoCall() {
             });
 
         pcRef.current.ontrack = (event) => {
-            if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0];
+            console.log('🎥 Received remote track');
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = event.streams[0];
+                setCallStarted(true);
+                setConnectionStatus('Connected');
+            }
         };
 
         pcRef.current.onicecandidate = (event) => {
@@ -78,35 +88,74 @@ export default function VideoCall() {
 
         socketRef.current.on('initiator', () => {
             console.log('🟢 I am initiator');
+            setConnectionStatus('Waiting for others to join...');
+        });
+
+        socketRef.current.on('peer-in-room', () => {
+            console.log('👥 Peer already in room');
+            setConnectionStatus('Connecting to peer...');
         });
 
         socketRef.current.on('ready', async () => {
-            console.log('📞 Peer ready');
+            console.log('📞 Peer ready - creating offer');
+            setConnectionStatus('Establishing connection...');
 
             if (!pcRef.current) return;
 
-            const offer = await pcRef.current.createOffer();
-            await pcRef.current.setLocalDescription(offer);
+            try {
+                const offer = await pcRef.current.createOffer();
+                await pcRef.current.setLocalDescription(offer);
 
-            socketRef.current?.emit('offer', { roomId, offer });
-            setCallStarted(true);
+                socketRef.current?.emit('offer', { roomId, offer });
+                console.log('📤 Sent offer');
+            } catch (err) {
+                console.error('Error creating offer:', err);
+                setConnectionStatus('Connection failed');
+            }
         });
 
         socketRef.current.on('offer', async ({ offer }) => {
-            await pcRef.current?.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await pcRef.current?.createAnswer();
-            await pcRef.current?.setLocalDescription(answer);
+            console.log('📥 Received offer');
+            setConnectionStatus('Answering call...');
 
-            socketRef.current?.emit('answer', { roomId, answer });
-            setCallStarted(true);
+            try {
+                await pcRef.current?.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await pcRef.current?.createAnswer();
+                await pcRef.current?.setLocalDescription(answer);
+
+                socketRef.current?.emit('answer', { roomId, answer });
+                console.log('📤 Sent answer');
+            } catch (err) {
+                console.error('Error handling offer:', err);
+                setConnectionStatus('Connection failed');
+            }
         });
 
         socketRef.current.on('answer', async ({ answer }) => {
-            await pcRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+            console.log('📥 Received answer');
+            try {
+                await pcRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+                console.log('✅ Connection established');
+            } catch (err) {
+                console.error('Error handling answer:', err);
+            }
         });
 
         socketRef.current.on('ice-candidate', async ({ candidate }) => {
-            await pcRef.current?.addIceCandidate(candidate);
+            try {
+                await pcRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (err) {
+                console.error('Error adding ICE candidate:', err);
+            }
+        });
+
+        socketRef.current.on('user-left', ({ name }) => {
+            console.log(`👋 ${name} left the call`);
+            setConnectionStatus(`${name} left the call`);
+            setCallStarted(false);
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = null;
+            }
         });
 
         socketRef.current.on('chat-message', (data) => setChat((prev) => [...prev, data]));
@@ -189,15 +238,21 @@ export default function VideoCall() {
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900">Video Call</h1>
-                    <div className="mt-2 flex items-center gap-2">
-                        <p className="text-sm text-gray-600">Room ID: {roomId}</p>
-                        <button
-                            onClick={copyRoomId}
-                            className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100"
-                        >
-                            <Copy className="h-3 w-3" />
-                            {copied ? 'Copied!' : 'Copy'}
-                        </button>
+                    <div className="mt-2 flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm text-gray-600">Room ID: {roomId}</p>
+                            <button
+                                onClick={copyRoomId}
+                                className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100"
+                            >
+                                <Copy className="h-3 w-3" />
+                                {copied ? 'Copied!' : 'Copy'}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${callStarted ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`}></div>
+                            <p className="text-sm font-medium text-gray-700">{connectionStatus}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -218,7 +273,7 @@ export default function VideoCall() {
                                     <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white">
                                         <div className="text-center">
                                             <Users className="mx-auto h-16 w-16 text-gray-400" />
-                                            <p className="mt-4 text-lg font-medium">Waiting for others to join...</p>
+                                            <p className="mt-4 text-lg font-medium">{connectionStatus}</p>
                                             <p className="mt-2 text-sm text-gray-400">Share the room ID to invite participants</p>
                                         </div>
                                     </div>
