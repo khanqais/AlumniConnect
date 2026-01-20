@@ -40,6 +40,13 @@ const userSchema = mongoose.Schema(
             type: [String],
             default: [],
         },
+        target_skills:{
+            type: [String],
+            default: [],
+            required: function() {
+                return this.role === 'student';
+            }
+        },
         bio: {
             type: String,
             default: '',
