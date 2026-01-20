@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  User, 
-  LogOut, 
-  Home, 
   Briefcase, 
   Users, 
   Target,
@@ -19,10 +16,11 @@ import {
   Building,
   GraduationCap,
   ExternalLink,
-  Filter,
   Search,
   RefreshCw,
-  FileText
+  Home,
+  FileText,
+  LogOut
 } from 'lucide-react';
 import './CareerPathVisualizer.css';
 
@@ -115,6 +113,9 @@ const CareerPathVisualizer: React.FC = () => {
   ];
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+    
     const fetchAlumniPaths = async () => {
       setLoading(true);
       setTimeout(() => {
@@ -180,10 +181,6 @@ const CareerPathVisualizer: React.FC = () => {
     fetchAlumniPaths();
   }, []);
 
-  const handleLogout = () => {
-    navigate('/login');
-  };
-
   const handleRefresh = () => {
     setLoading(true);
     setTimeout(() => setLoading(false), 800);
@@ -214,80 +211,220 @@ const CareerPathVisualizer: React.FC = () => {
         <div className="effect-circle effect-circle-2"></div>
       </div>
 
-      {/* Updated Header */}
-      <header className="career-path-header">
-        <div className="header-container">
-          <div className="flex items-center gap-6">
+      {/* Simple Navigation */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '1rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             {/* Logo/Brand */}
-            <Link to="/" className="logo-link">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
-                <Map className="h-6 w-6 text-white" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{
+                display: 'flex',
+                height: '2.5rem',
+                width: '2.5rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '0.5rem',
+                background: 'linear-gradient(to right, #2563eb, #4f46e5)'
+              }}>
+                <Users style={{ height: '1.5rem', width: '1.5rem', color: 'white' }} />
               </div>
-              <span className="hidden text-lg font-bold text-gray-900 sm:block">
+              <span style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: '700', 
+                color: '#111827',
+                display: window.innerWidth >= 640 ? 'block' : 'none'
+              }}>
                 AlumniConnect
               </span>
-            </Link>
-            
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            </div>
+
+            {/* Navigation Links */}
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <Home className="w-4 h-4" />
-                Dashboard
+                <Home style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Dashboard</span>
               </button>
               <button
                 onClick={() => navigate('/resources')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <FileText className="w-4 h-4" />
-                Resources
+                <FileText style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Resources</span>
               </button>
               <button
                 onClick={() => navigate('/recommendations')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <TrendingUp className="w-4 h-4" />
-                Recommendations
+                <TrendingUp style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Recommendations</span>
               </button>
               <button
                 onClick={() => navigate('/career-paths')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: '#eff6ff',
+                  cursor: 'pointer',
+                  color: '#2563eb',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }}
               >
-                <Map className="w-4 h-4" />
-                Career Paths
-              </button>
-              <button
-                onClick={() => navigate('/profile')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-              >
-                <User className="w-4 h-4" />
-                Profile
+                <Map style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Career Paths</span>
               </button>
             </nav>
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
+              <div style={{
+                display: 'flex',
+                height: '2.5rem',
+                width: '2.5rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '9999px',
+                background: 'linear-gradient(to right, #2563eb, #4f46e5)',
+                fontWeight: '700',
+                color: 'white'
+              }}>
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              <div className="hidden sm:block">
-                <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
-                <p className="text-xs capitalize text-gray-600">{user.role}</p>
+              <div style={{ display: window.innerWidth >= 640 ? 'block' : 'none' }}>
+                <h2 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>{user.name}</h2>
+                <p style={{ fontSize: '0.75rem', textTransform: 'capitalize', color: '#4b5563' }}>{user.role}</p>
               </div>
             </button>
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+              onClick={() => navigate('/login')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #fecaca',
+                background: 'white',
+                cursor: 'pointer',
+                color: '#dc2626',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#fef2f2';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
             >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <LogOut style={{ height: '1rem', width: '1rem' }} />
+              <span style={{ display: window.innerWidth >= 640 ? 'inline' : 'none' }}>Logout</span>
             </button>
           </div>
         </div>

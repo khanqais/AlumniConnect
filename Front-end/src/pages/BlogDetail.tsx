@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import Navigation from '../components/Navigation';
 
 interface Blog {
     _id: string;
@@ -181,6 +182,8 @@ const BlogDetail = () => {
                 <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
                 <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
             </div>
+
+            <Navigation />
 
             {/* Header */}
             <header className="relative z-10 border-b border-white/10 bg-slate-900/50 backdrop-blur-xl">

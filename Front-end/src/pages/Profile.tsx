@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import Navigation from '../components/Navigation';
 
 interface WorkExperience {
     id: string;
@@ -272,6 +273,8 @@ const Profile = () => {
                 <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-blue-100 blur-3xl opacity-50"></div>
                 <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-indigo-100 blur-3xl opacity-50"></div>
             </div>
+
+            <Navigation />
 
             {/* Header Navigation */}
             <header className="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-xl">

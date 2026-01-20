@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  User, 
-  LogOut, 
-  Home, 
   Briefcase, 
   Users, 
-  BookOpen, 
-  FileText,
-  TrendingUp,
   Target,
   Star,
-  Download,
   RefreshCw,
   ChevronRight,
   Award,
-  CheckCircle
+  CheckCircle,
+  Home,
+  FileText,
+  TrendingUp,
+  Map,
+  LogOut
 } from 'lucide-react';
 import './Recommendation.css';
 
@@ -50,22 +48,90 @@ const Recommendation: React.FC = () => {
   };
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+    
     const fetchRecommendations = async () => {
       setLoading(true);
-      try {
-        const res = await fetch('/api/recommendations/mentorship');
-        const data: AlumniRecommendation[] = await res.json();
+      setTimeout(() => {
+        const mockData: AlumniRecommendation[] = [
+          {
+            alumniId: '1',
+            name: 'Sarah Johnson',
+            currentRole: 'Senior Software Engineer',
+            company: 'Google',
+            skills: ['React', 'TypeScript', 'Node.js', 'AWS', 'Docker'],
+            score: 95,
+            matchPercent: 92,
+            reason: 'Strong match in frontend technologies and cloud infrastructure',
+            availability: 'Available',
+            experience: 8,
+            lastActive: '2 days ago',
+            bio: 'Passionate about building scalable web applications and mentoring junior developers.'
+          },
+          {
+            alumniId: '2',
+            name: 'Michael Chen',
+            currentRole: 'Lead Data Scientist',
+            company: 'Microsoft',
+            skills: ['Python', 'Machine Learning', 'TensorFlow', 'AWS', 'SQL'],
+            score: 88,
+            matchPercent: 85,
+            reason: 'Excellent match in Python and cloud technologies',
+            availability: 'Available',
+            experience: 10,
+            lastActive: '1 week ago',
+            bio: 'Data science leader with expertise in ML and AI solutions.'
+          },
+          {
+            alumniId: '3',
+            name: 'Emily Rodriguez',
+            currentRole: 'Full Stack Developer',
+            company: 'Amazon',
+            skills: ['React', 'Node.js', 'MongoDB', 'TypeScript', 'GraphQL'],
+            score: 90,
+            matchPercent: 88,
+            reason: 'Perfect match in full-stack development skills',
+            availability: 'Available',
+            experience: 6,
+            lastActive: '3 days ago',
+            bio: 'Full-stack engineer specializing in modern web technologies and microservices.'
+          },
+          {
+            alumniId: '4',
+            name: 'David Kim',
+            currentRole: 'DevOps Engineer',
+            company: 'Netflix',
+            skills: ['AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Terraform'],
+            score: 82,
+            matchPercent: 78,
+            reason: 'Strong match in cloud and infrastructure automation',
+            availability: 'Busy',
+            experience: 7,
+            lastActive: '1 day ago',
+            bio: 'DevOps specialist focused on cloud infrastructure and automation.'
+          },
+          {
+            alumniId: '5',
+            name: 'Priya Patel',
+            currentRole: 'Product Manager',
+            company: 'Meta',
+            skills: ['Product Strategy', 'Agile', 'User Research', 'Data Analysis'],
+            score: 75,
+            matchPercent: 70,
+            reason: 'Good match for career transition to product management',
+            availability: 'Available',
+            experience: 9,
+            lastActive: '5 days ago',
+            bio: 'Product leader with technical background, passionate about user-centric design.'
+          }
+        ];
 
-        setAlumniList(data);
-
-        const allSkills = Array.from(new Set(data.flatMap(a => a.skills)));
+        setAlumniList(mockData);
+        const allSkills = Array.from(new Set(mockData.flatMap(a => a.skills)));
         setAvailableSkills(['all', ...allSkills]);
-
-      } catch (err) {
-        console.error(err);
-        alert('Failed to fetch recommendations');
-      }
-      setLoading(false);
+        setLoading(false);
+      }, 1200);
     };
 
     fetchRecommendations();
@@ -86,10 +152,6 @@ const Recommendation: React.FC = () => {
 
   const handleCloseProfile = () => {
     setSelectedAlumni(null);
-  };
-
-  const handleLogout = () => {
-    navigate('/login');
   };
 
   const sortedAlumni = [...alumniList].sort((a, b) => {
@@ -117,80 +179,220 @@ const Recommendation: React.FC = () => {
         <div className="effect-circle effect-circle-2"></div>
       </div>
 
-      {/* Updated Header */}
-      <header className="recommendation-header">
-        <div className="header-container">
-          <div className="flex items-center gap-6">
+      {/* Simple Navigation */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '1rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             {/* Logo/Brand */}
-            <Link to="/" className="logo-link">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
-                <Users className="h-6 w-6 text-white" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{
+                display: 'flex',
+                height: '2.5rem',
+                width: '2.5rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '0.5rem',
+                background: 'linear-gradient(to right, #2563eb, #4f46e5)'
+              }}>
+                <Users style={{ height: '1.5rem', width: '1.5rem', color: 'white' }} />
               </div>
-              <span className="hidden text-lg font-bold text-gray-900 sm:block">
+              <span style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: '700', 
+                color: '#111827',
+                display: window.innerWidth >= 640 ? 'block' : 'none'
+              }}>
                 AlumniConnect
               </span>
-            </Link>
-            
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            </div>
+
+            {/* Navigation Links */}
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <Home className="w-4 h-4" />
-                Dashboard
+                <Home style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Dashboard</span>
               </button>
               <button
                 onClick={() => navigate('/resources')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <FileText className="w-4 h-4" />
-                Resources
+                <FileText style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Resources</span>
               </button>
               <button
                 onClick={() => navigate('/recommendations')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: '#eff6ff',
+                  cursor: 'pointer',
+                  color: '#2563eb',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }}
               >
-                <TrendingUp className="w-4 h-4" />
-                Recommendations
+                <TrendingUp style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Recommendations</span>
               </button>
               <button
-                onClick={() => navigate('/community')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                onClick={() => navigate('/career-paths')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <Users className="w-4 h-4" />
-                Community
-              </button>
-              <button
-                onClick={() => navigate('/profile')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-              >
-                <User className="w-4 h-4" />
-                Profile
+                <Map style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Career Paths</span>
               </button>
             </nav>
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
+              <div style={{
+                display: 'flex',
+                height: '2.5rem',
+                width: '2.5rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '9999px',
+                background: 'linear-gradient(to right, #2563eb, #4f46e5)',
+                fontWeight: '700',
+                color: 'white'
+              }}>
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              <div className="hidden sm:block">
-                <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
-                <p className="text-xs capitalize text-gray-600">{user.role}</p>
+              <div style={{ display: window.innerWidth >= 640 ? 'block' : 'none' }}>
+                <h2 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827' }}>{user.name}</h2>
+                <p style={{ fontSize: '0.75rem', textTransform: 'capitalize', color: '#4b5563' }}>{user.role}</p>
               </div>
             </button>
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+              onClick={() => navigate('/login')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #fecaca',
+                background: 'white',
+                cursor: 'pointer',
+                color: '#dc2626',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#fef2f2';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
             >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <LogOut style={{ height: '1rem', width: '1rem' }} />
+              <span style={{ display: window.innerWidth >= 640 ? 'inline' : 'none' }}>Logout</span>
             </button>
           </div>
         </div>

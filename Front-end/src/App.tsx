@@ -13,6 +13,10 @@ import BlogDetail from './pages/BlogDetail';
 import Profile from './pages/Profile';
 import VideoCall from "./pages/VideoCall";
 import WebinarScheduler from './pages/WebinarScheduler';
+import WebinarList from './pages/WebinarList';
+import Community from './pages/Community';
+import QuestionDetail from './pages/QuestionDetail';
+import Chat from './pages/Chat';
 import type { ReactElement } from 'react';
 import './App.css';
 import CareerPathVisualizer from './pages/CareerPathVisualizer';
@@ -131,6 +135,54 @@ function App() {
                 <WebinarScheduler/>
               </ProtectedRoute>
             } 
+          />
+          <Route  
+            path="/webinar-scheduler/:eventId" 
+            element={
+              <ProtectedRoute>
+                <WebinarScheduler/>
+              </ProtectedRoute>
+            } 
+          />
+          <Route
+            path="/webinars"
+            element={
+              <ProtectedRoute>
+                <WebinarList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community"
+            element={
+              <ProtectedRoute>
+                <Community />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community/:id"
+            element={
+              <ProtectedRoute>
+                <QuestionDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat/:userId"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/blogs/:id"
