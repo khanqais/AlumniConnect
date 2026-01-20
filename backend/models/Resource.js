@@ -39,6 +39,31 @@ const resourceSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
         }],
+        dislikes: {
+            type: Number,
+            default: 0,
+        },
+        dislikedBy: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
+        comments: [{
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                required: true,
+            },
+            userName: String,
+            userAvatar: String,
+            text: {
+                type: String,
+                required: true,
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now,
+            },
+        }],
         isApproved: {
             type: Boolean,
             default: false,

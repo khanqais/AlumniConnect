@@ -25,7 +25,20 @@ interface Resource {
     tags: string[];
     downloads: number;
     likes: number;
+    dislikes: number;
+    likedBy: string[];
+    dislikedBy: string[];
+    comments: Comment[];
     isApproved: boolean;
+    createdAt: string;
+}
+
+interface Comment {
+    _id: string;
+    user: string;
+    userName: string;
+    userAvatar: string;
+    text: string;
     createdAt: string;
 }
 
@@ -37,6 +50,9 @@ const Resources = () => {
     const [search, setSearch] = useState('');
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
+    const [showCommentsModal, setShowCommentsModal] = useState(false);
+    const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+    const [newComment, setNewComment] = useState('');
     const [uploadForm, setUploadForm] = useState({
         title: '',
         description: '',
@@ -124,6 +140,79 @@ const Resources = () => {
             await fetchMyResources();
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const handleDislike = async (id: string) => {
+        try {
+            await axios.post(`http://localhost:5000/api/resources/dislike/${id}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${user?.token}`,
+                },
+            });
+            await fetchResources();
+            await fetchMyResources();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleOpenComments = (resource: Resource) => {
+        setSelectedResource(resource);
+        setShowCommentsModal(true);
+    };
+
+    const handleAddComment = async () => {
+        if (!selectedResource || !newComment.trim()) return;
+
+        try {
+            await axios.post(
+                `http://localhost:5000/api/resources/comment/${selectedResource._id}`,
+                { text: newComment },
+                {
+                    headers: {
+                        Authorization: `Bearer ${user?.token}`,
+                    },
+                }
+            );
+            setNewComment('');
+            await fetchResources();
+            await fetchMyResources();
+            
+            // Update selected resource with new comments
+            const updatedResource = await axios.get(
+                `http://localhost:5000/api/resources/${selectedResource._id}`
+            );
+            setSelectedResource(updatedResource.data);
+        } catch (error) {
+            console.error(error);
+            alert('Failed to add comment');
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        if (!selectedResource) return;
+
+        try {
+            await axios.delete(
+                `http://localhost:5000/api/resources/comment/${selectedResource._id}/${commentId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${user?.token}`,
+                    },
+                }
+            );
+            await fetchResources();
+            await fetchMyResources();
+            
+            // Update selected resource
+            const updatedResource = await axios.get(
+                `http://localhost:5000/api/resources/${selectedResource._id}`
+            );
+            setSelectedResource(updatedResource.data);
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete comment');
         }
     };
 
@@ -354,12 +443,28 @@ const Resources = () => {
                                                 <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
                                                     {resource.category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                                 </span>
-                                                <button
-                                                    onClick={() => handleLike(resource._id)}
-                                                    className="text-gray-600 transition-colors hover:text-red-500"
-                                                >
-                                                    ❤️ {resource.likes}
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleLike(resource._id)}
+                                                        className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-colors ${
+                                                            resource.likedBy?.includes(user?._id || '')
+                                                                ? 'bg-red-100 text-red-600'
+                                                                : 'bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600'
+                                                        }`}
+                                                    >
+                                                        👍 {resource.likes}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDislike(resource._id)}
+                                                        className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-colors ${
+                                                            resource.dislikedBy?.includes(user?._id || '')
+                                                                ? 'bg-blue-100 text-blue-600'
+                                                                : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600'
+                                                        }`}
+                                                    >
+                                                        👎 {resource.dislikes || 0}
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <h3 className="mb-2 text-lg font-semibold text-gray-900">{resource.title}</h3>
@@ -371,6 +476,19 @@ const Resources = () => {
                                                         {tag}
                                                     </span>
                                                 ))}
+                                            </div>
+
+                                            {/* Comment Button */}
+                                            <div className="mb-4 border-t border-gray-100 pt-3">
+                                                <button
+                                                    onClick={() => handleOpenComments(resource)}
+                                                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                                                >
+                                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                    </svg>
+                                                    {resource.comments?.length || 0} Comments
+                                                </button>
                                             </div>
 
                                             <div className="flex items-center justify-between border-t border-gray-100 pt-4">
@@ -532,6 +650,109 @@ const Resources = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Comments Modal */}
+            {showCommentsModal && selectedResource && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                    <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white shadow-xl max-h-[80vh] flex flex-col">
+                        <div className="border-b border-gray-200 p-6 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Comments</h2>
+                                <p className="text-sm text-gray-600 mt-1">{selectedResource.title}</p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowCommentsModal(false);
+                                    setSelectedResource(null);
+                                    setNewComment('');
+                                }}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Comments List */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            {selectedResource.comments && selectedResource.comments.length > 0 ? (
+                                selectedResource.comments.map((comment) => (
+                                    <div key={comment._id} className="flex gap-3 p-4 rounded-lg bg-gray-50">
+                                        {comment.userAvatar ? (
+                                            <img
+                                                src={`http://localhost:5000/${comment.userAvatar}`}
+                                                alt={comment.userName}
+                                                className="h-10 w-10 rounded-full object-cover ring-2 ring-blue-500/50"
+                                            />
+                                        ) : (
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 text-sm font-bold text-white ring-2 ring-blue-500/50">
+                                                {comment.userName?.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-semibold text-gray-900">{comment.userName}</p>
+                                                {comment.user === user?._id && (
+                                                    <button
+                                                        onClick={() => handleDeleteComment(comment._id)}
+                                                        className="text-xs text-red-600 hover:text-red-700"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-500 mb-2">
+                                                {new Date(comment.createdAt).toLocaleString()}
+                                            </p>
+                                            <p className="text-sm text-gray-700">{comment.text}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8">
+                                    <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <p className="mt-2 text-gray-500">No comments yet. Be the first to comment!</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Add Comment */}
+                        <div className="border-t border-gray-200 p-6">
+                            <div className="flex gap-3">
+                                <textarea
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    placeholder="Write a comment..."
+                                    rows={3}
+                                    className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none resize-none"
+                                />
+                            </div>
+                            <div className="mt-3 flex justify-end gap-2">
+                                <button
+                                    onClick={() => {
+                                        setShowCommentsModal(false);
+                                        setSelectedResource(null);
+                                        setNewComment('');
+                                    }}
+                                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    onClick={handleAddComment}
+                                    disabled={!newComment.trim()}
+                                    className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Post Comment
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
