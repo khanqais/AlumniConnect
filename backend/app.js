@@ -34,6 +34,7 @@ const io = new Server(server, {
   },
 });
 
+
 /* ============================
    UPLOADS
 ============================ */
@@ -52,7 +53,7 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/resources", require("./routes/resourceRoutes"));
 app.use("/api/blogs", require("./routes/blogRoutes"));
 app.use("/api/questions", require("./routes/questionRoutes"));
-//app.use("/api/webinars", require("./routes/webinarRoutes"));
+app.use("/api/webinars", require("./routes/webinarRoute"));
 
 
 /* ============================

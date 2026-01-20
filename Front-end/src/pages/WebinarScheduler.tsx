@@ -112,37 +112,80 @@ const WebinarScheduler: React.FC = () => {
       skillsCovered: prev.skillsCovered.filter(skill => skill !== skillToRemove)
     }));
   };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/webinars/schedule",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          webinarName: formData.webinarName,
+          date: formData.date,
+          time: formData.time,
+          duration: formData.duration,
+          description: formData.description,
+          maxParticipants: formData.maxParticipants,
+          skillsCovered: formData.skillsCovered,
+          recordingAllowed: formData.recordingAllowed,
+          prerequisites: formData.prerequisites,
+          // ❌ alumniName & platform intentionally NOT sent
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to schedule webinar");
+
+    console.log("✅ Webinar scheduled:", data.webinar);
+    setSuccess(true);
+
+    // ✅ redirect to video room
+    navigate(`/video/${data.webinar.roomId}`);
+  } catch (err: any) {
+    console.error(err);
+    alert(err.message || "Error scheduling webinar");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Webinar scheduled:', formData);
-      setLoading(false);
-      setSuccess(true);
+  //   // Simulate API call
+  //   setTimeout(() => {
+  //     console.log('Webinar scheduled:', formData);
+  //     setLoading(false);
+  //     setSuccess(true);
       
-      // Reset form after successful submission
-      setTimeout(() => {
-        setFormData({
-          alumniName: '',
-          webinarName: '',
-          date: '',
-          time: '',
-          duration: '60',
-          description: '',
-          platform: 'google-meet',
-          maxParticipants: 100,
-          skillsCovered: [],
-          skillInput: '',
-          recordingAllowed: true,
-          prerequisites: ''
-        });
-        setSuccess(false);
-      }, 3000);
-    }, 1500);
-  };
+  //     // Reset form after successful submission
+  //     setTimeout(() => {
+  //       setFormData({
+  //         alumniName: '',
+  //         webinarName: '',
+  //         date: '',
+  //         time: '',
+  //         duration: '60',
+  //         description: '',
+  //         platform: 'google-meet',
+  //         maxParticipants: 100,
+  //         skillsCovered: [],
+  //         skillInput: '',
+  //         recordingAllowed: true,
+  //         prerequisites: ''
+  //       });
+  //       setSuccess(false);
+  //     }, 3000);
+  //   }, 1500);
+  // };
 
   const getMinDate = () => {
     const tomorrow = new Date();
