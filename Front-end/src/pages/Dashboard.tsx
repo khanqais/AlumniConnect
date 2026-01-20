@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -10,7 +11,9 @@ const Dashboard = () => {
         logout();
         navigate('/login');
     };
-
+    const startVideoCall = () => { 
+        const newRoomId = uuidv4(); 
+  navigate(`/videocall/${newRoomId}`); }
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             {/* Background Effects */}
@@ -265,9 +268,12 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
+              <button onClick={startVideoCall}>Start Video Call</button>
             </main>
         </div>
     );
 };
 
 export default Dashboard;
+
+
