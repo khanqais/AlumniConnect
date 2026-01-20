@@ -34,8 +34,8 @@ const Login = () => {
 
             login(res.data);
 
-            // Redirect to dashboard
-            navigate('/dashboard'); // Changed from '/'
+            
+            navigate('/dashboard'); 
 
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };

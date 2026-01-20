@@ -78,11 +78,21 @@ const registerUser = async (req, res) => {
         if (user) {
             // Send verification email
             try {
+                console.log(`📧 Attempting to send verification email to: ${user.email}`);
+                console.log(`📧 Verification token: ${verificationToken}`);
+                
                 const emailResult = await sendVerificationEmail(user, verificationToken);
-                console.log(`📧 Verification email sent to ${emailResult.sentTo}`);
+                
+                console.log(`✅ Verification email sent successfully!`);
+                console.log(`📧 Sent to: ${emailResult.sentTo}`);
+                console.log(`📧 Message ID: ${emailResult.messageId}`);
             } catch (emailError) {
-                console.error('Failed to send verification email:', emailError);
-                // Don't fail registration if email fails
+                console.error('❌ Failed to send verification email:');
+                console.error('Error name:', emailError.name);
+                console.error('Error message:', emailError.message);
+                console.error('Error code:', emailError.code);
+                console.error('Full error:', emailError);
+                // Don't fail registration if email fails - but log it thoroughly
             }
 
             res.status(201).json({

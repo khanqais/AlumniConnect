@@ -182,13 +182,28 @@ const sendVerificationEmail = async (user, token) => {
     };
     
     try {
+        console.log('📤 Sending verification email...');
+        console.log('   From:', mailOptions.from);
+        console.log('   To:', mailOptions.to);
+        console.log('   Subject:', mailOptions.subject);
+        
         const info = await transporter.sendMail(mailOptions);
-        console.log('✅ Verification email sent to:', outlookEmail);
-        console.log('Message ID:', info.messageId);
+        
+        console.log('✅ Verification email sent successfully!');
+        console.log('   Sent to:', outlookEmail);
+        console.log('   Message ID:', info.messageId);
+        console.log('   Response:', info.response);
+        
         return { success: true, messageId: info.messageId, sentTo: outlookEmail };
     } catch (error) {
-        console.error('❌ Error sending verification email:', error);
-        throw new Error('Failed to send verification email');
+        console.error('❌ Error sending verification email:');
+        console.error('   Error Type:', error.name);
+        console.error('   Error Message:', error.message);
+        console.error('   Error Code:', error.code);
+        if (error.command) console.error('   SMTP Command:', error.command);
+        if (error.responseCode) console.error('   Response Code:', error.responseCode);
+        console.error('   Full Error:', error);
+        throw error; // Throw the original error with all details
     }
 };
 
