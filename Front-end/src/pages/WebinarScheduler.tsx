@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import './WebinarScheduler.css';
+import { useAuth } from '../context/AuthContext'; // Add this import
 
 interface WebinarFormData {
   alumniName: string;
@@ -37,6 +38,7 @@ interface WebinarFormData {
 
 const WebinarScheduler: React.FC = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth(); // Add auth context
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -142,15 +144,8 @@ const WebinarScheduler: React.FC = () => {
   };
 
   const handleLogout = () => {
+    logout();
     navigate('/login');
-  };
-
-  const getTodayDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   };
 
   const getMinDate = () => {
@@ -163,68 +158,95 @@ const WebinarScheduler: React.FC = () => {
   };
 
   return (
-    <div className="webinar-scheduler-page">
+    <div className="webinar-container">
       {/* Background Effects */}
       <div className="background-effects">
-        <div className="effect-circle effect-circle-1"></div>
-        <div className="effect-circle effect-circle-2"></div>
+        <div className="background-blur bg-blue-100"></div>
+        <div className="background-blur bg-indigo-100"></div>
       </div>
 
-      {/* Header Navigation */}
-      <header className="webinar-scheduler-header">
-        <div className="header-container">
-          <div className="header-left">
-            <Link to="/" className="logo-link">
-              <div className="logo-icon-container">
-                <Video className="logo-icon" />
+      {/* Header with Full Navigation */}
+      <header className="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              {/* Logo/Brand */}
+              <div className="flex items-center gap-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
+                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <Link to="/" className="hidden text-lg font-bold text-gray-900 sm:block">
+                  AlumniConnect
+                </Link>
               </div>
-              <span className="logo-text">AlumniConnect</span>
-            </Link>
-            
-            <nav className="nav-links">
-              <button onClick={() => navigate('/dashboard')} className="nav-button">
-                <Home className="nav-button-icon" />
-                <span>Dashboard</span>
-              </button>
-              <button onClick={() => navigate('/webinars')} className="nav-button active">
-                <Video className="nav-button-icon" />
-                <span>Webinars</span>
-              </button>
-              <button onClick={() => navigate('/recommendations')} className="nav-button">
-                <Users className="nav-button-icon" />
-                <span>Recommendations</span>
-              </button>
-              <button onClick={() => navigate('/resources')} className="nav-button">
-                <FileText className="nav-button-icon" />
-                <span>Resources</span>
-              </button>
-              <button onClick={() => navigate('/profile')} className="nav-button">
-                <User className="nav-button-icon" />
-                <span>Profile</span>
-              </button>
-            </nav>
-          </div>
 
-          <div className="header-right">
-            <div className="user-profile" onClick={() => navigate('/profile')}>
-              <div className="user-avatar">
-                A
-              </div>
-              <div className="user-info">
-                <h2 className="user-name">Admin Panel</h2>
-                <p className="user-role">Webinar Manager</p>
-              </div>
+              {/* Navigation */}
+              <nav className="hidden md:flex items-center gap-1">
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => navigate('/resources')}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Resources
+                </button>
+                <button
+                  onClick={() => navigate('/blogs')}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Blogs
+                </button>
+                <button
+                  onClick={() => navigate('/community')}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Community
+                </button>
+                <button
+                  onClick={() => navigate('/webinar-scheduler')}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50"
+                >
+                  Events
+                </button>
+              </nav>
             </div>
-            <button onClick={handleLogout} className="logout-button">
-              <LogOut className="logout-icon" />
-              <span>Logout</span>
-            </button>
+
+            {/* User Menu */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+                <div className="hidden sm:block">
+                  <h2 className="text-sm font-semibold text-gray-900">{user?.name}</h2>
+                  <p className="text-xs capitalize text-gray-600">{user?.role}</p>
+                </div>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="webinar-scheduler-main">
+      <main className="webinar-main">
         {/* Page Header */}
         <div className="page-header">
           <div className="page-title-container">
@@ -236,9 +258,9 @@ const WebinarScheduler: React.FC = () => {
           <div className="page-actions">
             <button 
               onClick={() => navigate('/webinars/list')}
-              className="view-webinars-button"
+              className="view-webinars-btn"
             >
-              <Calendar className="button-icon" />
+              <Calendar className="btn-icon" />
               View Scheduled Webinars
             </button>
           </div>
@@ -367,7 +389,7 @@ const WebinarScheduler: React.FC = () => {
                           onChange={handleInputChange}
                           required
                           min={getMinDate()}
-                          className="form-input date-input"
+                          className="form-input"
                         />
                       </div>
                       <p className="form-hint">
@@ -387,7 +409,7 @@ const WebinarScheduler: React.FC = () => {
                           value={formData.time}
                           onChange={handleInputChange}
                           required
-                          className="form-input time-input"
+                          className="form-input"
                         />
                       </div>
                     </div>
@@ -402,7 +424,7 @@ const WebinarScheduler: React.FC = () => {
                         <button
                           key={option.value}
                           type="button"
-                          className={`duration-button ${formData.duration === option.value ? 'selected' : ''}`}
+                          className={`duration-btn ${formData.duration === option.value ? 'active' : ''}`}
                           onClick={() => setFormData(prev => ({ ...prev, duration: option.value }))}
                         >
                           {option.label}
@@ -428,7 +450,7 @@ const WebinarScheduler: React.FC = () => {
                         <button
                           key={platform.id}
                           type="button"
-                          className={`platform-button ${formData.platform === platform.id ? 'selected' : ''}`}
+                          className={`platform-btn ${formData.platform === platform.id ? 'active' : ''}`}
                           onClick={() => setFormData(prev => ({ ...prev, platform: platform.id }))}
                         >
                           <span className="platform-icon">{platform.icon}</span>
@@ -451,7 +473,7 @@ const WebinarScheduler: React.FC = () => {
                         onChange={handleInputChange}
                         min="1"
                         max="1000"
-                        className="form-input participants-input"
+                        className="form-input"
                       />
                     </div>
                     <p className="form-hint">
@@ -460,7 +482,7 @@ const WebinarScheduler: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label checkbox-label">
+                    <label className="checkbox-label">
                       <input
                         type="checkbox"
                         name="recordingAllowed"
@@ -494,7 +516,7 @@ const WebinarScheduler: React.FC = () => {
                         value={formData.skillInput}
                         onChange={(e) => setFormData(prev => ({ ...prev, skillInput: e.target.value }))}
                         onKeyDown={handleSkillAdd}
-                        className="form-input skills-input"
+                        className="form-input"
                         placeholder="Type a skill and press Enter..."
                       />
                       <span className="skills-hint">Press Enter to add</span>
@@ -508,7 +530,7 @@ const WebinarScheduler: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleSkillRemove(skill)}
-                              className="skill-remove"
+                              className="skill-remove-btn"
                             >
                               <X className="skill-remove-icon" />
                             </button>
@@ -526,14 +548,14 @@ const WebinarScheduler: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/webinars')}
-                className="cancel-button"
+                className="cancel-btn"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="submit-button"
+                className="submit-btn"
               >
                 {loading ? (
                   <>
@@ -542,9 +564,9 @@ const WebinarScheduler: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Calendar className="button-icon" />
+                    <Calendar className="btn-icon" />
                     Schedule Webinar
-                    <ChevronRight className="button-icon" />
+                    <ChevronRight className="btn-icon" />
                   </>
                 )}
               </button>

@@ -12,6 +12,7 @@ import Blogs from './pages/Blogs';
 import BlogDetail from './pages/BlogDetail';
 import Profile from './pages/Profile';
 import VideoCall from "./pages/VideoCall";
+import WebinarScheduler from './pages/WebinarScheduler';
 import type { ReactElement } from 'react';
 import './App.css';
 import CareerPathVisualizer from './pages/CareerPathVisualizer';
@@ -120,6 +121,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Recommendation/>
+              </ProtectedRoute>
+            } 
+          />
+          <Route  
+            path="/webinar-scheduler" 
+            element={
+              <ProtectedRoute>
+                <WebinarScheduler/>
               </ProtectedRoute>
             } 
           />

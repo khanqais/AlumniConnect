@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import './Blogs.css';
 
 interface Blog {
     _id: string;
@@ -108,63 +109,65 @@ const Blogs = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="blogs-container">
             {/* Background Effects */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
-                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
+            <div className="background-effects">
+                <div className="background-blur bg-blue-100"></div>
+                <div className="background-blur bg-indigo-100"></div>
             </div>
 
             {/* Header with Full Navigation */}
-            <header className="relative z-10 border-b border-white/10 bg-slate-900/50 backdrop-blur-xl">
+            <header className="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-xl">
                 <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             {/* Logo/Brand */}
                             <div className="flex items-center gap-2">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
                                     <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
                                 </div>
-                                <span className="hidden text-lg font-bold text-white sm:block">AlumniConnect</span>
+                                <Link to="/" className="hidden text-lg font-bold text-gray-900 sm:block">
+                                    AlumniConnect
+                                </Link>
                             </div>
 
                             {/* Navigation */}
                             <nav className="hidden md:flex items-center gap-1">
                                 <button
                                     onClick={() => navigate('/dashboard')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Dashboard
                                 </button>
                                 <button
                                     onClick={() => navigate('/resources')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Resources
                                 </button>
                                 <button
                                     onClick={() => navigate('/blogs')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-white bg-white/10"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50"
                                 >
                                     Blogs
                                 </button>
                                 <button
                                     onClick={() => navigate('/community')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Community
                                 </button>
                                 <button
-                                    onClick={() => navigate('/events')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    onClick={() => navigate('/webinar-scheduler')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Events
                                 </button>
                                 <button
                                     onClick={() => navigate('/profile')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Profile
                                 </button>
@@ -173,21 +176,21 @@ const Blogs = () => {
 
                         {/* User Menu */}
                         <div className="flex items-center gap-3">
-                            <div 
-                                className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                            <button
                                 onClick={() => navigate('/profile')}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
                             >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 font-bold text-white">
-                                    {user?.name.charAt(0).toUpperCase()}
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
+                                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                                 </div>
                                 <div className="hidden sm:block">
-                                    <h2 className="text-sm font-semibold text-white">{user?.name}</h2>
-                                    <p className="text-xs capitalize text-gray-400">{user?.role}</p>
+                                    <h2 className="text-sm font-semibold text-gray-900">{user?.name}</h2>
+                                    <p className="text-xs capitalize text-gray-600">{user?.role}</p>
                                 </div>
-                            </div>
+                            </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition-all hover:bg-red-500/20"
+                                className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
                             >
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -200,24 +203,24 @@ const Blogs = () => {
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="main-content text-black">
                 {/* Page Title & Actions */}
-                <div className="mb-8 flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-white">Blogs</h1>
-                    <div className="flex items-center gap-3">
+                <div className="page-header-actions">
+                    <h1 className="page-title">Blogs</h1>
+                    <div className="action-buttons">
                         <button
                             onClick={handleRefresh}
-                            className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white hover:bg-white/10"
+                            className="refresh-btn"
                             title="Refresh"
                         >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="refresh-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </button>
                         {user?.role === 'alumni' && (
                             <button
                                 onClick={() => setShowCreateModal(true)}
-                                className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                                className="write-blog-btn"
                             >
                                 Write Blog
                             </button>
@@ -226,25 +229,17 @@ const Blogs = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="mb-6 flex gap-2 border-b border-white/10">
+                <div className="blog-tabs">
                     <button
                         onClick={() => setActiveTab('all')}
-                        className={`rounded-t-lg px-6 py-3 text-sm font-medium transition-all ${
-                            activeTab === 'all'
-                                ? 'border-b-2 border-purple-500 bg-white/10 text-white'
-                                : 'text-gray-400 hover:text-white'
-                        }`}
+                        className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
                     >
                         All Blogs
                     </button>
                     {user?.role === 'alumni' && (
                         <button
                             onClick={() => setActiveTab('my')}
-                            className={`rounded-t-lg px-6 py-3 text-sm font-medium transition-all ${
-                                activeTab === 'my'
-                                    ? 'border-b-2 border-purple-500 bg-white/10 text-white'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`}
                         >
                             My Blogs ({myBlogs.length})
                         </button>
@@ -253,17 +248,13 @@ const Blogs = () => {
 
                 {/* Search & Filter - Only show for 'all' tab */}
                 {activeTab === 'all' && (
-                    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex gap-2 overflow-x-auto pb-2">
+                    <div className="search-filter-container">
+                        <div className="category-filters">
                             {['all', 'career-advice', 'interview-tips', 'industry-insights', 'personal-journey', 'technical'].map((cat) => (
                                 <button
                                     key={cat}
                                     onClick={() => setCategory(cat)}
-                                    className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                                        category === cat
-                                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                                            : 'border border-white/20 bg-white/5 text-gray-300 hover:bg-white/10'
-                                    }`}
+                                    className={`category-btn ${category === cat ? 'active' : ''}`}
                                 >
                                     {cat === 'all' ? 'All' : cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                 </button>
@@ -275,15 +266,15 @@ const Blogs = () => {
                             placeholder="Search blogs..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none sm:w-64"
+                            className="search-input"
                         />
                     </div>
                 )}
 
                 {/* Blog Grid */}
                 {loading ? (
-                    <div className="flex justify-center py-20">
-                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"></div>
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
                     </div>
                 ) : (
                     <>
@@ -291,20 +282,20 @@ const Blogs = () => {
                             // My Blogs
                             user?.role === 'alumni' ? (
                                 myBlogs.length === 0 ? (
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center backdrop-blur-xl">
-                                        <svg className="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="empty-state">
+                                        <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                         </svg>
-                                        <p className="mt-4 text-gray-400">You haven't written any blogs yet</p>
+                                        <p className="empty-text">You haven't written any blogs yet</p>
                                         <button
                                             onClick={() => setShowCreateModal(true)}
-                                            className="mt-4 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                                            className="write-first-btn"
                                         >
                                             Write Your First Blog
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                    <div className="blogs-grid">
                                         {myBlogs.map((blog) => (
                                             <BlogCard key={blog._id} blog={blog} onLike={handleLike} />
                                         ))}
@@ -314,14 +305,14 @@ const Blogs = () => {
                         ) : (
                             // All Blogs
                             blogs.length === 0 ? (
-                                <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center backdrop-blur-xl">
-                                    <svg className="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="empty-state">
+                                    <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                     </svg>
-                                    <p className="mt-4 text-gray-400">No blogs found</p>
+                                    <p className="empty-text">No blogs found</p>
                                 </div>
                             ) : (
-                                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <div className="blogs-grid">
                                     {blogs.map((blog) => (
                                         <BlogCard key={blog._id} blog={blog} onLike={handleLike} />
                                     ))}
@@ -353,75 +344,73 @@ const BlogCard = ({ blog, onLike }: { blog: Blog; onLike: (id: string) => void }
     const { user } = useAuth();
 
     return (
-        <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all hover:border-purple-500/50 hover:bg-white/10">
+        <div className="blog-card text-black">
             {blog.coverImage && (
-                <div className="mb-4 aspect-video overflow-hidden rounded-lg">
+                <div className="cover-image-container">
                     <img
                         src={`http://localhost:5000/${blog.coverImage}`}
                         alt={blog.title}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        className="cover-image"
                     />
                 </div>
             )}
 
-            <div className="mb-3 flex items-center justify-between">
-                <span className="rounded-full bg-purple-500/20 px-3 py-1 text-xs font-medium text-purple-300">
+            <div className="card-header">
+                <span className="category-badge">
                     {blog.category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                 </span>
-                <span className="text-xs text-gray-400">{blog.readTime} min read</span>
+                <span className="read-time">{blog.readTime} min read</span>
             </div>
 
             <h3 
-                className="mb-2 cursor-pointer text-lg font-semibold text-white hover:text-purple-300 transition-colors line-clamp-2"
+                className="blog-title"
                 onClick={() => navigate(`/blogs/${blog._id}`)}
             >
                 {blog.title}
             </h3>
 
-            <p className="mb-4 line-clamp-3 text-sm text-gray-400">{blog.excerpt}</p>
+            <p className="blog-excerpt">{blog.excerpt}</p>
 
             {blog.tags.length > 0 && (
-                <div className="mb-4 flex flex-wrap gap-2">
+                <div className="blog-tags">
                     {blog.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className="rounded-full bg-blue-500/20 px-2 py-1 text-xs text-blue-300">
+                        <span key={idx} className="tag">
                             {tag}
                         </span>
                     ))}
                     {blog.tags.length > 3 && (
-                        <span className="rounded-full bg-gray-500/20 px-2 py-1 text-xs text-gray-300">
+                        <span className="tag-more">
                             +{blog.tags.length - 3}
                         </span>
                     )}
                 </div>
             )}
 
-            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+            <div className="card-footer">
                 <div 
-                    className="flex items-center gap-3 cursor-pointer group/author flex-1"
+                    className="author-info"
                     onClick={() => navigate(`/profile/${blog.author._id}`)}
                 >
                     {blog.author.avatar ? (
                         <img
                             src={`http://localhost:5000/${blog.author.avatar}`}
                             alt={blog.authorName}
-                            className="h-10 w-10 rounded-full object-cover ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all"
+                            className="author-avatar"
                         />
                     ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-sm font-bold text-white ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all">
+                        <div className="author-avatar-placeholder">
                             {blog.authorName.charAt(0).toUpperCase()}
                         </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-300 group-hover/author:text-purple-300 transition-colors truncate">
-                            {blog.authorName}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
+                    <div className="author-details">
+                        <p className="author-name">{blog.authorName}</p>
+                        <p className="author-meta">
                             {blog.author.company && blog.author.jobTitle 
                                 ? `${blog.author.jobTitle} at ${blog.author.company}`
                                 : `${blog.author.role === 'alumni' ? 'Alumni' : 'Student'} • ${blog.author.collegeName}`
                             }
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="blog-date">
                             {new Date(blog.createdAt).toLocaleDateString('en-US', { 
                                 month: 'short', 
                                 day: 'numeric',
@@ -431,9 +420,9 @@ const BlogCard = ({ blog, onLike }: { blog: Blog; onLike: (id: string) => void }
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span className="flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="blog-stats">
+                    <span className="view-count">
+                        <svg className="view-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
@@ -444,13 +433,9 @@ const BlogCard = ({ blog, onLike }: { blog: Blog; onLike: (id: string) => void }
                             e.stopPropagation();
                             onLike(blog._id);
                         }}
-                        className={`flex items-center gap-1 transition-colors ${
-                            user && blog.likedBy.includes(user._id) 
-                                ? 'text-pink-400 hover:text-pink-300' 
-                                : 'hover:text-pink-400'
-                        }`}
+                        className={`like-btn ${user && blog.likedBy.includes(user._id) ? 'liked' : ''}`}
                     >
-                        <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                        <svg className="like-icon" viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                         </svg>
                         {blog.likes}
@@ -510,108 +495,108 @@ const CreateBlogModal = ({ onClose, onSuccess }: { onClose: () => void; onSucces
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900 p-8">
-                <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-white">Write a Blog</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="modal-overlay">
+            <div className="modal">
+                <div className="modal-header">
+                    <h2 className="modal-title text-black">Write a Blog</h2>
+                    <button onClick={onClose} className="modal-close-btn">
+                        <svg className="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-300">Title</label>
+                <form onSubmit={handleSubmit} className="blog-form text-black">
+                    <div className="form-group">
+                        <label className="form-label text-black">Title</label>
                         <input
                             type="text"
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                            className="form-input text-black"
                             placeholder="Enter an engaging title..."
                         />
                     </div>
 
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-300">Excerpt</label>
+                    <div className="form-group">
+                        <label className="form-label text-black">Excerpt</label>
                         <textarea
                             required
                             rows={2}
                             value={formData.excerpt}
                             onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                            className="form-textarea text-black"
                             placeholder="Brief description of your blog..."
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-300">Category</label>
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label text-black">Category</label>
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                                className="form-select text-black"
                             >
-                                <option value="career-advice" className="bg-slate-800">Career Advice</option>
-                                <option value="interview-tips" className="bg-slate-800">Interview Tips</option>
-                                <option value="industry-insights" className="bg-slate-800">Industry Insights</option>
-                                <option value="personal-journey" className="bg-slate-800">Personal Journey</option>
-                                <option value="technical" className="bg-slate-800">Technical</option>
-                                <option value="other" className="bg-slate-800">Other</option>
+                                <option value="career-advice" className="option-bg text-black">Career Advice</option>
+                                <option value="interview-tips" className="option-bg text-black">Interview Tips</option>
+                                <option value="industry-insights" className="option-bg text-black">Industry Insights</option>
+                                <option value="personal-journey" className="option-bg text-black">Personal Journey</option>
+                                <option value="technical" className="option-bg text-black">Technical</option>
+                                <option value="other" className="option-bg text-black">Other</option>
                             </select>
                         </div>
 
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-300">Tags (comma separated)</label>
+                        <div className="form-group">
+                            <label className="form-label text-black">Tags (comma separated)</label>
                             <input
                                 type="text"
                                 value={formData.tags}
                                 onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                                className="form-input text-black"
                                 placeholder="career, tech, advice..."
                             />
                         </div>
                     </div>
 
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-300">Cover Image (optional)</label>
+                    <div className="form-group">
+                        <label className="form-label text-black">Cover Image (optional)</label>
                         <input
                             type="file"
                             onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-purple-700"
+                            className="file-input"
                             accept="image/*"
                         />
                     </div>
 
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-300">Content</label>
+                    <div className="form-group">
+                        <label className="form-label text-black">Content</label>
                         <textarea
                             required
                             rows={15}
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                            className="content-textarea text-black"
                             placeholder="Write your blog content here... You can use plain text or basic formatting."
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="form-hint text-gray-600">
                             Tip: Use line breaks for paragraphs. Your blog will be published immediately.
                         </p>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="form-actions">
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-medium text-white hover:from-purple-700 hover:to-pink-700 disabled:opacity-50"
+                            className="submit-btn"
                         >
                             {loading ? 'Publishing...' : 'Publish Blog'}
                         </button>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-lg border border-white/20 bg-white/5 px-6 py-3 font-medium text-white hover:bg-white/10"
+                            className="cancel-btn text-black"
                         >
                             Cancel
                         </button>
