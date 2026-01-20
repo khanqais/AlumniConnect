@@ -19,7 +19,12 @@ const app = express();
 /* ============================
    MIDDLEWARE
 ============================ */
-app.use(cors({ origin: "*" }));
+// app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: "http://localhost:5173", // your frontend
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"] // <--- important
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -54,7 +59,7 @@ app.use("/api/resources", require("./routes/resourceRoutes"));
 app.use("/api/blogs", require("./routes/blogRoutes"));
 app.use("/api/questions", require("./routes/questionRoutes"));
 app.use("/api/webinars", require("./routes/webinarRoute"));
-
+app.use("/api/availability", require("./routes/availabiltyRoutes"));
 
 /* ============================
    HEALTH CHECK
@@ -168,6 +173,8 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("chat-message", message);
   });
 });
+
+
 
 /* ============================
    START SERVER  (IMPORTANT)

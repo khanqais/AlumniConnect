@@ -664,6 +664,60 @@ const sendWebinarNotificationEmail = async ({
     await transporter.sendMail(mailOptions);
 };
 
+// Send mentor availability notification email
+const sendMentorAvailabilityEmail = async ({
+    toEmail,
+    studentName,
+    mentorName,
+    startTime,
+    endTime,
+    bookingLink
+}) => {
+    const transporter = createTransporter();
+    const outlookEmail = convertToOutlookEmail(toEmail);
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM || `"Alumni Mentorship Platform" <${process.env.EMAIL_USER}>`,
+        to: outlookEmail,
+        subject: `🟢 ${mentorName} is available for 1:1 Mentorship`,
+        html: `
+            <h2>Hello ${studentName},</h2>
+
+            <p><strong>${mentorName}</strong> has opened new availability for a one-on-one mentorship session.</p>
+
+            <ul>
+                <li><strong>Start:</strong> ${new Date(startTime).toLocaleString()}</li>
+                <li><strong>End:</strong> ${new Date(endTime).toLocaleString()}</li>
+            </ul>
+
+            <p>
+                Click the button below to book this slot before it fills up:
+            </p>
+
+            <div style="margin: 20px 0;">
+                <a href="${bookingLink}"
+                   style="
+                     padding: 12px 24px;
+                     background: #2563eb;
+                     color: white;
+                     text-decoration: none;
+                     border-radius: 6px;
+                     font-weight: bold;
+                   ">
+                    Book Slot
+                </a>
+            </div>
+
+            <p>If you miss this slot, keep an eye out for future availability.</p>
+
+            <p>🎓 Alumni Mentorship Platform</p>
+        `,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+
 
 module.exports = {
     generateVerificationToken,
@@ -672,5 +726,6 @@ module.exports = {
     sendVerificationEmail,
     sendWelcomeEmail,
     convertToOutlookEmail,
-    sendWebinarNotificationEmail
+    sendWebinarNotificationEmail,
+    sendMentorAvailabilityEmail
 };
