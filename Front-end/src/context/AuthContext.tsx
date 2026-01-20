@@ -16,6 +16,7 @@ interface AuthContextType {
     user: User | null;
     login: (userData: User) => void;
     logout: () => void;
+    updateUser: (userData: Partial<User>) => void;
     loading: boolean;
 }
 
@@ -50,6 +51,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         delete axios.defaults.headers.common['Authorization'];
     };
 
+    const updateUser = (userData: Partial<User>) => {
+        if (user) {
+            const updatedUser = { ...user, ...userData };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+    };
+
     useEffect(() => {
         if (user?.token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
@@ -57,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [user]);
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

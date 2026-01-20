@@ -21,7 +21,8 @@ import {
   ExternalLink,
   Filter,
   Search,
-  RefreshCw
+  RefreshCw,
+  FileText
 } from 'lucide-react';
 import './CareerPathVisualizer.css';
 
@@ -60,14 +61,12 @@ const CareerPathVisualizer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'timeline' | 'network'>('timeline');
 
-  // Mock user data
   const user = {
     name: 'John Student',
     role: 'student',
     skills: ['React', 'TypeScript', 'Node.js', 'MongoDB', 'AWS', 'Python']
   };
 
-  // Career paths data
   const careerPaths: CareerPath[] = [
     {
       id: 'software-engineer',
@@ -115,7 +114,6 @@ const CareerPathVisualizer: React.FC = () => {
     }
   ];
 
-  // Fetch alumni paths (mock data)
   useEffect(() => {
     const fetchAlumniPaths = async () => {
       setLoading(true);
@@ -216,54 +214,80 @@ const CareerPathVisualizer: React.FC = () => {
         <div className="effect-circle effect-circle-2"></div>
       </div>
 
-      {/* Header Navigation */}
+      {/* Updated Header */}
       <header className="career-path-header">
         <div className="header-container">
-          <div className="header-left">
+          <div className="flex items-center gap-6">
+            {/* Logo/Brand */}
             <Link to="/" className="logo-link">
-              <div className="logo-icon-container">
-                <Map className="logo-icon" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
+                <Map className="h-6 w-6 text-white" />
               </div>
-              <span className="logo-text">AlumniConnect</span>
+              <span className="hidden text-lg font-bold text-gray-900 sm:block">
+                AlumniConnect
+              </span>
             </Link>
             
-            <nav className="nav-links">
-              <button onClick={() => navigate('/dashboard')} className="nav-button">
-                <Home className="nav-button-icon" />
-                <span>Dashboard</span>
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+              >
+                <Home className="w-4 h-4" />
+                Dashboard
               </button>
-              <button onClick={() => navigate('/recommendations')} className="nav-button">
-                <TrendingUp className="nav-button-icon" />
-                <span>Recommendations</span>
+              <button
+                onClick={() => navigate('/resources')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Resources
               </button>
-              <button onClick={() => navigate('/career-paths')} className="nav-button active">
-                <Map className="nav-button-icon" />
-                <span>Career Paths</span>
+              <button
+                onClick={() => navigate('/recommendations')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Recommendations
               </button>
-              <button onClick={() => navigate('/resources')} className="nav-button">
-                <Briefcase className="nav-button-icon" />
-                <span>Resources</span>
+              <button
+                onClick={() => navigate('/career-paths')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+              >
+                <Map className="w-4 h-4" />
+                Career Paths
               </button>
-              <button onClick={() => navigate('/profile')} className="nav-button">
-                <User className="nav-button-icon" />
-                <span>Profile</span>
+              <button
+                onClick={() => navigate('/profile')}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+              >
+                <User className="w-4 h-4" />
+                Profile
               </button>
             </nav>
           </div>
 
-          <div className="header-right">
-            <div className="user-profile" onClick={() => navigate('/profile')}>
-              <div className="user-avatar">
+          {/* User Menu */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              <div className="user-info">
-                <h2 className="user-name">{user.name}</h2>
-                <p className="user-role">{user.role}</p>
+              <div className="hidden sm:block">
+                <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
+                <p className="text-xs capitalize text-gray-600">{user.role}</p>
               </div>
-            </div>
-            <button onClick={handleLogout} className="logout-button">
-              <LogOut className="logout-icon" />
-              <span>Logout</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>

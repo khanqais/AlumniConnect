@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -11,6 +11,8 @@ import Resources from './pages/Resources';
 import Blogs from './pages/Blogs';
 import BlogDetail from './pages/BlogDetail';
 import Profile from './pages/Profile';
+import VideoCall from "./pages/VideoCall";
+import WebinarScheduler from './pages/WebinarScheduler';
 import type { ReactElement } from 'react';
 import './App.css';
 import CareerPathVisualizer from './pages/CareerPathVisualizer';
@@ -97,6 +99,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/videocall/:roomId" element={<VideoCallWrapper />}/>
           <Route
             path="/blogs"
             element={
@@ -118,6 +121,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Recommendation/>
+              </ProtectedRoute>
+            } 
+          />
+          <Route  
+            path="/webinar-scheduler" 
+            element={
+              <ProtectedRoute>
+                <WebinarScheduler/>
               </ProtectedRoute>
             } 
           />
@@ -176,5 +187,5 @@ function App() {
     </Router>
   );
 }
-
+function VideoCallWrapper() {useParams(); return <VideoCall/>; }
 export default App;

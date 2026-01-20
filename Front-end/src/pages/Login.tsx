@@ -31,11 +31,13 @@ const Login = () => {
             const res = await axios.post('http://localhost:5000/api/auth/login', formData);
 
             console.log('✅ User Login Response:', res.data);
+            //anshu putting to save in localStorage
+            if (res.data.token) { localStorage.setItem("token", res.data.token); }
 
             login(res.data);
 
-            // Redirect to dashboard
-            navigate('/dashboard'); // Changed from '/'
+            
+            navigate('/dashboard'); 
 
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
@@ -47,45 +49,45 @@ const Login = () => {
 
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
-                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
+                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-blue-100 blur-3xl"></div>
+                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-indigo-100 blur-3xl"></div>
             </div>
 
             {/* Home Link */}
             <Link to="/" className="absolute left-6 top-6 z-20 flex items-center gap-2 transition-opacity hover:opacity-80">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700">
                     <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                 </div>
-                <span className="text-xl font-bold text-white">AlumniConnect</span>
+                <span className="text-xl font-bold text-gray-900">AlumniConnect</span>
             </Link>
 
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-md mt-16">
                 {/* Login Card */}
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/50 shadow-2xl backdrop-blur-xl">
+                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
                     <div className="px-8 py-10">
                         {/* Header */}
                         <div className="mb-8 text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600">
+                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700">
                                 <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
-                            <p className="mt-2 text-gray-400">Sign in to continue to your account</p>
+                            <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+                            <p className="mt-2 text-gray-600">Sign in to continue to your account</p>
                         </div>
 
                         {/* Error Message */}
                         {error && (
-                            <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-500/50 bg-red-500/10 p-4">
-                                <svg className="h-5 w-5 flex-shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+                                <svg className="h-5 w-5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <p className="text-sm text-red-300">{error}</p>
+                                <p className="text-sm text-red-700">{error}</p>
                             </div>
                         )}
 
@@ -93,7 +95,7 @@ const Login = () => {
                         <form onSubmit={onSubmit} className="space-y-5">
                             {/* Email */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">Email Address</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Email Address</label>
                                 <div className="relative">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +108,7 @@ const Login = () => {
                                         value={email}
                                         onChange={onChange}
                                         required
-                                        className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 pr-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                        className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 text-gray-900 placeholder-gray-500 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                         placeholder="you@example.com"
                                     />
                                 </div>
@@ -114,7 +116,7 @@ const Login = () => {
 
                             {/* Password */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">Password</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Password</label>
                                 <div className="relative">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,7 +129,7 @@ const Login = () => {
                                         value={password}
                                         onChange={onChange}
                                         required
-                                        className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 pr-3 text-white placeholder-gray-500 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                        className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 text-gray-900 placeholder-gray-500 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                         placeholder="••••••••"
                                     />
                                 </div>
@@ -137,7 +139,7 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="group relative w-full overflow-hidden rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-3 font-semibold text-white transition-all hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50"
+                                className="group relative w-full overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                             >
                                 <span className="relative flex items-center justify-center gap-2">
                                     {loading ? (
@@ -162,9 +164,9 @@ const Login = () => {
 
                         {/* Sign Up Link */}
                         <div className="mt-6 text-center">
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-gray-600">
                                 Don't have an account?{' '}
-                                <Link to="/register" className="font-semibold text-purple-400 transition-colors hover:text-purple-300">
+                                <Link to="/register" className="font-semibold text-blue-600 transition-colors hover:text-blue-700">
                                     Create one now
                                 </Link>
                             </p>
@@ -173,16 +175,16 @@ const Login = () => {
                 </div>
 
                 {/* Admin Login Link */}
-                <div className="mt-6 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4 backdrop-blur-sm">
+                <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
                     <div className="flex items-start gap-3">
-                        <svg className="h-5 w-5 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="h-5 w-5 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <h3 className="text-sm font-semibold text-blue-300">Admin Access</h3>
-                            <p className="mt-1 text-xs text-blue-200/80">
+                            <h3 className="text-sm font-semibold text-blue-800">Admin Access</h3>
+                            <p className="mt-1 text-xs text-blue-700">
                                 Administrators should{' '}
-                                <Link to="/admin" className="font-semibold text-blue-300 underline hover:text-blue-200">
+                                <Link to="/admin" className="font-semibold text-blue-600 underline hover:text-blue-800">
                                     login here
                                 </Link>
                             </p>

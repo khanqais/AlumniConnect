@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 interface Resource {
     _id: string;
@@ -20,7 +20,7 @@ interface Resource {
         bio?: string;
         company?: string;
         jobTitle?: string;
-    };
+    } | null;
     tags: string[];
     downloads: number;
     likes: number;
@@ -175,63 +175,65 @@ const Resources = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-black">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl"></div>
-                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-pink-600/30 blur-3xl"></div>
+                <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-blue-100 blur-3xl"></div>
+                <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-indigo-100 blur-3xl"></div>
             </div>
 
             {/* Header with Full Navigation */}
-            <header className="relative z-10 border-b border-white/10 bg-slate-900/50 backdrop-blur-xl">
+            <header className="relative z-10 border-b border-gray-200 bg-white/80 backdrop-blur-xl">
                 <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             {/* Logo/Brand */}
                             <div className="flex items-center gap-2">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
                                     <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
                                 </div>
-                                <span className="hidden text-lg font-bold text-white sm:block">AlumniConnect</span>
+                                <Link to="/" className="hidden text-lg font-bold text-gray-900 sm:block">
+                                    AlumniConnect
+                                </Link>
                             </div>
 
                             {/* Navigation */}
                             <nav className="hidden md:flex items-center gap-1">
                                 <button
                                     onClick={() => navigate('/dashboard')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Dashboard
                                 </button>
                                 <button
                                     onClick={() => navigate('/resources')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-white bg-white/10"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50"
                                 >
                                     Resources
                                 </button>
                                 <button
                                     onClick={() => navigate('/blogs')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Blogs
                                 </button>
                                 <button
                                     onClick={() => navigate('/community')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Community
                                 </button>
                                 <button
-                                    onClick={() => navigate('/events')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    onClick={() => navigate('/webinar-scheduler')}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Events
                                 </button>
                                 <button
                                     onClick={() => navigate('/profile')}
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 >
                                     Profile
                                 </button>
@@ -240,21 +242,21 @@ const Resources = () => {
 
                         {/* User Menu */}
                         <div className="flex items-center gap-3">
-                            <div 
-                                className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                            <button
                                 onClick={() => navigate('/profile')}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
                             >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 font-bold text-white">
-                                    {user?.name.charAt(0).toUpperCase()}
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
+                                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                                 </div>
                                 <div className="hidden sm:block">
-                                    <h2 className="text-sm font-semibold text-white">{user?.name}</h2>
-                                    <p className="text-xs capitalize text-gray-400">{user?.role}</p>
+                                    <h2 className="text-sm font-semibold text-gray-900">{user?.name}</h2>
+                                    <p className="text-xs capitalize text-gray-600">{user?.role}</p>
                                 </div>
-                            </div>
+                            </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition-all hover:bg-red-500/20"
+                                className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
                             >
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -267,15 +269,15 @@ const Resources = () => {
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 text-black">
                 {/* Page Title & Actions */}
                 <div className="mb-8 flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-white">Resource Library</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Resource Library</h1>
                     <div className="flex items-center gap-3">
                         {/* Refresh Button */}
                         <button
                             onClick={handleRefresh}
-                            className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white hover:bg-white/10"
+                            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
                             title="Refresh"
                         >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +286,7 @@ const Resources = () => {
                         </button>
                         <button
                             onClick={() => setShowUploadModal(true)}
-                            className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                            className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-800"
                         >
                             Upload Resource
                         </button>
@@ -292,13 +294,13 @@ const Resources = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="mb-6 flex gap-2 border-b border-white/10">
+                <div className="mb-6 flex gap-2 border-b border-gray-200">
                     <button
                         onClick={() => setActiveTab('all')}
                         className={`rounded-t-lg px-6 py-3 text-sm font-medium transition-all ${
                             activeTab === 'all'
-                                ? 'border-b-2 border-purple-500 bg-white/10 text-white'
-                                : 'text-gray-400 hover:text-white'
+                                ? 'border-b-2 border-blue-600 bg-blue-50 text-blue-600'
+                                : 'text-gray-600 hover:text-gray-900'
                         }`}
                     >
                         All Resources
@@ -307,8 +309,8 @@ const Resources = () => {
                         onClick={() => setActiveTab('my')}
                         className={`rounded-t-lg px-6 py-3 text-sm font-medium transition-all ${
                             activeTab === 'my'
-                                ? 'border-b-2 border-purple-500 bg-white/10 text-white'
-                                : 'text-gray-400 hover:text-white'
+                                ? 'border-b-2 border-blue-600 bg-blue-50 text-blue-600'
+                                : 'text-gray-600 hover:text-gray-900'
                         }`}
                     >
                         My Uploads ({myResources.length})
@@ -325,8 +327,8 @@ const Resources = () => {
                                     onClick={() => setCategory(cat)}
                                     className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                                         category === cat
-                                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                                            : 'border border-white/20 bg-white/5 text-gray-300 hover:bg-white/10'
+                                            ? 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white'
+                                            : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
                                     }`}
                                 >
                                     {cat === 'all' ? 'All' : cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
@@ -339,7 +341,7 @@ const Resources = () => {
                             placeholder="Search resources..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none sm:w-64"
+                            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none sm:w-64"
                         />
                     </div>
                 )}
@@ -347,21 +349,21 @@ const Resources = () => {
                 {/* Resources Grid */}
                 {loading ? (
                     <div className="flex justify-center py-20">
-                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"></div>
+                        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
                     </div>
                 ) : (
                     <>
                         {activeTab === 'my' ? (
                             // My Resources
                             myResources.length === 0 ? (
-                                <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center backdrop-blur-xl">
-                                    <svg className="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
+                                    <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <p className="mt-4 text-gray-400">You haven't uploaded any resources yet</p>
+                                    <p className="mt-4 text-gray-600">You haven't uploaded any resources yet</p>
                                     <button
                                         onClick={() => setShowUploadModal(true)}
-                                        className="mt-4 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                                        className="mt-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-2 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-800"
                                     >
                                         Upload First Resource
                                     </button>
@@ -371,43 +373,43 @@ const Resources = () => {
                                     {myResources.map((resource) => (
                                         <div
                                             key={resource._id}
-                                            className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all hover:border-purple-500/50 hover:bg-white/10"
+                                            className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md"
                                         >
                                             {/* Approval Status Badge */}
                                             <div className="mb-4 flex items-start justify-between">
-                                                <span className="rounded-full bg-purple-500/20 px-3 py-1 text-xs font-medium text-purple-300">
+                                                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
                                                     {resource.category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                                 </span>
                                                 {resource.isApproved ? (
-                                                    <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-medium text-green-300">
+                                                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
                                                         ✓ Published
                                                     </span>
                                                 ) : (
-                                                    <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-medium text-yellow-300">
+                                                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
                                                         ⏳ Pending
                                                     </span>
                                                 )}
                                             </div>
 
-                                            <h3 className="mb-2 text-lg font-semibold text-white">{resource.title}</h3>
-                                            <p className="mb-4 line-clamp-2 text-sm text-gray-400">{resource.description}</p>
+                                            <h3 className="mb-2 text-lg font-semibold text-gray-900">{resource.title}</h3>
+                                            <p className="mb-4 line-clamp-2 text-sm text-gray-600">{resource.description}</p>
 
                                             <div className="mb-4 flex flex-wrap gap-2">
                                                 {resource.tags.slice(0, 3).map((tag, idx) => (
-                                                    <span key={idx} className="rounded-full bg-blue-500/20 px-2 py-1 text-xs text-blue-300">
+                                                    <span key={idx} className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700 border border-blue-200">
                                                         {tag}
                                                     </span>
                                                 ))}
                                             </div>
 
-                                            <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                                                <div className="text-xs text-gray-400">
+                                            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                                                <div className="text-xs text-gray-600">
                                                     <p>📥 {resource.downloads} downloads</p>
                                                     <p>❤️ {resource.likes} likes</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleDownload(resource._id, resource.file)}
-                                                    className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                                                    className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-800"
                                                 >
                                                     Download
                                                 </button>
@@ -419,74 +421,91 @@ const Resources = () => {
                         ) : (
                             // All Resources
                             resources.length === 0 ? (
-                                <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center backdrop-blur-xl">
-                                    <svg className="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
+                                    <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <p className="mt-4 text-gray-400">No approved resources found</p>
+                                    <p className="mt-4 text-gray-600">No approved resources found</p>
                                 </div>
                             ) : (
                                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                     {resources.map((resource) => (
                                         <div
                                             key={resource._id}
-                                            className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all hover:border-purple-500/50 hover:bg-white/10"
+                                            className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md"
                                         >
                                             <div className="mb-4 flex items-start justify-between">
-                                                <span className="rounded-full bg-purple-500/20 px-3 py-1 text-xs font-medium text-purple-300">
+                                                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
                                                     {resource.category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                                 </span>
                                                 <button
                                                     onClick={() => handleLike(resource._id)}
-                                                    className="text-gray-400 transition-colors hover:text-pink-400"
+                                                    className="text-gray-600 transition-colors hover:text-red-500"
                                                 >
                                                     ❤️ {resource.likes}
                                                 </button>
                                             </div>
 
-                                            <h3 className="mb-2 text-lg font-semibold text-white">{resource.title}</h3>
-                                            <p className="mb-4 line-clamp-2 text-sm text-gray-400">{resource.description}</p>
+                                            <h3 className="mb-2 text-lg font-semibold text-gray-900">{resource.title}</h3>
+                                            <p className="mb-4 line-clamp-2 text-sm text-gray-600">{resource.description}</p>
 
                                             <div className="mb-4 flex flex-wrap gap-2">
                                                 {resource.tags.slice(0, 3).map((tag, idx) => (
-                                                    <span key={idx} className="rounded-full bg-blue-500/20 px-2 py-1 text-xs text-blue-300">
+                                                    <span key={idx} className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700 border border-blue-200">
                                                         {tag}
                                                     </span>
                                                 ))}
                                             </div>
 
-                                            <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                                                <div 
-                                                    className="flex items-center gap-3 cursor-pointer group/author"
-                                                    onClick={() => navigate(`/profile/${resource.uploadedBy._id}`)}
-                                                >
-                                                    {resource.uploadedBy.avatar ? (
-                                                        <img
-                                                            src={`http://localhost:5000/${resource.uploadedBy.avatar}`}
-                                                            alt={resource.uploadedBy.name}
-                                                            className="h-10 w-10 rounded-full object-cover ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-sm font-bold text-white ring-2 ring-purple-500/50 group-hover/author:ring-purple-400 transition-all">
-                                                            {resource.uploadedBy.name.charAt(0).toUpperCase()}
+                                            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                                                {resource.uploadedBy ? (
+                                                    <div 
+                                                        className="flex items-center gap-3 cursor-pointer group/author"
+                                                        onClick={() => resource.uploadedBy && navigate(`/profile/${resource.uploadedBy._id}`)}
+                                                    >
+                                                        {resource.uploadedBy.avatar ? (
+                                                            <img
+                                                                src={`http://localhost:5000/${resource.uploadedBy.avatar}`}
+                                                                alt={resource.uploadedBy.name}
+                                                                className="h-10 w-10 rounded-full object-cover ring-2 ring-blue-500/50 group-hover/author:ring-blue-400 transition-all"
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 text-sm font-bold text-white ring-2 ring-blue-500/50 group-hover/author:ring-blue-400 transition-all">
+                                                                {resource.uploadedBy.name.charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-800 group-hover/author:text-blue-600 transition-colors truncate">
+                                                                {resource.uploadedBy.name}
+                                                            </p>
+                                                            <p className="text-xs text-gray-600 truncate">
+                                                                {resource.uploadedBy.company && resource.uploadedBy.jobTitle 
+                                                                    ? `${resource.uploadedBy.jobTitle} at ${resource.uploadedBy.company}`
+                                                                    : resource.uploadedBy.role === 'alumni' ? 'Alumni' : 'Student'
+                                                                }
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">📥 {resource.downloads} downloads</p>
                                                         </div>
-                                                    )}
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-300 group-hover/author:text-purple-300 transition-colors truncate">
-                                                            {resource.uploadedBy.name}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            {resource.uploadedBy.company && resource.uploadedBy.jobTitle 
-                                                                ? `${resource.uploadedBy.jobTitle} at ${resource.uploadedBy.company}`
-                                                                : resource.uploadedBy.role === 'alumni' ? 'Alumni' : 'Student'
-                                                            }
-                                                        </p>
-                                                        <p className="text-xs text-gray-600">📥 {resource.downloads} downloads</p>
                                                     </div>
-                                                </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-gray-400 to-gray-500 text-sm font-bold text-white ring-2 ring-gray-400/50">
+                                                            ?
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-800 truncate">
+                                                                {resource.uploaderName || 'Unknown User'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-600 truncate">
+                                                                {resource.uploaderRole || 'User'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">📥 {resource.downloads} downloads</p>
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <button
                                                     onClick={() => handleDownload(resource._id, resource.file)}
-                                                    className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white hover:from-purple-700 hover:to-pink-700"
+                                                    className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-800"
                                                 >
                                                     Download
                                                 </button>
@@ -503,12 +522,12 @@ const Resources = () => {
             {/* Upload Modal */}
             {showUploadModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                    <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-8">
+                    <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
                         <div className="mb-6 flex items-center justify-between">
-                            <h2 className="text-2xl font-bold text-white">Upload Resource</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">Upload Resource</h2>
                             <button
                                 onClick={() => setShowUploadModal(false)}
-                                className="text-gray-400 hover:text-white"
+                                className="text-gray-500 hover:text-gray-700"
                             >
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -516,97 +535,65 @@ const Resources = () => {
                             </button>
                         </div>
 
-                        {/* Info Banner
-                        <div className={`mb-6 rounded-lg p-4 ${
-                            user?.role === 'alumni' 
-                                ? 'border border-green-500/30 bg-green-500/10'
-                                : 'border border-blue-500/30 bg-blue-500/10'
-                        }`}>
-                            <div className="flex items-start gap-3">
-                                <svg className={`h-5 w-5 flex-shrink-0 ${
-                                    user?.role === 'alumni' ? 'text-green-400' : 'text-blue-400'
-                                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <div>
-                                    {user?.role === 'alumni' ? (
-                                        <>
-                                            <h3 className="text-sm font-semibold text-green-300">Auto-Published</h3>
-                                            <p className="mt-1 text-xs text-green-200/80">
-                                                As an alumni, your resource will be published immediately and visible to everyone.
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <h3 className="text-sm font-semibold text-blue-300">Pending Review</h3>
-                                            <p className="mt-1 text-xs text-blue-200/80">
-                                                Your upload will be reviewed by an admin before being published to everyone.
-                                            </p>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </div> */}
-
                         <form onSubmit={handleUpload} className="space-y-4">
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">Title</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Title</label>
                                 <input
                                     type="text"
                                     required
                                     value={uploadForm.title}
                                     onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
-                                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-purple-500 focus:outline-none"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
                                     placeholder="e.g., My Software Engineer Resume"
                                 />
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">Description</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Description</label>
                                 <textarea
                                     required
                                     rows={3}
                                     value={uploadForm.description}
                                     onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
-                                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-purple-500 focus:outline-none"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
                                     placeholder="Describe your resource..."
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-300">Category</label>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700">Category</label>
                                     <select
                                         value={uploadForm.category}
                                         onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
-                                        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-purple-500 focus:outline-none"
+                                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
                                     >
-                                        <option value="resume" className="bg-slate-800">Resume</option>
-                                        <option value="interview-experience" className="bg-slate-800">Interview Experience</option>
-                                        <option value="study-material" className="bg-slate-800">Study Material</option>
-                                        <option value="project" className="bg-slate-800">Project</option>
+                                        <option value="resume" className="bg-white">Resume</option>
+                                        <option value="interview-experience" className="bg-white">Interview Experience</option>
+                                        <option value="study-material" className="bg-white">Study Material</option>
+                                        <option value="project" className="bg-white">Project</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-300">Tags (comma separated)</label>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700">Tags (comma separated)</label>
                                     <input
                                         type="text"
                                         value={uploadForm.tags}
                                         onChange={(e) => setUploadForm({ ...uploadForm, tags: e.target.value })}
-                                        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-purple-500 focus:outline-none"
+                                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
                                         placeholder="e.g., Java, Backend, Google"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-300">Upload File</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Upload File</label>
                                 <input
                                     type="file"
                                     required
                                     onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-purple-700"
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700"
                                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
@@ -616,14 +603,14 @@ const Resources = () => {
                                 <button
                                     type="submit"
                                     disabled={uploadLoading}
-                                    className="flex-1 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-3 font-medium text-white hover:from-purple-700 hover:to-pink-700 disabled:opacity-50"
+                                    className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-3 font-medium text-white hover:from-blue-700 hover:to-indigo-800 disabled:opacity-50"
                                 >
                                     {uploadLoading ? 'Uploading...' : 'Upload Resource'}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setShowUploadModal(false)}
-                                    className="rounded-lg border border-white/20 bg-white/5 px-6 py-3 font-medium text-white hover:bg-white/10"
+                                    className="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 hover:bg-gray-50"
                                 >
                                     Cancel
                                 </button>
