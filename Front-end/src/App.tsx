@@ -63,6 +63,7 @@ const PublicRoute = ({ children }: { children: ReactElement }) => {
 };
 
 function App() {
+
   return (
     <Router>
       <AuthProvider>
@@ -112,7 +113,7 @@ function App() {
             path="/career-path" 
             element={
               <ProtectedRoute>
-                <CareerPathVisualizer/>
+                <CareerPathVisualizer />
               </ProtectedRoute>
             } 
           />

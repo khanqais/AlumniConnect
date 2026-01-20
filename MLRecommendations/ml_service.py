@@ -17,12 +17,13 @@ def career_path():
     for alum in alumni:
         alum_skills = set(alum.get('skills', []))
         common_skills = student_skills.intersection(alum_skills)
-
+        
         match_pct = (len(common_skills) / len(student_skills) * 100) if student_skills else 0
         missing_skills = list(alum_skills - student_skills)
 
         results.append({
             "name": alum.get("name"),
+            "experience":alum.get("experience"),
             "jobTitle": alum.get("jobTitle", ""),
             "company": alum.get("company", ""),
             "skillMatchPercentage": round(match_pct, 2),
@@ -54,6 +55,7 @@ def target_skills():
 
         results.append({
             "name": alum.get("name"),
+            "experience":alum.get("experience"),
             "jobTitle": alum.get("jobTitle", ""),
             "company": alum.get("company", ""),
             "targetSkillMatchPercentage": round(match_pct, 2),

@@ -10,6 +10,7 @@ interface User {
     role: 'student' | 'alumni' | 'admin';
     token: string;
     isApproved?: boolean;
+    skills: string[];
 }
 
 interface AuthContextType {
