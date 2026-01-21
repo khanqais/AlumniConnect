@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Send, Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Users } from 'lucide-react';
+import { useLocation } from "react-router-dom";
 
 interface Message {
     sender: string;
@@ -12,6 +13,9 @@ interface Message {
 }
 
 export default function VideoCall() {
+    const location = useLocation();
+const { startTime, endTime } = location.state || {};
+
     const { user } = useAuth();
     const { roomId } = useParams<{ roomId: string }>();
     const navigate = useNavigate();
@@ -30,6 +34,19 @@ export default function VideoCall() {
     const [showChat, setShowChat] = useState(true);
     const [copied, setCopied] = useState(false);
     const [connectionStatus, setConnectionStatus] = useState<string>('Connecting...');
+
+    useEffect(() => {
+    if (!startTime) return;
+
+    const now = new Date();
+    const start = new Date(startTime);
+
+    if (now < start) {
+        setConnectionStatus("Call has not started yet");
+        return;
+    }
+}, [startTime]);
+
 
     useEffect(() => {
         if (!roomId) return;
