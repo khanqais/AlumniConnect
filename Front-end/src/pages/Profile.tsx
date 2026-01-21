@@ -425,7 +425,7 @@ const Profile = () => {
                             {!isOwnProfile && (
                                 <div className="flex flex-wrap gap-2 sm:pb-4">
                                     <button 
-                                        onClick={() => navigate('/chat')}
+                                        onClick={() => navigate(`/chat/${userId || profile._id}`)}
                                         className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2.5 font-medium text-white transition-all hover:from-blue-700 hover:to-indigo-800 shadow-sm"
                                     >
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
