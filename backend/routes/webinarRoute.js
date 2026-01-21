@@ -253,28 +253,61 @@ router.get('/', protect, async (req, res) => {
       .populate('createdBy', 'name email role') // to show organizer info
       .lean();
 
+    // Filter out webinars with missing organizers
+    webinars = webinars.filter(w => w.createdBy);
+
     // Filter by search
     if (search) {
       const regex = new RegExp(search, 'i');
       webinars = webinars.filter(w => regex.test(w.webinarName));
     }
 
-    // Filter by status
-    if (status) {
+    // Map to frontend format with status calculation
+    const mapped = webinars.map(w => {
       const now = new Date();
-      webinars = webinars.filter(w => {
-        if (status === 'upcoming') return new Date(w.scheduledAt) > now;
-        if (status === 'ongoing') {
-          const start = new Date(w.scheduledAt);
-          const end = new Date(start.getTime() + parseInt(w.duration) * 60000);
-          return start <= now && now <= end;
-        }
-        if (status === 'completed') return new Date(w.scheduledAt) < now;
-        return true;
-      });
+      const start = new Date(w.scheduledAt);
+      const end = new Date(start.getTime() + parseInt(w.duration) * 60000);
+      
+      let webinarStatus = 'upcoming';
+      if (now > end) {
+        webinarStatus = 'completed';
+      } else if (now >= start && now <= end) {
+        webinarStatus = 'ongoing';
+      }
+
+      return {
+        _id: w._id,
+        webinarName: w.webinarName,
+        description: w.description,
+        scheduledAt: w.scheduledAt,
+        time: start.toTimeString().split(' ')[0].slice(0, 5),
+        duration: w.duration,
+        platform: 'google-meet',
+        roomId: w.roomId,
+        meetingLink: `https://meet.google.com/${w.roomId}`,
+        organizer: {
+          _id: w.createdBy._id,
+          name: w.createdBy.name,
+          email: w.createdBy.email,
+          role: w.createdBy.role,
+        },
+        registeredUsers: w.registeredUsers || [],
+        maxParticipants: w.maxParticipants,
+        status: webinarStatus,
+        skillsCovered: w.skillsCovered || [],
+        recordingAllowed: w.recordingAllowed,
+        prerequisites: w.prerequisites,
+        createdAt: w.createdAt,
+      };
+    });
+
+    // Filter by status after mapping
+    let filtered = mapped;
+    if (status) {
+      filtered = mapped.filter(w => w.status === status);
     }
 
-    res.json(webinars);
+    res.json(filtered);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Failed to fetch webinars' });
@@ -313,6 +346,27 @@ router.post("/register/:id", protect, async (req, res) => {
     res.json({ success: true, message: "Registered successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete webinar
+router.delete("/:id", protect, async (req, res) => {
+  try {
+    const webinar = await Webinar.findById(req.params.id);
+    if (!webinar) {
+      return res.status(404).json({ message: "Webinar not found" });
+    }
+
+    // Check if user is the creator
+    if (req.user._id.toString() !== webinar.createdBy.toString()) {
+      return res.status(403).json({ message: "You are not authorized to delete this webinar" });
+    }
+
+    await Webinar.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "Webinar deleted successfully" });
+  } catch (err) {
+    console.error("Delete webinar error:", err);
+    res.status(500).json({ message: "Failed to delete webinar" });
   }
 });
 
