@@ -29,19 +29,37 @@ export default function VideoCall() {
 
     const token = localStorage.getItem("token");
 
-    socketRef.current = io("http://localhost:5000", {
-      auth: { token },
-      transports: ["websocket"],
-    });
+    // socketRef.current = io("http://localhost:5000", {
+    //   auth: { token },
+    //   transports: ["websocket"],
+    // });
+  socketRef.current = io("https://unopinioned-nonluminously-deja.ngrok-free.dev", {
+  auth: { token },
+  transports: ["websocket"],
+});
+
+
 
     socketRef.current.on("connect", () => console.log("✅ Socket connected"));
     socketRef.current.on("connect_error", (err) =>
       console.error("❌ Socket error:", err.message)
     );
 
+    // pcRef.current = new RTCPeerConnection({
+    //   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    // });
+
     pcRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+  iceServers: [
+    { urls: "stun:stun.relay.metered.ca:80" },
+    {
+      urls: "turn:global.relay.metered.ca:80",
+      username: "ac33ad4482e45a676b17e0d5",   // copy from Metered dashboard
+      credential: "9UWOIHpwToenrGVZ", // copy from Metered dashboard
+    },
+  ],
+});
+
 
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
@@ -59,7 +77,8 @@ export default function VideoCall() {
     pcRef.current.onicecandidate = (event) => {
       if (event.candidate) {
         socketRef.current?.emit("ice-candidate", {
-          room: roomId,
+          
+          roomId,
           candidate: event.candidate,
         });
       }
@@ -67,14 +86,32 @@ export default function VideoCall() {
 
     socketRef.current.emit("join-room", roomId);
 
-    socketRef.current.on("user-connected", () => setIsInitiator(true));
+    // socketRef.current.on("user-connected", () => setIsInitiator(true));
+
+    socketRef.current.on("initiator", () => {
+  console.log("🟢 I am initiator");
+  setIsInitiator(true);
+});
+
+socketRef.current.on("ready", async () => {
+  console.log("📞 Peer ready");
+
+  if (!pcRef.current) return;
+
+  const offer = await pcRef.current.createOffer();
+  await pcRef.current.setLocalDescription(offer);
+
+  socketRef.current?.emit("offer", { roomId, offer });
+  setCallStarted(true);
+});
+
 
     socketRef.current.on("offer", async ({ offer }) => {
       await pcRef.current?.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await pcRef.current?.createAnswer();
       await pcRef.current?.setLocalDescription(answer);
 
-      socketRef.current?.emit("answer", { room: roomId, answer });
+      socketRef.current?.emit("answer", { roomId, answer });
     });
 
     socketRef.current.on("answer", async ({ answer }) => {
@@ -100,7 +137,7 @@ export default function VideoCall() {
     const offer = await pcRef.current.createOffer();
     await pcRef.current.setLocalDescription(offer);
 
-    socketRef.current?.emit("offer", { room: roomId, offer });
+    socketRef.current?.emit("offer", { roomId, offer });
     setCallStarted(true);
   };
 
@@ -121,7 +158,7 @@ const sendMessage = () => {
   };
 
   socketRef.current?.emit("chat-message", {
-    room: roomId,
+    roomId,
     message: msg,
   });
 
