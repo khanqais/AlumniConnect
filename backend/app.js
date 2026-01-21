@@ -63,6 +63,7 @@ app.use("/api/questions", require("./routes/questionRoutes"));
 app.use("/api/webinars", require("./routes/webinarRoute"));
 app.use("/api/availability", require("./routes/availabiltyRoutes"));
 app.use("/api/recommend", require("./routes/recommendationRoutes"));
+app.use("/api/messages", require("./routes/messageRoutes"));
 // app.use("/api/webinars", require('./routes/webinarRoutes'));
 
 /* ============================
