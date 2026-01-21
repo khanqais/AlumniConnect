@@ -239,29 +239,133 @@ router.post("/schedule", protect, async (req, res) => {
     });
   }
 });
-router.get("/", protect, async (req, res) => {
-  const webinars = await Webinar.find()
-    .populate("createdBy", "name email role");
-  res.json(webinars);
+// router.get("/", protect, async (req, res) => {
+//   const webinars = await Webinar.find()
+//     .populate("createdBy", "name email role");
+//   res.json(webinars);
+// });
+router.get('/', protect, async (req, res) => {
+  try {
+    const { status, search } = req.query;
+
+    // Get all webinars
+    let webinars = await Webinar.find()
+      .populate('createdBy', 'name email role') // to show organizer info
+      .lean();
+
+    // Filter by search
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      webinars = webinars.filter(w => regex.test(w.webinarName));
+    }
+
+    // Filter by status
+    if (status) {
+      const now = new Date();
+      webinars = webinars.filter(w => {
+        if (status === 'upcoming') return new Date(w.scheduledAt) > now;
+        if (status === 'ongoing') {
+          const start = new Date(w.scheduledAt);
+          const end = new Date(start.getTime() + parseInt(w.duration) * 60000);
+          return start <= now && now <= end;
+        }
+        if (status === 'completed') return new Date(w.scheduledAt) < now;
+        return true;
+      });
+    }
+
+    res.json(webinars);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch webinars' });
+  }
 });
 
+
 // Register for a webinar
+// router.post("/register/:id", protect, async (req, res) => {
+//   const webinar = await Webinar.findById(req.params.id);
+//   if (!webinar) return res.status(404).json({ error: "Webinar not found" });
+
+//   if (webinar.registeredUsers.includes(req.user._id)) {
+//     return res.status(400).json({ error: "Already registered" });
+//   }
+
+//   webinar.registeredUsers.push(req.user._id);
+//   await webinar.save();
+
+//   res.json({ success: true });
+// });
 router.post("/register/:id", protect, async (req, res) => {
   try {
     const webinar = await Webinar.findById(req.params.id);
-    if (!webinar) return res.status(404).json({ error: "Webinar not found" });
+    if (!webinar) {
+      return res.status(404).json({ error: "Webinar not found" });
+    }
 
-    if (webinar.attendees.includes(req.user._id))
+    if (webinar.registeredUsers.includes(req.user._id)) {
       return res.status(400).json({ error: "Already registered" });
+    }
 
-    webinar.attendees.push(req.user._id);
+    webinar.registeredUsers.push(req.user._id);
     await webinar.save();
 
-    res.json({ success: true, webinar });
+    res.json({ success: true, message: "Registered successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ error: err.message });
   }
 });
+
+router.post("/attendance/join/:roomId", protect, async (req, res) => {
+  try {
+    const webinar = await Webinar.findOne({ roomId: req.params.roomId });
+    if (!webinar) {
+      return res.status(404).json({ error: "Webinar not found" });
+    }
+
+    const alreadyJoined = webinar.attendance.find(
+      (a) => a.user.toString() === req.user._id.toString()
+    );
+
+    if (!alreadyJoined) {
+      webinar.attendance.push({
+        user: req.user._id,
+        joinedAt: new Date(),
+      });
+      await webinar.save();
+    }
+
+    res.json({ success: true, message: "Attendance marked (join)" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * MARK ATTENDANCE – LEAVE
+ */
+// router.post("/attendance/leave/:roomId", protect, async (req, res) => {
+//   try {
+//     const webinar = await Webinar.findOne({ roomId: req.params.roomId });
+//     if (!webinar) {
+//       return res.status(404).json({ error: "Webinar not found" });
+//     }
+
+//     const record = webinar.attendance.find(
+//       (a) => a.user.toString() === req.user._id.toString()
+//     );
+
+//     if (record && !record.leftAt) {
+//       record.leftAt = new Date();
+//       await webinar.save();
+//     }
+
+//     res.json({ success: true, message: "Attendance marked (leave)" });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
+// module.exports = router;
 
 module.exports = router;

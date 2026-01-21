@@ -13,6 +13,8 @@ const User = require("./models/User");
 
 dotenv.config();
 connectDB();
+require("./cron/webinarReminder");
+
 
 const app = express();
 
@@ -60,6 +62,7 @@ app.use("/api/blogs", require("./routes/blogRoutes"));
 app.use("/api/questions", require("./routes/questionRoutes"));
 app.use("/api/webinars", require("./routes/webinarRoute"));
 app.use("/api/availability", require("./routes/availabiltyRoutes"));
+// app.use("/api/webinars", require('./routes/webinarRoutes'));
 
 /* ============================
    HEALTH CHECK
@@ -168,10 +171,18 @@ io.on("connection", (socket) => {
     });
   });
 
+  // socket.on("chat-message", ({ roomId, message }) => {
+  //   console.log(`Chat message in room ${roomId}:`, message);
+  //   socket.to(roomId).emit("chat-message", message);
+  // });
   socket.on("chat-message", ({ roomId, message }) => {
-    console.log(`Chat message in room ${roomId}:`, message);
-    socket.to(roomId).emit("chat-message", message);
-  });
+  console.log(`Chat message in room ${roomId}:`, message);
+
+  // 🔥 SEND TO EVERYONE IN ROOM (INCLUDING SENDER)
+  socket.to(roomId).emit("chat-message", message);
+  
+});
+
 });
 
 

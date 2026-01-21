@@ -18,6 +18,29 @@ const { startTime, endTime } = location.state || {};
 
     const { user } = useAuth();
     const { roomId } = useParams<{ roomId: string }>();
+    useEffect(() => {
+  if (!roomId) return;
+
+  const markJoin = async () => {
+    try {
+      await fetch(
+        `http://localhost:5000/api/webinars/attendance/join/${roomId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log("✅ Attendance marked (JOIN)");
+    } catch (err) {
+      console.error("❌ Attendance join failed", err);
+    }
+  };
+
+  markJoin();
+}, [roomId]);
+
     const navigate = useNavigate();
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -238,6 +261,24 @@ const { startTime, endTime } = location.state || {};
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+//     useEffect(() => {
+//   return () => {
+//     if (!roomId) return;
+
+//     fetch(
+//       `http://localhost:5000/api/webinars/attendance/leave/${roomId}`,
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("token")}`,
+//         },
+//       }
+//     ).then(() => {
+//       console.log("👋 Attendance marked (LEAVE)");
+//     });
+//   };
+// }, [roomId]);
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">

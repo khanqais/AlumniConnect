@@ -335,6 +335,20 @@ return (
                 <p className="mt-2 text-sm text-gray-600">
                   Schedule a time-based mentorship session with students
                 </p>
+                  <div className="flex-1">
+                         <h3 className="text-lg font-semibold text-gray-900">Getting Started</h3>
+                            <p className="mt-2 text-sm text-gray-700">
+                               Welcome to AlumniConnect! Explore our resource library, read blogs from alumni, ask questions in the community,
+                              or attend upcoming events. Your journey starts here!
+                             </p>
+                          <button
+                                onClick={() => navigate('/resources')}
+                                className="mt-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-800"
+                            >
+                                Explore Now
+                            </button>
+                        </div>
+
 
                 <button
                   onClick={scheduleCall}
