@@ -134,6 +134,26 @@ const QuestionDetail = () => {
         }
     };
 
+    const handleToggleSolved = async () => {
+        if (!user?.token) return;
+
+        try {
+            await axios.post(
+                `http://localhost:5000/api/questions/toggle-solved/${id}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                    },
+                }
+            );
+            fetchQuestion();
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            alert(err.response?.data?.message || 'Failed to toggle solved status');
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -205,6 +225,24 @@ const QuestionDetail = () => {
                                     #{tag}
                                 </span>
                             ))}
+                        </div>
+                    )}
+
+                    {isQuestionOwner && (
+                        <div className="mb-4">
+                            <button
+                                onClick={handleToggleSolved}
+                                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                    question.isSolved
+                                        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                }`}
+                            >
+                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                {question.isSolved ? 'Mark as Unanswered' : 'Mark as Answered'}
+                            </button>
                         </div>
                     )}
 

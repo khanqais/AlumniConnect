@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import axios from 'axios';
 import { 
   User, 
   LogOut, 
@@ -22,8 +23,19 @@ import {
 import './WebinarScheduler.css';
 import { useAuth } from '../context/AuthContext'; // Add this import
 
+interface AlumniData {
+  _id: string;
+  name: string;
+  email: string;
+  company?: string;
+  jobTitle?: string;
+  graduationYear?: number;
+  skills?: string[];
+}
+
 interface WebinarFormData {
   alumniName: string;
+  alumniId: string;
   webinarName: string;
   date: string;
   time: string;
@@ -42,9 +54,12 @@ const WebinarScheduler: React.FC = () => {
   const { user } = useAuth(); // Add auth context
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [alumniList, setAlumniList] = useState<AlumniData[]>([]);
+  const [loadingAlumni, setLoadingAlumni] = useState(true);
 
   const [formData, setFormData] = useState<WebinarFormData>({
     alumniName: '',
+    alumniId: '',
     webinarName: '',
     date: '',
     time: '',
@@ -58,14 +73,22 @@ const WebinarScheduler: React.FC = () => {
     prerequisites: ''
   });
 
-  // Mock alumni data
-  const alumniList = [
-    { id: '1', name: 'Sarah Johnson - Google' },
-    { id: '2', name: 'Michael Chen - Microsoft' },
-    { id: '3', name: 'Emma Wilson - Amazon' },
-    { id: '4', name: 'David Lee - Netflix' },
-    { id: '5', name: 'Lisa Taylor - Meta' }
-  ];
+  // Fetch alumni from backend
+  useEffect(() => {
+    const fetchAlumni = async () => {
+      try {
+        setLoadingAlumni(true);
+        const res = await axios.get('http://localhost:5000/api/auth/alumni');
+        setAlumniList(res.data);
+      } catch (error) {
+        console.error('Error fetching alumni:', error);
+      } finally {
+        setLoadingAlumni(false);
+      }
+    };
+
+    fetchAlumni();
+  }, []);
 
   // Platform options
   const platformOptions = [
@@ -90,6 +113,14 @@ const WebinarScheduler: React.FC = () => {
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
+    } else if (name === 'alumniName') {
+      // When alumni is selected, store both name and ID
+      const selectedAlumni = alumniList.find(a => a._id === value);
+      setFormData(prev => ({ 
+        ...prev, 
+        alumniName: selectedAlumni ? `${selectedAlumni.name}${selectedAlumni.company ? ` - ${selectedAlumni.company}` : ''}` : '',
+        alumniId: value
+      }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -147,7 +178,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     setSuccess(true);
 
     // ✅ redirect to video room
-    navigate(`/video/${data.webinar.roomId}`);
+    navigate(`/videocall/${data.webinar.roomId}`);
   } catch (err: any) {
     console.error(err);
     alert(err.message || "Error scheduling webinar");
@@ -256,15 +287,20 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </label>
                     <select
                       name="alumniName"
-                      value={formData.alumniName}
+                      value={formData.alumniId}
                       onChange={handleInputChange}
                       required
                       className="form-select"
+                      disabled={loadingAlumni}
                     >
-                      <option value="">Choose an alumni speaker...</option>
+                      <option value="">
+                        {loadingAlumni ? 'Loading alumni...' : 'Choose an alumni speaker...'}
+                      </option>
                       {alumniList.map(alumni => (
-                        <option key={alumni.id} value={alumni.name}>
+                        <option key={alumni._id} value={alumni._id}>
                           {alumni.name}
+                          {alumni.company ? ` - ${alumni.company}` : ''}
+                          {alumni.jobTitle ? ` (${alumni.jobTitle})` : ''}
                         </option>
                       ))}
                     </select>
