@@ -348,6 +348,39 @@ router.post("/register/:id", protect, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// ✅ Validate webinar room before joining video call
+router.get("/room/:roomId", protect, async (req, res) => {
+  try {
+    const webinar = await Webinar.findOne({ roomId: req.params.roomId })
+      .populate("createdBy", "name email role");
+
+    if (!webinar) {
+      return res.status(404).json({ error: "Invalid webinar room" });
+    }
+
+    const now = new Date();
+    const start = new Date(webinar.scheduledAt);
+    const end = new Date(start.getTime() + parseInt(webinar.duration) * 60000);
+
+    if (now < start) {
+      return res.status(403).json({ error: "Webinar not started yet" });
+    }
+
+    if (now > end) {
+      return res.status(403).json({ error: "Webinar has ended" });
+    }
+
+    res.json({
+      success: true,
+      webinar,
+    });
+  } catch (err) {
+    console.error("❌ Webinar room validation error:", err);
+    res.status(500).json({ error: "Failed to validate webinar room" });
+  }
+});
+
+
 
 // Delete webinar
 router.delete("/:id", protect, async (req, res) => {
