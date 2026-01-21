@@ -253,9 +253,29 @@ const verifyEmail = async (req, res) => {
     }
 };
 
+// @desc Get all approved alumni
+// @route GET /api/auth/alumni
+// @access Public (or Protected)
+const getAllAlumni = async (req, res) => {
+    try {
+        const alumni = await User.find({
+            role: 'alumni',
+            isApproved: true,
+            isEmailVerified: true
+        }).select('name email company jobTitle graduationYear skills')
+          .sort({ name: 1 });
+
+        res.json(alumni);
+    } catch (error) {
+        console.error('Error fetching alumni:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getUserStats,
     verifyEmail,
+    getAllAlumni,
 };

@@ -54,39 +54,43 @@ const getAllWebinars = async (req, res) => {
       .populate("createdBy", "name email role")
       .sort({ scheduledAt: 1 });
 
-    // Map to match frontend "status" field
-    const mapped = webinars.map((w) => {
-      let webinarStatus = "upcoming";
-      const now = new Date();
-      if (now > w.scheduledAt) webinarStatus = "completed";
-      else if (now >= w.scheduledAt && now <= new Date(w.scheduledAt.getTime() + parseInt(w.duration) * 60000)) webinarStatus = "ongoing";
+    // Map to match frontend "status" field and filter out webinars with missing organizers
+    const mapped = webinars
+      .filter(w => w.createdBy) // Only include webinars with valid organizers
+      .map((w) => {
+        let webinarStatus = "upcoming";
+        const now = new Date();
+        if (now > w.scheduledAt) webinarStatus = "completed";
+        else if (now >= w.scheduledAt && now <= new Date(w.scheduledAt.getTime() + parseInt(w.duration) * 60000)) webinarStatus = "ongoing";
 
-      return {
-        _id: w._id,
-        title: w.webinarName,
-        description: w.description,
-        date: w.scheduledAt.toISOString(),
-        time: w.scheduledAt.toTimeString().split(" ")[0].slice(0,5),
-        duration: w.duration,
-        platform: "google-meet", // default for now
-        meetingLink: `https://meet.google.com/${w.roomId}`,
-        organizer: {
-          _id: w.createdBy._id,
-          name: w.createdBy.name,
-          email: w.createdBy.email,
-          role: w.createdBy.role,
-        },
-        registeredUsers: w.registeredUsers,
-        maxParticipants: w.maxParticipants,
-        status: webinarStatus,
-        category: "General",
-        tags: [],
-        skillsCovered: w.skillsCovered,
-        recordingAllowed: w.recordingAllowed,
-        prerequisites: w.prerequisites,
-        createdAt: w.createdAt,
-      };
-    });
+        return {
+          _id: w._id,
+          webinarName: w.webinarName,
+          title: w.webinarName,
+          description: w.description,
+          scheduledAt: w.scheduledAt,
+          date: w.scheduledAt.toISOString(),
+          time: w.scheduledAt.toTimeString().split(" ")[0].slice(0,5),
+          duration: w.duration,
+          platform: "google-meet", // default for now
+          meetingLink: `https://meet.google.com/${w.roomId}`,
+          organizer: {
+            _id: w.createdBy._id,
+            name: w.createdBy.name,
+            email: w.createdBy.email,
+            role: w.createdBy.role,
+          },
+          registeredUsers: w.registeredUsers,
+          maxParticipants: w.maxParticipants,
+          status: webinarStatus,
+          category: "General",
+          tags: [],
+          skillsCovered: w.skillsCovered,
+          recordingAllowed: w.recordingAllowed,
+          prerequisites: w.prerequisites,
+          createdAt: w.createdAt,
+        };
+      });
 
     res.json(mapped);
   } catch (err) {
