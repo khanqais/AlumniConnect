@@ -3,10 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import Footer from '../components/Footer';
 import Navigation from '../components/Navigation';
+import { useState } from "react";
+
 
 const Dashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [joinRoomId, setJoinRoomId] = useState("");
+
+const joinVideoCall = () => {
+  if (!joinRoomId.trim()) {
+    alert("Please enter a valid Room ID");
+    return;
+  }
+
+  navigate(`/videocall/${joinRoomId.trim()}`);
+};
+
 
   const scheduleCall = async () => {
   try {
@@ -312,79 +325,104 @@ return (
         </div>
 
         {/* Explore Features */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-2xl font-bold text-gray-900">
-            Explore Features
-          </h2>
+       {/* Explore Features */}
+<div className="mb-8">
+  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+    Explore Features
+  </h2>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-            {/* ALUMNI – Schedule Call */}
-            {user?.role === "alumni" && (
-              <div className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition-all hover:border-green-500 hover:shadow-md">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50">
-                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10" />
-                  </svg>
-                </div>
-
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Schedule Video Call
-                </h3>
-
-                <p className="mt-2 text-sm text-gray-600">
-                  Schedule a time-based mentorship session with students
-                </p>
-                  <div className="flex-1">
-                         <h3 className="text-lg font-semibold text-gray-900">Getting Started</h3>
-                            <p className="mt-2 text-sm text-gray-700">
-                               Welcome to AlumniConnect! Explore our resource library, read blogs from alumni, ask questions in the community,
-                              or attend upcoming events. Your journey starts here!
-                             </p>
-                          <button
-                                onClick={() => navigate('/resources')}
-                                className="mt-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-800"
-                            >
-                                Explore Now
-                            </button>
-                        </div>
-
-
-                <button
-                  onClick={scheduleCall}
-                  className="mt-4 text-sm font-medium text-green-600 hover:text-green-800"
-                >
-                  Schedule Call →
-                </button>
-              </div>
-            )}
-
-            {/* Instant Call */}
-            <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
-                <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-
-              <h3 className="text-lg font-semibold text-gray-900">
-                Instant Video Call
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-600">
-                Start an immediate video call (demo mode)
-              </p>
-
-              <button
-                onClick={startVideoCall}
-                className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
-              >
-                Start Call →
-              </button>
-            </div>
-
-          </div>
+    {/* ALUMNI – Schedule Call */}
+    {user?.role === "alumni" && (
+      <div className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition-all hover:border-green-500 hover:shadow-md">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50">
+          <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10" />
+          </svg>
         </div>
+
+        <h3 className="text-lg font-semibold text-gray-900">
+          Schedule Video Call
+        </h3>
+
+        <p className="mt-2 text-sm text-gray-600">
+          Schedule a time-based mentorship session with students
+        </p>
+
+        <button
+          onClick={scheduleCall}
+          className="mt-4 text-sm font-medium text-green-600 hover:text-green-800"
+        >
+          Schedule Call →
+        </button>
+      </div>
+    )}
+
+    {/* JOIN VIDEO CALL – Visible to ALL (alumni + student) */}
+    <div className="group rounded-2xl border border-purple-200 bg-white p-6 shadow-sm transition-all hover:border-purple-500 hover:shadow-md">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50">
+        <svg
+          className="h-6 w-6 text-purple-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h8m-4-4v8" />
+        </svg>
+      </div>
+
+      <h3 className="text-lg font-semibold text-gray-900">
+        Join Video Call
+      </h3>
+
+      <p className="mt-2 text-sm text-gray-600">
+        Enter Room ID to join an existing call
+      </p>
+
+      <input
+        type="text"
+        placeholder="Enter Room ID"
+        value={joinRoomId}
+        onChange={(e) => setJoinRoomId(e.target.value)}
+        className="mt-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+      />
+
+      <button
+        onClick={joinVideoCall}
+        className="mt-4 w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700"
+      >
+        Join Call →
+      </button>
+    </div>
+
+    {/* Instant Call */}
+    <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
+        <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      </div>
+
+      <h3 className="text-lg font-semibold text-gray-900">
+        Instant Video Call
+      </h3>
+
+      <p className="mt-2 text-sm text-gray-600">
+        Start an immediate video call (demo mode)
+      </p>
+
+      <button
+        onClick={startVideoCall}
+        className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
+      >
+        Start Call →
+      </button>
+    </div>
+
+  </div>
+</div>
+
 
         {/* Getting Started */}
         <div className="rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
