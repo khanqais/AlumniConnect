@@ -27,6 +27,9 @@ const Recommendation: React.FC = () => {
   const [selectedAlumni, setSelectedAlumni] = useState<AlumniRecommendation | null>(null);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+    
     const fetchRecommendations = async () => {
       // 1. Check if user ID exists to avoid ".../null" error
       const studentId = localStorage.getItem('userId') || user?._id;
@@ -111,7 +114,12 @@ const Recommendation: React.FC = () => {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
                 <Map className="h-6 w-6 text-white" />
               </div>
-              <span className="hidden text-lg font-bold text-gray-900 sm:block">
+              <span style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: '700', 
+                color: '#111827',
+                display: window.innerWidth >= 640 ? 'block' : 'none'
+              }}>
                 AlumniConnect
               </span>
             </Link>
@@ -120,24 +128,78 @@ const Recommendation: React.FC = () => {
             <nav className="hidden md:flex items-center gap-1">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <Home className="w-4 h-4" />
-                Dashboard
+                <Home style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Dashboard</span>
               </button>
               <button
                 onClick={() => navigate('/resources')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#374151';
+                }}
               >
-                <FileText className="w-4 h-4" />
-                Resources
+                <FileText style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Resources</span>
               </button>
               <button
                 onClick={() => navigate('/recommendations')}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: '#eff6ff',
+                  cursor: 'pointer',
+                  color: '#2563eb',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }}
               >
-                <TrendingUp className="w-4 h-4" />
-                Recommendations
+                <TrendingUp style={{ width: '1rem', height: '1rem' }} />
+                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Recommendations</span>
               </button>
               <button
                 onClick={() => navigate('/career-path')}
@@ -157,10 +219,26 @@ const Recommendation: React.FC = () => {
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
                 {user && user.name.charAt(0).toUpperCase()}
@@ -171,11 +249,30 @@ const Recommendation: React.FC = () => {
               </div>
             </button>
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+              onClick={() => navigate('/login')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #fecaca',
+                background: 'white',
+                cursor: 'pointer',
+                color: '#dc2626',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#fef2f2';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
             >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <LogOut style={{ height: '1rem', width: '1rem' }} />
+              <span style={{ display: window.innerWidth >= 640 ? 'inline' : 'none' }}>Logout</span>
             </button>
           </div>
         </div>

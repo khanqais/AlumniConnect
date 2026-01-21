@@ -5,6 +5,13 @@ const fs = require('fs');
 // Upload resource
 const uploadResource = async (req, res) => {
     try {
+        // Check if user is alumni
+        if (req.user.role !== 'alumni') {
+            return res.status(403).json({ 
+                message: 'Only alumni can upload resources' 
+            });
+        }
+
         const { title, description, category, tags } = req.body;
 
         if (!req.file) {
@@ -71,7 +78,8 @@ const getResources = async (req, res) => {
 const getResourceById = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id)
-            .populate('uploadedBy', 'name email role collegeName graduationYear avatar bio company jobTitle');
+            .populate('uploadedBy', 'name email role collegeName graduationYear avatar bio company jobTitle')
+            .populate('comments.user', 'name avatar');
 
         if (!resource) {
             return res.status(404).json({ message: 'Resource not found' });
@@ -126,6 +134,15 @@ const likeResource = async (req, res) => {
         }
 
         const alreadyLiked = resource.likedBy.includes(req.user._id);
+        const alreadyDisliked = resource.dislikedBy.includes(req.user._id);
+
+        // Remove from disliked if previously disliked
+        if (alreadyDisliked) {
+            resource.dislikes -= 1;
+            resource.dislikedBy = resource.dislikedBy.filter(
+                (userId) => userId.toString() !== req.user._id.toString()
+            );
+        }
 
         if (alreadyLiked) {
             resource.likes -= 1;
@@ -142,7 +159,130 @@ const likeResource = async (req, res) => {
         res.json({
             success: true,
             likes: resource.likes,
+            dislikes: resource.dislikes,
             isLiked: !alreadyLiked,
+            isDisliked: false,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Dislike resource
+const dislikeResource = async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        const alreadyDisliked = resource.dislikedBy.includes(req.user._id);
+        const alreadyLiked = resource.likedBy.includes(req.user._id);
+
+        // Remove from liked if previously liked
+        if (alreadyLiked) {
+            resource.likes -= 1;
+            resource.likedBy = resource.likedBy.filter(
+                (userId) => userId.toString() !== req.user._id.toString()
+            );
+        }
+
+        if (alreadyDisliked) {
+            resource.dislikes -= 1;
+            resource.dislikedBy = resource.dislikedBy.filter(
+                (userId) => userId.toString() !== req.user._id.toString()
+            );
+        } else {
+            resource.dislikes += 1;
+            resource.dislikedBy.push(req.user._id);
+        }
+
+        await resource.save();
+
+        res.json({
+            success: true,
+            likes: resource.likes,
+            dislikes: resource.dislikes,
+            isLiked: false,
+            isDisliked: !alreadyDisliked,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Add comment to resource
+const addComment = async (req, res) => {
+    try {
+        const { text } = req.body;
+
+        if (!text || text.trim() === '') {
+            return res.status(400).json({ message: 'Comment text is required' });
+        }
+
+        const resource = await Resource.findById(req.params.id);
+
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        const comment = {
+            user: req.user._id,
+            userName: req.user.name,
+            userAvatar: req.user.avatar || '',
+            text: text.trim(),
+            createdAt: new Date(),
+        };
+
+        resource.comments.push(comment);
+        await resource.save();
+
+        // Populate the resource to get full comment details
+        await resource.populate('comments.user', 'name avatar');
+
+        res.json({
+            success: true,
+            message: 'Comment added successfully',
+            comments: resource.comments,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Delete comment
+const deleteComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        
+        const resource = await Resource.findById(req.params.id);
+
+        if (!resource) {
+            return res.status(404).json({ message: 'Resource not found' });
+        }
+
+        const comment = resource.comments.id(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        // Check if user owns the comment or is admin
+        if (comment.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to delete this comment' });
+        }
+
+        resource.comments.pull(commentId);
+        await resource.save();
+
+        res.json({
+            success: true,
+            message: 'Comment deleted successfully',
+            comments: resource.comments,
         });
     } catch (error) {
         console.error(error);
@@ -192,6 +332,9 @@ module.exports = {
     getResourceById,
     downloadResource,
     likeResource,
+    dislikeResource,
+    addComment,
+    deleteComment,
     getMyResources,
     deleteResource,
 };
