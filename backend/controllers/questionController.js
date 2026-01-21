@@ -188,6 +188,34 @@ const upvoteAnswer = async (req, res) => {
     }
 };
 
+// Toggle question solved status
+const toggleSolved = async (req, res) => {
+    try {
+        const question = await Question.findById(req.params.id);
+
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        // Only question asker can mark as solved
+        if (question.askedBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Only question asker can mark as solved' });
+        }
+
+        question.isSolved = !question.isSolved;
+        await question.save();
+
+        res.json({
+            success: true,
+            message: question.isSolved ? 'Question marked as solved' : 'Question marked as unsolved',
+            isSolved: question.isSolved,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     askQuestion,
     getQuestions,
@@ -195,4 +223,5 @@ module.exports = {
     postAnswer,
     acceptAnswer,
     upvoteAnswer,
+    toggleSolved,
 };

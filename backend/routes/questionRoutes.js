@@ -7,6 +7,7 @@ const {
     postAnswer,
     acceptAnswer,
     upvoteAnswer,
+    toggleSolved,
 } = require('../controllers/questionController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -16,5 +17,6 @@ router.get('/:id', getQuestionById);
 router.post('/answer/:id', protect, postAnswer);
 router.post('/accept/:id', protect, acceptAnswer);
 router.post('/upvote/:id', protect, upvoteAnswer);
+router.post('/toggle-solved/:id', protect, toggleSolved);
 
 module.exports = router;
