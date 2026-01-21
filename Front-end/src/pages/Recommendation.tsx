@@ -332,8 +332,8 @@ const Recommendation: React.FC = () => {
                 <tr>
                   <th>Alumni</th>
                   <th>Role</th>
-                  <th>Skills</th>
-                  <th>Match</th>
+                  {/* <th>Skills</th> */}
+                  {/* <th>Match</th> */}
                   <th>Exp.</th>
                   <th>Actions</th>
                 </tr>
@@ -358,14 +358,14 @@ const Recommendation: React.FC = () => {
                         ))}
                       </div>
                     </td>
-                    <td>
+                    {/* <td>
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 h-1.5 rounded-full overflow-hidden">
                           <div className="bg-green-500 h-full" style={{ width: `${alumni.skillMatchPercentage}%` }}></div>
                         </div>
                         <span className="text-xs font-bold">{alumni.skillMatchPercentage}%</span>
                       </div>
-                    </td>
+                    </td> */}
                     <td>{alumni.experience}y</td>
                     <td>
                       <div className="flex gap-2">

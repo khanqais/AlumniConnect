@@ -854,7 +854,8 @@ import {
   Filter,
   Search,
   RefreshCw,
-  FileText
+  FileText,
+  ChevronRight
 } from 'lucide-react';
 import './Recommendation.css'; // Wahi CSS use kar rahe hain consistent design ke liye
 import { useAuth } from '../context/AuthContext';
@@ -863,7 +864,7 @@ interface CareerPath {
   alumniName: string;
   currentRole: string;
   company: string;
-  path: string[]; // Sequential roles e.g. ["Intern", "Junior Dev", "Senior Dev"]
+  // path: string[]; 
   skillsAcquired: string[];
   duration: string;
   industry: string;
@@ -882,10 +883,11 @@ const CareerPathVisualizer: React.FC = () => {
       setLoading(true);
       try {
         // API endpoint change kar lena agar backend alag hai
-        const res = await fetch(`http://localhost:5000/api/recommend/career-path/${studentId}`);
+        const res = await fetch(`http://localhost:5000/api/recommend/career-path/${user?._id}`);
         const result = await res.json();
 
         const data: CareerPath[] = Array.isArray(result) ? result : (result.paths || []);
+        
         setPaths(data);
       } catch (err) {
         console.error("Path Fetch Error:", err);
@@ -1071,11 +1073,11 @@ const CareerPathVisualizer: React.FC = () => {
               }}
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
-                {user.name.charAt(0).toUpperCase()}
+                {user && user.name.charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:block">
-                <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
-                <p className="text-xs capitalize text-gray-600">{user.role}</p>
+                <h2 className="text-sm font-semibold text-gray-900">{user && user.name}</h2>
+                <p className="text-xs capitalize text-gray-600">{user && user.role}</p>
               </div>
             </button>
             <button
@@ -1127,9 +1129,9 @@ const CareerPathVisualizer: React.FC = () => {
               <thead>
                 <tr>
                   <th>Alumni & Role</th>
-                  <th>Career Trajectory</th>
-                  <th>Skills Path</th>
-                  <th>Total Time</th>
+                  {/* <th>Career Trajectory</th> */}
+                  {/* <th>Skills Path</th> */}
+                  {/* <th>Total Time</th> */}
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -1140,11 +1142,11 @@ const CareerPathVisualizer: React.FC = () => {
                       <div className="flex items-center gap-3">
                         {/* Safe charAt check: Agar name nahi hai toh '?' dikhayega */}
                         <div className="alumni-avatar bg-indigo-100 text-indigo-700">
-                          {path?.alumniName ? path.alumniName.charAt(0).toUpperCase() : '?'}
+                          {path?.currentRole ? path.currentRole.charAt(0).toUpperCase() : '?'}
                         </div>
                         <div>
                           <div className="font-bold text-gray-900">
-                            {path?.alumniName || "Unknown Alumni"}
+                            {path?.alumniName }
                           </div>
                           <div className="text-xs text-indigo-600 font-medium">
                             {path?.currentRole || "Position"} @ {path?.company || "Company"}
@@ -1155,14 +1157,14 @@ const CareerPathVisualizer: React.FC = () => {
                     <td>
                       <div className="flex items-center gap-1 text-xs">
                         {/* path.path ko check kar rahe hain ki array hai ya nahi */}
-                        {Array.isArray(path?.path) ? path.path.map((step, i) => (
+                        {/* {Array.isArray(path?.path) ? path.path.map((step, i) => (
                           <React.Fragment key={i}>
                             <span className="bg-gray-50 border border-gray-200 px-2 py-1 rounded text-gray-600 whitespace-nowrap">
                               {step}
                             </span>
-                            {i < path.path.length - 1 && <ChevronRight size={12} className="text-gray-400" />}
+                            {i < path.length - 1 && <ChevronRight size={12} className="text-gray-400" />}
                           </React.Fragment>
-                        )) : "No path data"}
+                        )) : "No path data"} */}
                       </div>
                     </td>
                     <td>
@@ -1175,9 +1177,9 @@ const CareerPathVisualizer: React.FC = () => {
                         )) : null}
                       </div>
                     </td>
-                    <td className="text-sm font-semibold text-gray-700">
+                    {/* <td className="text-sm font-semibold text-gray-700">
                       {path?.duration || "N/A"}
-                    </td>
+                    </td> */}
                     <td>
                       <button
                         onClick={() => setSelectedPath(path)}
