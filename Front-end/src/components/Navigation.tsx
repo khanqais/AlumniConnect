@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import {
     Home,
     TrendingUp,
@@ -11,7 +12,8 @@ import {
     Calendar,
     LogOut,
     User,
-    ChevronDown
+    ChevronDown,
+    Bell
 } from 'lucide-react';
 
 const Navigation = () => {
@@ -22,6 +24,35 @@ const Navigation = () => {
     // Dropdown state
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Unread message count
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    const fetchUnreadCount = useCallback(async () => {
+        if (!user?.token) return;
+        try {
+            const { data } = await axios.get('http://localhost:5000/api/messages/unread-count', {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            setUnreadCount(data.count || 0);
+        } catch {
+            // silently ignore
+        }
+    }, [user?.token]);
+
+    // Poll every 30 seconds
+    useEffect(() => {
+        fetchUnreadCount();
+        const interval = setInterval(fetchUnreadCount, 30000);
+        return () => clearInterval(interval);
+    }, [fetchUnreadCount]);
+
+    // Clear badge when navigating to /chat
+    useEffect(() => {
+        if (location.pathname === '/chat') {
+            setUnreadCount(0);
+        }
+    }, [location.pathname]);
 
     const handleLogout = () => {
         logout();
@@ -107,6 +138,20 @@ const Navigation = () => {
                     {/* Right Side */}
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 border-l border-gray-200 pl-4">
+
+                            {/* Message Notification Bell */}
+                            <button
+                                onClick={() => navigate('/chat')}
+                                className="relative flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                                title="Messages"
+                            >
+                                <Bell className="h-5 w-5" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white leading-none">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
 
                             {/* ✅ Profile Dropdown */}
                             <div className="relative" ref={dropdownRef}>
