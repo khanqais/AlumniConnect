@@ -460,7 +460,7 @@ const Dashboard = () => {
             Getting Started
           </h3>
           <p className="mt-2 text-sm text-gray-700">
-            Explore resources, connect with alumni, attend events,
+            Connect with alumni, attend events,
             and grow your professional network.
           </p>
         </div>

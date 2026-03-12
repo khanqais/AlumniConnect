@@ -1,1250 +1,316 @@
-// import React, { useState, useEffect } from 'react';
-// import { useNavigate, Link } from 'react-router-dom';
-// import { 
-//   User, 
-//   LogOut, 
-//   Home, 
-//   Briefcase, 
-//   Users, 
-//   Target,
-//   TrendingUp,
-//   Map,
-//   GitBranch,
-//   CheckCircle,
-//   ArrowRight,
-//   Star,
-//   Award,
-//   Zap,
-//   Clock,
-//   Building,
-//   GraduationCap,
-//   ExternalLink,
-//   Filter,
-//   Search,
-//   RefreshCw,
-//   FileText
-// } from 'lucide-react';
-// import './CareerPathVisualizer.css';
-// import { useAuth } from '../context/AuthContext';
-
-// import { useEffect, useState } from "react";
-// import { useAuth } from "../context/AuthContext";
-// import { Link, useNavigate } from "react-router-dom";
-
-// // interface CareerPath {
-// //   id: string;
-// //   title: string;
-// //   description: string;
-// //   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-// //   duration: string;
-// //   skills: string[];
-// //   alumniCount: number;
-// //   avgSalary: string;
-// //   growth: 'High' | 'Medium' | 'Low';
-// // }
-
-// // interface AlumniPath {
-// //   id: string;
-// //   name: string;
-// //   currentRole: string;
-// //   company: string;
-// //   path: string[];
-// //   yearsToCurrent: number;
-// //   skills: string[];
-// //   matchScore: number;
-// //   education: string;
-// //   previousRoles: string[];
-// //   achievements: string[];
-// // }
-// interface CareerRecommendation {
-//   name: string;
-//   jobTitle: string;
-//   company: string;
-//   skillMatchPercentage: number;
-//   missingSkills: string[];
-// }
-
-// const CareerPathVisualizer: React.FC = () => {
-//     const { user } = useAuth();
-//   const navigate = useNavigate();
-//   const [loading, setLoading] = useState(true);
-//   const [selectedPath, setSelectedPath] = useState<string>('software-engineer');
-//   // const [alumniPaths, setAlumniPaths] = useState<AlumniPath[]>([]);
-//   const [skillFilter, setSkillFilter] = useState<string>('all');
-//   const [searchQuery, setSearchQuery] = useState<string>('');
-//   const [viewMode, setViewMode] = useState<'timeline' | 'network'>('timeline');
-
-// useEffect(() => {
-//   const fetchCareer = async () => {
-//     if (!user) return;
-//     const res = await fetch(
-//       `http://localhost:5000/api/recommend/career-path/${user._id}`
-//     );
-//     const data = await res.json();
-//     setCareer(data);
-//   };
-
-//   fetchCareer();
-// }, [user]);
-
-
-
-//   const handleLogout = () => {
-//     navigate('/login');
-//   };
-
-//   const handleRefresh = () => {
-//     setLoading(true);
-//     setTimeout(() => setLoading(false), 800);
-//   };
-
-//   const handleViewAlumni = (alumniId: string) => {
-//     alert(`Opening detailed profile for alumni ${alumniId}`);
-//   };
-
-//   const filteredAlumniPaths = alumniPaths.filter(alumni => {
-//     const matchesPath = selectedPath === 'all' || 
-//       alumni.skills.some(skill => 
-//         careerPaths.find(p => p.id === selectedPath)?.skills.includes(skill)
-//       );
-//     const matchesSearch = searchQuery === '' || 
-//       alumni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       alumni.currentRole.toLowerCase().includes(searchQuery.toLowerCase());
-//     return matchesPath && matchesSearch;
-//   });
-
-//   const getSelectedPath = () => careerPaths.find(p => p.id === selectedPath);
-
-//   return (
-//     <div className="career-path-page">
-//       {/* Background Effects */}
-//       <div className="background-effects">
-//         <div className="effect-circle effect-circle-1"></div>
-//         <div className="effect-circle effect-circle-2"></div>
-//       </div>
-
-//       {/* Updated Header */}
-// <header className="career-path-header">
-//   <div className="header-container">
-//     <div className="flex items-center gap-6">
-//       {/* Logo/Brand */}
-//       <Link to="/" className="logo-link">
-//         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
-//           <Map className="h-6 w-6 text-white" />
-//         </div>
-//         <span className="hidden text-lg font-bold text-gray-900 sm:block">
-//           AlumniConnect
-//         </span>
-//       </Link>
-
-//       {/* Navigation */}
-//       <nav className="hidden md:flex items-center gap-1">
-//         <button
-//           onClick={() => navigate('/dashboard')}
-//           className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
-//         >
-//           <Home className="w-4 h-4" />
-//           Dashboard
-//         </button>
-//         <button
-//           onClick={() => navigate('/resources')}
-//           className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-//         >
-//           <FileText className="w-4 h-4" />
-//           Resources
-//         </button>
-//         <button
-//           onClick={() => navigate('/recommendations')}
-//           className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-//         >
-//           <TrendingUp className="w-4 h-4" />
-//           Recommendations
-//         </button>
-//         <button
-//           onClick={() => navigate('/career-paths')}
-//           className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
-//         >
-//           <Map className="w-4 h-4" />
-//           Career Paths
-//         </button>
-//         <button
-//           onClick={() => navigate('/profile')}
-//           className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-//         >
-//           <User className="w-4 h-4" />
-//           Profile
-//         </button>
-//       </nav>
-//     </div>
-
-//     {/* User Menu */}
-//     <div className="flex items-center gap-3">
-//       <button
-//         onClick={() => navigate('/profile')}
-//         className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
-//       >
-//         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
-//           {user.name.charAt(0).toUpperCase()}
-//         </div>
-//         <div className="hidden sm:block">
-//           <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
-//           <p className="text-xs capitalize text-gray-600">{user.role}</p>
-//         </div>
-//       </button>
-//       <button
-//         onClick={handleLogout}
-//         className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
-//       >
-//         <LogOut className="h-4 w-4" />
-//         <span className="hidden sm:inline">Logout</span>
-//       </button>
-//     </div>
-//   </div>
-// </header>
-
-//       {/* Main Content */}
-//       <main className="career-path-main">
-//         {/* Page Header */}
-//         <div className="page-header">
-//           <div className="page-title-container">
-//             <h1 className="page-title">Career Path Visualizer</h1>
-//             <p className="page-subtitle">
-//               Explore real career trajectories of alumni who match your skill set
-//             </p>
-//           </div>
-//           <div className="page-actions">
-//             <button onClick={handleRefresh} className="refresh-button">
-//               <RefreshCw className="refresh-icon" />
-//               Refresh Data
-//             </button>
-//           </div>
-//         </div>
-
-//         {/* User Skills */}
-//         <div className="user-skills-section">
-//           <div className="skills-header">
-//             <Target className="skills-icon" />
-//             <h3 className="skills-title">Your Skill Profile</h3>
-//           </div>
-//           <div className="skills-container">
-//             {user.skills.map((skill, index) => (
-//               <div key={index} className="skill-pill">
-//                 <Zap className="skill-icon" />
-//                 <span>{skill}</span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* Career Path Selection */}
-//         <div className="career-paths-section">
-//           <div className="section-header">
-//             <h2 className="section-title">Choose Your Career Path</h2>
-//             <p className="section-subtitle">Select a path to see alumni who followed similar trajectories</p>
-//           </div>
-
-//           <div className="career-paths-grid">
-//             {careerPaths.map((path) => (
-//               <div
-//                 key={path.id}
-//                 className={`career-path-card ${selectedPath === path.id ? 'selected' : ''}`}
-//                 onClick={() => setSelectedPath(path.id)}
-//               >
-//                 <div className="path-header">
-//                   <div className="path-icon">
-//                     <Briefcase className="path-icon-svg" />
-//                   </div>
-//                   <div className="path-meta">
-//                     <span className={`difficulty-badge difficulty-${path.difficulty.toLowerCase()}`}>
-//                       {path.difficulty}
-//                     </span>
-//                     <span className="alumni-count">
-//                       <Users className="alumni-count-icon" />
-//                       {path.alumniCount} alumni
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <h3 className="path-title">{path.title}</h3>
-//                 <p className="path-description">{path.description}</p>
-
-//                 <div className="path-stats">
-//                   <div className="stat">
-//                     <Clock className="stat-icon" />
-//                     <div>
-//                       <div className="stat-value">{path.duration}</div>
-//                       <div className="stat-label">Duration</div>
-//                     </div>
-//                   </div>
-//                   <div className="stat">
-//                     <TrendingUp className="stat-icon" />
-//                     <div>
-//                       <div className="stat-value">{path.avgSalary}</div>
-//                       <div className="stat-label">Avg. Salary</div>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <div className="path-skills">
-//                   {path.skills.map((skill, idx) => (
-//                     <span key={idx} className="path-skill-tag">{skill}</span>
-//                   ))}
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* Filters */}
-//         <div className="filters-section">
-//           <div className="search-container">
-//             <Search className="search-icon" />
-//             <input
-//               type="text"
-//               placeholder="Search alumni by name or role..."
-//               value={searchQuery}
-//               onChange={(e) => setSearchQuery(e.target.value)}
-//               className="search-input"
-//             />
-//           </div>
-
-//           <div className="view-toggle">
-//             <button
-//               onClick={() => setViewMode('timeline')}
-//               className={`view-button ${viewMode === 'timeline' ? 'active' : ''}`}
-//             >
-//               <GitBranch className="view-button-icon" />
-//               Timeline View
-//             </button>
-//             <button
-//               onClick={() => setViewMode('network')}
-//               className={`view-button ${viewMode === 'network' ? 'active' : ''}`}
-//             >
-//               <Map className="view-button-icon" />
-//               Network View
-//             </button>
-//           </div>
-//         </div>
-
-//         {/* Loading State */}
-//         {loading ? (
-//           <div className="loading-container">
-//             <div className="loading-spinner"></div>
-//             <p className="loading-text">Analyzing career paths and matching alumni...</p>
-//           </div>
-//         ) : (
-//           <>
-//             {/* Selected Path Info */}
-//             {getSelectedPath() && (
-//               <div className="selected-path-info">
-//                 <div className="selected-path-header">
-//                   <h2 className="selected-path-title">
-//                     {getSelectedPath()?.title} Career Path
-//                     <span className="match-badge">
-//                       <CheckCircle className="match-icon" />
-//                       {filteredAlumniPaths.length} Matching Alumni
-//                     </span>
-//                   </h2>
-//                   <div className="path-growth">
-//                     <span className={`growth-indicator growth-${getSelectedPath()?.growth.toLowerCase()}`}>
-//                       {getSelectedPath()?.growth} Growth
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <div className="path-details">
-//                   <div className="detail-card">
-//                     <div className="detail-icon">
-//                       <Users className="detail-icon-svg" />
-//                     </div>
-//                     <div className="detail-content">
-//                       <div className="detail-value">{getSelectedPath()?.alumniCount}</div>
-//                       <div className="detail-label">Total Alumni</div>
-//                     </div>
-//                   </div>
-
-//                   <div className="detail-card">
-//                     <div className="detail-icon">
-//                       <Clock className="detail-icon-svg" />
-//                     </div>
-//                     <div className="detail-content">
-//                       <div className="detail-value">{getSelectedPath()?.duration}</div>
-//                       <div className="detail-label">Typical Timeline</div>
-//                     </div>
-//                   </div>
-
-//                   <div className="detail-card">
-//                     <div className="detail-icon">
-//                       <TrendingUp className="detail-icon-svg" />
-//                     </div>
-//                     <div className="detail-content">
-//                       <div className="detail-value">{getSelectedPath()?.avgSalary}</div>
-//                       <div className="detail-label">Salary Range</div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             )}
-
-//             {/* Alumni Career Paths */}
-//             <div className="alumni-paths-section">
-//               <div className="section-header">
-//                 <h2 className="section-title">Alumni Career Trajectories</h2>
-//                 <p className="section-subtitle">
-//                   Real paths taken by alumni with similar skills to yours
-//                 </p>
-//               </div>
-
-//               {filteredAlumniPaths.length === 0 ? (
-//                 <div className="empty-state">
-//                   <Map className="empty-icon" />
-//                   <h3 className="empty-title">No matching alumni found</h3>
-//                   <p className="empty-message">
-//                     Try selecting a different career path or adjusting your search
-//                   </p>
-//                 </div>
-//               ) : (
-//                 <div className="alumni-paths-container">
-//                   {filteredAlumniPaths.map((alumni) => (
-//                     <div key={alumni.id} className="alumni-path-card">
-//                       <div className="alumni-header">
-//                         <div className="alumni-avatar">
-//                           {alumni.name.charAt(0).toUpperCase()}
-//                         </div>
-//                         <div className="alumni-info">
-//                           <h3 className="alumni-name">{alumni.name}</h3>
-//                           <div className="alumni-role">
-//                             <Building className="role-icon" />
-//                             <span>{alumni.currentRole} at {alumni.company}</span>
-//                           </div>
-//                           <div className="alumni-match">
-//                             <Star className="match-icon" />
-//                             <span className="match-score">{alumni.matchScore}% Skill Match</span>
-//                           </div>
-//                         </div>
-//                         <div className="alumni-meta">
-//                           <div className="meta-item">
-//                             <Clock className="meta-icon" />
-//                             <span>{alumni.yearsToCurrent} years</span>
-//                           </div>
-//                           <div className="meta-item">
-//                             <GraduationCap className="meta-icon" />
-//                             <span>{alumni.education}</span>
-//                           </div>
-//                         </div>
-//                       </div>
-
-//                       {/* Career Timeline */}
-//                       <div className="career-timeline">
-//                         <div className="timeline-title">
-//                           <GitBranch className="timeline-icon" />
-//                           <span>Career Progression</span>
-//                         </div>
-//                         <div className="timeline-path">
-//                           {alumni.path.map((step, index) => (
-//                             <div key={index} className="timeline-step">
-//                               <div className="step-dot"></div>
-//                               <div className="step-content">
-//                                 <div className="step-title">{step}</div>
-//                                 {index < alumni.path.length - 1 && (
-//                                   <ArrowRight className="step-arrow" />
-//                                 )}
-//                               </div>
-//                             </div>
-//                           ))}
-//                         </div>
-//                       </div>
-
-//                       {/* Skills & Achievements */}
-//                       <div className="alumni-details">
-//                         <div className="details-column">
-//                           <h4 className="details-title">Key Skills</h4>
-//                           <div className="skills-list">
-//                             {alumni.skills.map((skill, idx) => (
-//                               <span key={idx} className="skill-badge">
-//                                 {skill}
-//                               </span>
-//                             ))}
-//                           </div>
-//                         </div>
-//                         <div className="details-column">
-//                           <h4 className="details-title">Achievements</h4>
-//                           <ul className="achievements-list">
-//                             {alumni.achievements.map((achievement, idx) => (
-//                               <li key={idx} className="achievement-item">
-//                                 <Award className="achievement-icon" />
-//                                 <span>{achievement}</span>
-//                               </li>
-//                             ))}
-//                           </ul>
-//                         </div>
-//                       </div>
-
-//                       {/* Action Buttons */}
-//                       <div className="alumni-actions">
-//                         <button 
-//                           onClick={() => handleViewAlumni(alumni.id)}
-//                           className="view-profile-button"
-//                         >
-//                           <ExternalLink className="button-icon" />
-//                           View Full Profile
-//                         </button>
-//                         <button className="connect-button">
-//                           <Users className="button-icon" />
-//                           Request Guidance
-//                         </button>
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* Insights Section */}
-//             <div className="insights-section">
-//               <h2 className="insights-title">Career Path Insights</h2>
-//               <div className="insights-grid">
-//                 <div className="insight-card">
-//                   <div className="insight-icon insight-icon-blue">
-//                     <TrendingUp className="insight-icon-svg" />
-//                   </div>
-//                   <h3 className="insight-title">Average Time to Senior Role</h3>
-//                   <p className="insight-value">
-//                     {filteredAlumniPaths.length > 0
-//                       ? Math.round(filteredAlumniPaths.reduce((acc, curr) => acc + curr.yearsToCurrent, 0) / filteredAlumniPaths.length)
-//                       : 0} years
-//                   </p>
-//                 </div>
-
-//                 <div className="insight-card">
-//                   <div className="insight-icon insight-icon-purple">
-//                     <Building className="insight-icon-svg" />
-//                   </div>
-//                   <h3 className="insight-title">Top Companies</h3>
-//                   <p className="insight-value">
-//                     Google, Microsoft, Amazon, Netflix
-//                   </p>
-//                 </div>
-
-//                 <div className="insight-card">
-//                   <div className="insight-icon insight-icon-green">
-//                     <Zap className="insight-icon-svg" />
-//                   </div>
-//                   <h3 className="insight-title">Most Valuable Skills</h3>
-//                   <p className="insight-value">
-//                     System Design, Leadership, Cloud
-//                   </p>
-//                 </div>
-
-//                 <div className="insight-card">
-//                   <div className="insight-icon insight-icon-orange">
-//                     <Award className="insight-icon-svg" />
-//                   </div>
-//                   <h3 className="insight-title">Common Milestones</h3>
-//                   <p className="insight-value">
-//                     Promotion within 2-3 years, Technical leadership
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-//           </>
-//         )}
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default CareerPathVisualizer;
-// ... sab imports waise hi, jo tumhare original code me hai
-
-// import React, { useState, useEffect } from 'react';
-// import { useNavigate, Link } from 'react-router-dom';
-// import { 
-//   User, LogOut, Home, Briefcase, Users, Target, TrendingUp, Map, 
-//   GitBranch, CheckCircle, ArrowRight, Star, Award, Zap, Clock, 
-//   Building, GraduationCap, ExternalLink, Search, RefreshCw, FileText, 
-
-// } from 'lucide-react';
-// import './CareerPathVisualizer.css';
-// // import { useAuth } from '../context/AuthContext';
-
-// interface CareerRecommendation {
-//   name: string;
-//   jobTitle: string;
-//   company: string;
-//   skillMatchPercentage: number;
-//   missingSkills: string[];
-// }
-
-// const CareerPathVisualizer: React.FC = () => {
-//   const { user } = useAuth();
-//   const navigate = useNavigate();
-
-//   const [career, setCareer] = useState<CareerRecommendation | null>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [searchQuery, setSearchQuery] = useState<string>('');
-//   const [viewMode, setViewMode] = useState<'timeline' | 'network'>('timeline');
-
-//   // Backend Integration
-//   useEffect(() => {
-//     const fetchCareer = async () => {
-//       if (!user?._id) return;
-//       try {
-//         setLoading(true);
-//         const res = await fetch(`http://localhost:5000/api/recommend/career-path/${user._id}`);
-//         const data = await res.json();
-
-//         setCareer({
-//           ...data,
-//           missingSkills: Array.isArray(data.missingSkills) ? data.missingSkills : [],
-//         });
-//       } catch (err) {
-//         console.error("Fetch error:", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchCareer();
-//   }, [user]);
-
-//   const handleLogout = () => navigate('/login');
-
-//   const handleRefresh = () => {
-//     window.location.reload(); 
-//   };
-
-//   if (!user) return <div className="p-10 text-center">Please login to view this page.</div>;
-
-//   return (
-//     <div className="career-path-page">
-//       {/* Background Effects */}
-//       <div className="background-effects">
-//         <div className="effect-circle effect-circle-1"></div>
-//         <div className="effect-circle effect-circle-2"></div>
-//       </div>
-
-      // {/* Header Section */}
-      //       <header className="career-path-header">
-      //   <div className="header-container">
-      //     <div className="flex items-center gap-6">
-      //       {/* Logo/Brand */}
-      //       <Link to="/" className="logo-link">
-      //         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700">
-      //           <Map className="h-6 w-6 text-white" />
-      //         </div>
-      //         <span className="hidden text-lg font-bold text-gray-900 sm:block">
-      //           AlumniConnect
-      //         </span>
-      //       </Link>
-
-      //       {/* Navigation */}
-      //       <nav className="hidden md:flex items-center gap-1">
-      //         <button
-      //           onClick={() => navigate('/dashboard')}
-      //           className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
-      //         >
-      //           <Home className="w-4 h-4" />
-      //           Dashboard
-      //         </button>
-      //         <button
-      //           onClick={() => navigate('/resources')}
-      //           className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-      //         >
-      //           <FileText className="w-4 h-4" />
-      //           Resources
-      //         </button>
-      //         <button
-      //           onClick={() => navigate('/recommendations')}
-      //           className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-      //         >
-      //           <TrendingUp className="w-4 h-4" />
-      //           Recommendations
-      //         </button>
-      //         <button
-      //           onClick={() => navigate('/career-paths')}
-      //           className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 flex items-center gap-1"
-      //         >
-      //           <Map className="w-4 h-4" />
-      //           Career Paths
-      //         </button>
-      //         <button
-      //           onClick={() => navigate('/profile')}
-      //           className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center gap-1"
-      //         >
-      //           <User className="w-4 h-4" />
-      //           Profile
-      //         </button>
-      //       </nav>
-      //     </div>
-
-      //     {/* User Menu */}
-      //     <div className="flex items-center gap-3">
-      //       <button
-      //         onClick={() => navigate('/profile')}
-      //         className="flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-gray-100"
-      //       >
-      //         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
-      //           {user.name.charAt(0).toUpperCase()}
-      //         </div>
-      //         <div className="hidden sm:block">
-      //           <h2 className="text-sm font-semibold text-gray-900">{user.name}</h2>
-      //           <p className="text-xs capitalize text-gray-600">{user.role}</p>
-      //         </div>
-      //       </button>
-      //       <button
-      //         onClick={handleLogout}
-      //         className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
-      //       >
-      //         <LogOut className="h-4 w-4" />
-      //         <span className="hidden sm:inline">Logout</span>
-      //       </button>
-      //     </div>
-      //   </div>
-      // </header>
-
-//       <main className="career-path-main">
-//         {/* Page Header */}
-//         <div className="page-header">
-//           <div>
-//             <h1 className="page-title">Career Path Visualizer</h1>
-//             <p className="page-subtitle">Explore real career trajectories of alumni matching your profile</p>
-//           </div>
-//           <button onClick={handleRefresh} className="refresh-button">
-//             <RefreshCw className={`refresh-icon ${loading ? 'animate-spin' : ''}`} />
-//             Refresh Data
-//           </button>
-//         </div>
-
-//         {/* User Current Skills */}
-//         <div className="user-skills-section">
-//           <div className="skills-header">
-//             <Target className="skills-icon" />
-//             <h3 className="skills-title">Your Current Skill Profile</h3>
-//           </div>
-//           <div className="skills-container">
-//             {user.skills?.map((skill, index) => (
-//               <div key={index} className="skill-pill">
-//                 <Zap className="skill-icon" /> <span>{skill}</span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {loading ? (
-//           <div className="loading-container">
-//             <div className="loading-spinner"></div>
-//             <p>Analyzing career paths and matching alumni...</p>
-//           </div>
-//         ) : (
-//           <>
-//             {/* AI Recommendation Card */}
-//             {career && (
-//               <section className="recommendation-section">
-//                 <div className="section-header">
-//                   <h2 className="section-title">Recommended Path for You</h2>
-//                 </div>
-
-//                 <div className="alumni-path-card featured-path">
-//                   <div className="alumni-header">
-//                     {/* <div className="alumni-avatar featured-avatar">{career.name.charAt(0)}</div> */}
-//                     <div className="alumni-avatar featured-avatar">
-//   {career?.name ? career.name.charAt(0).toUpperCase() : '?'}
-// </div>
-//                     <div className="alumni-info">
-//                       <h3 className="alumni-name">{career.jobTitle}</h3>
-//                       <div className="alumni-role">
-//                         <Building className="role-icon" />
-//                         <span>Based on Top Alumni at {career.company}</span>
-//                       </div>
-//                       <div className="alumni-match">
-//                         <Star className="match-icon fill-yellow-400" />
-//                         <span className="match-score">{career.skillMatchPercentage}% Match Score</span>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   {/* Skill Progress Bar */}
-//                   <div className="match-progress-container">
-//                     <div className="match-progress-bar">
-//                       <div className="match-progress-fill" style={{ width: `${career.skillMatchPercentage}%` }}></div>
-//                     </div>
-//                   </div>
-
-//                   <div className="alumni-details">
-//                     <div className="details-column">
-//                       <h4 className="details-title">Skills to Master</h4>
-//                       <div className="skills-list">
-//                         {career.missingSkills.length > 0 ? (
-//                           career.missingSkills.map((skill, idx) => (
-//                             <span key={idx} className="skill-badge missing">{skill}</span>
-//                           ))
-//                         ) : (
-//                           <span className="text-green-600 text-sm font-medium">🎯 You have all the required skills!</span>
-//                         )}
-//                       </div>
-//                     </div>
-//                     <div className="details-column">
-//                       <h4 className="details-title">Success Milestones</h4>
-//                       <ul className="achievements-list">
-//                         <li className="achievement-item"><Award className="achievement-icon" /> Average {career.jobTitle} salary: $120k+</li>
-//                         <li className="achievement-item"><Award className="achievement-icon" /> High growth potential in {career.company}</li>
-//                       </ul>
-//                     </div>
-//                   </div>
-
-//                   <div className="alumni-actions">
-//                     <button className="view-profile-button">
-//                       <ExternalLink className="button-icon" /> Explore Path
-//                     </button>
-//                     <button className="connect-button">
-//                       <Users className="button-icon" /> Mentor Search
-//                     </button>
-//                   </div>
-//                 </div>
-//               </section>
-//             )}
-
-//             {/* Insights Section */}
-//             <div className="insights-section">
-//               <h2 className="insights-title">Career Path Insights</h2>
-//               <div className="insights-grid">
-//                 <div className="insight-card">
-//                   <div className="insight-icon insight-icon-blue"><TrendingUp /></div>
-//                   <h3>Growth Trend</h3>
-//                   <p className="insight-value">High Demand</p>
-//                 </div>
-//                 <div className="insight-card">
-//                   <div className="insight-icon insight-icon-purple"><Building /></div>
-//                   <h3>Top Companies</h3>
-//                   <p className="insight-value">Google, Microsoft</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </>
-//         )}
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default CareerPathVisualizer;
-
+// CareerPathVisualizer.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { 
-  User, 
-  LogOut, 
-  Home, 
-  Briefcase, 
-  Users, 
-  Target,
-  TrendingUp,
-  Map,
-  GitBranch,
-  CheckCircle,
-  ArrowRight,
-  Star,
-  Award,
-  Zap,
-  Clock,
-  Building,
-  GraduationCap,
-  ExternalLink,
-  Filter,
-  Search,
-  RefreshCw,
-  FileText,
-  ChevronRight
-} from 'lucide-react';
-import './Recommendation.css'; // Wahi CSS use kar rahe hain consistent design ke liye
+import { Map, RefreshCw, ExternalLink, Award } from 'lucide-react';
+// ✅ CSS import removed — all styles are now inline Tailwind
 import { useAuth } from '../context/AuthContext';
+import Navigation from '../components/Navigation';
 
-interface CareerPath {
-  alumniName: string;
-  currentRole: string;
-  company: string;
-  // path: string[]; 
-  skillsAcquired: string[];
-  duration: string;
-  industry: string;
+interface CareerMatch {
+    name: string;
+    jobTitle: string;
+    company: string;
+    experience: string;
+    skills: string[];
+    skillMatchPercentage: number;
+    missingSkills: string[];
 }
 
 const CareerPathVisualizer: React.FC = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [paths, setPaths] = useState<CareerPath[]>([]);
-  const [selectedPath, setSelectedPath] = useState<CareerPath | null>(null);
-  const [industryFilter, setIndustryFilter] = useState('all');
+    const { user } = useAuth();
+    const [loading, setLoading] = useState<boolean>(true);
+    const [matches, setMatches] = useState<CareerMatch[]>([]);
+    const [selectedMatch, setSelectedMatch] = useState<CareerMatch | null>(null);
 
-  useEffect(() => {
-    const fetchAlumniPaths = async () => {
-      setLoading(true);
-      try {
-        // API endpoint change kar lena agar backend alag hai
-        const res = await fetch(`http://localhost:5000/api/recommend/career-path/${user?._id}`);
-        const result = await res.json();
+    useEffect(() => {
+        const fetchMatches = async () => {
+            setLoading(true);
+            try {
+                // Replace with actual API call:
+                // const res = await fetch('/api/career-matches');
+                // const data = await res.json();
+                // setMatches(data);
+                setMatches([]);
+            } catch (err) {
+                console.error('Failed to fetch career matches:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMatches();
+    }, []);
 
-        const data: CareerPath[] = Array.isArray(result) ? result : (result.paths || []);
-        
-        setPaths(data);
-      } catch (err) {
-        console.error("Path Fetch Error:", err);
-        setPaths([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+    return (
+        // .recommendation-page / .career-path-page
+        <div className="min-h-screen bg-slate-50 relative overflow-x-hidden">
+            <Navigation />
 
-    fetchAlumniPaths();
-  }, []);
-
-  const handleLogout = () => {
-    navigate('/login');
-  };
-
-  const filteredPaths = industryFilter === 'all'
-    ? paths
-    : paths.filter(p => p.industry === industryFilter);
-
-  return (
-    <div className="recommendation-page">
-      <div className="background-effects">
-        <div className="effect-circle effect-circle-1"></div>
-        <div className="effect-circle effect-circle-2"></div>
-      </div>
-
-      {/* Updated Header */}
-      <header className="career-path-header">
-        <div className="header-container">
-          <div className="flex items-center gap-6">
-            {/* Logo/Brand */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{
-                display: 'flex',
-                height: '2.5rem',
-                width: '2.5rem',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '0.5rem',
-                background: 'linear-gradient(to right, #2563eb, #4f46e5)'
-              }}>
-                <Users style={{ height: '1.5rem', width: '1.5rem', color: 'white' }} />
-              </div>
-              <span style={{ 
-                fontSize: '1.125rem', 
-                fontWeight: '700', 
-                color: '#111827',
-                display: window.innerWidth >= 640 ? 'block' : 'none'
-              }}>
-                AlumniConnect
-              </span>
-            </div>
-            
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              <button
-                onClick={() => navigate('/dashboard')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: '#374151',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  e.currentTarget.style.color = '#111827';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#374151';
-                }}
-              >
-                <Home style={{ width: '1rem', height: '1rem' }} />
-                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Dashboard</span>
-              </button>
-              <button
-                onClick={() => navigate('/resources')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: '#374151',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  e.currentTarget.style.color = '#111827';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#374151';
-                }}
-              >
-                <FileText style={{ width: '1rem', height: '1rem' }} />
-                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Resources</span>
-              </button>
-              <button
-                onClick={() => navigate('/recommendations')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: '#374151',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  e.currentTarget.style.color = '#111827';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#374151';
-                }}
-              >
-                <TrendingUp style={{ width: '1rem', height: '1rem' }} />
-                <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>Recommendations</span>
-              </button>
-              <button
-                onClick={() => navigate('/career-paths')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  background: '#eff6ff',
-                  cursor: 'pointer',
-                  color: '#2563eb',
-                  fontSize: '0.875rem',
-                  fontWeight: '500'
-                }}
-              >
-                <User className="w-4 h-4" />
-                Profile
-              </button>
-            </nav>
-          </div>
-
-          {/* User Menu */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              onClick={() => navigate('/profile')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 font-bold text-white">
-                {user && user.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="hidden sm:block">
-                <h2 className="text-sm font-semibold text-gray-900">{user && user.name}</h2>
-                <p className="text-xs capitalize text-gray-600">{user && user.role}</p>
-              </div>
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid #fecaca',
-                background: 'white',
-                cursor: 'pointer',
-                color: '#dc2626',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#fef2f2';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
-            >
-              <LogOut style={{ height: '1rem', width: '1rem' }} />
-              <span style={{ display: window.innerWidth >= 640 ? 'inline' : 'none' }}>Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="recommendation-main">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Career Path Journey</h1>
-            <p className="page-subtitle text-gray-500">Visualize how alumni reached their current positions</p>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Mapping career trajectories...</p>
-          </div>
-        ) : (
-          <div className="recommendations-table-container">
-            <table className="recommendations-table">
-              <thead>
-                <tr>
-                  <th>Alumni & Role</th>
-                  {/* <th>Career Trajectory</th> */}
-                  {/* <th>Skills Path</th> */}
-                  {/* <th>Total Time</th> */}
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPaths.map((path, idx) => (
-                  <tr key={idx} className="table-row">
-                    <td>
-                      <div className="flex items-center gap-3">
-                        {/* Safe charAt check: Agar name nahi hai toh '?' dikhayega */}
-                        <div className="alumni-avatar bg-indigo-100 text-indigo-700">
-                          {path?.currentRole ? path.currentRole.charAt(0).toUpperCase() : '?'}
-                        </div>
-                        <div>
-                          <div className="font-bold text-gray-900">
-                            {path?.alumniName }
-                          </div>
-                          <div className="text-xs text-indigo-600 font-medium">
-                            {path?.currentRole || "Position"} @ {path?.company || "Company"}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-1 text-xs">
-                        {/* path.path ko check kar rahe hain ki array hai ya nahi */}
-                        {/* {Array.isArray(path?.path) ? path.path.map((step, i) => (
-                          <React.Fragment key={i}>
-                            <span className="bg-gray-50 border border-gray-200 px-2 py-1 rounded text-gray-600 whitespace-nowrap">
-                              {step}
-                            </span>
-                            {i < path.length - 1 && <ChevronRight size={12} className="text-gray-400" />}
-                          </React.Fragment>
-                        )) : "No path data"} */}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex flex-wrap gap-1 max-w-[200px]">
-                        {/* Safe skills mapping */}
-                        {Array.isArray(path?.skillsAcquired) ? path.skillsAcquired.slice(0, 3).map((s, i) => (
-                          <span key={i} className="bg-green-50 text-green-700 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
-                            {s}
-                          </span>
-                        )) : null}
-                      </div>
-                    </td>
-                    {/* <td className="text-sm font-semibold text-gray-700">
-                      {path?.duration || "N/A"}
-                    </td> */}
-                    <td>
-                      <button
-                        onClick={() => setSelectedPath(path)}
-                        className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-bold"
-                      >
-                        Details <ExternalLink size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </main>
-
-      {/* Career Detail Modal */}
-      {selectedPath && (
-        <div className="profile-modal-overlay">
-          <div className="profile-modal max-w-2xl">
-            <div className="profile-modal-header bg-indigo-600 text-white p-6">
-              <h2 className="text-xl font-bold">Career Roadmap: {selectedPath.alumniName}</h2>
-              <button onClick={() => setSelectedPath(null)} className="text-2xl hover:text-gray-200">&times;</button>
+            {/* .background-effects — decorative blurred circles */}
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="absolute w-96 h-96 -top-24 -right-24 rounded-full opacity-10 blur-3xl bg-gradient-to-br from-blue-600 to-indigo-600" />
+                <div className="absolute w-72 h-72 -bottom-12 -left-24 rounded-full opacity-10 blur-3xl bg-gradient-to-br from-sky-500 to-blue-500" />
             </div>
 
-            <div className="p-8">
-              <div className="relative border-l-2 border-indigo-200 ml-4 pl-8 space-y-8">
-                {selectedPath.path.map((step, i) => (
-                  <div key={i} className="relative">
-                    <div className="absolute -left-[41px] top-1 w-4 h-4 bg-indigo-600 rounded-full border-4 border-white shadow"></div>
-                    <div>
-                      <h4 className="font-bold text-indigo-900 text-lg">{step}</h4>
-                      {i === selectedPath.path.length - 1 && (
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">CURRENT POSITION</span>
-                      )}
+            {/* .career-path-main / .recommendation-main */}
+            <main className="max-w-6xl mx-auto px-6 py-8 relative z-10">
+
+                {/* .page-header */}
+                <div className="bg-white rounded-2xl p-8 mb-6 shadow-md flex flex-col md:flex-row md:items-start md:justify-between gap-6 border border-gray-100">
+                    <div className="flex-1">
+                        {/* .page-title */}
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            Career Path Visualizer
+                        </h1>
+                        <div className="mt-2">
+                            <span className="text-sm text-gray-500 mr-2">Your Skills:</span>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                                {user?.skills?.map((s, i) => (
+                                    // .skill-pill
+                                    <span
+                                        key={i}
+                                        className="flex items-center gap-1 px-3 py-1 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-full text-blue-600 text-xs font-medium"
+                                    >
+                                        {s}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                ))}
-              </div>
 
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <Award className="text-indigo-600" size={18} /> Key Skills Mastered
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedPath.skillsAcquired.map((skill, i) => (
-                    <span key={i} className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {skill}
-                    </span>
-                  ))}
+                    {/* .refresh-button */}
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-blue-600 to-blue-700 border-none rounded-lg text-white text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-200 self-start"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </button>
                 </div>
-              </div>
-            </div>
 
-            <div className="profile-modal-footer">
-              <button onClick={() => setSelectedPath(null)} className="px-6 py-2 text-gray-600 font-medium">Close</button>
-              <button className="bg-indigo-600 text-white px-8 py-2 rounded-lg font-bold shadow-lg hover:bg-indigo-700 transition-colors">
-                Connect to Discuss Path
-              </button>
-            </div>
-          </div>
+                {/* Content States */}
+                {loading ? (
+                    // .loading-container
+                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-md text-center border border-gray-100">
+                        {/* .loading-spinner */}
+                        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4" />
+                        {/* .loading-text */}
+                        <p className="text-gray-500 text-base">Mapping career paths...</p>
+                    </div>
+
+                ) : matches.length === 0 ? (
+                    // .empty-state
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 text-center">
+                        {/* .empty-icon */}
+                        <Map className="w-12 h-12 text-gray-400 mb-4" />
+                        {/* .empty-title */}
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">No career matches found</h3>
+                        {/* .empty-message */}
+                        <p className="text-sm text-gray-500">Make sure your skills are set in your profile.</p>
+                    </div>
+
+                ) : (
+                    // .recommendations-table-container
+                    <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
+                        {/* .recommendations-table */}
+                        <table className="w-full border-collapse">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    {['Alumni', 'Role & Company', 'Match', 'Experience', 'Actions'].map(h => (
+                                        <th
+                                            key={h}
+                                            className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-4"
+                                        >
+                                            {h}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {matches.map((match, idx) => (
+                                    // .table-row
+                                    <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+
+                                        {/* Alumni column */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                {/* .alumni-avatar */}
+                                                <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full font-semibold text-white text-base flex-shrink-0">
+                                                    {match.name.charAt(0)}
+                                                </div>
+                                                <span className="font-bold text-gray-900">{match.name}</span>
+                                            </div>
+                                        </td>
+
+                                        {/* Role & Company */}
+                                        <td className="px-6 py-4">
+                                            <div className="font-medium text-gray-800">{match.jobTitle}</div>
+                                            <div className="text-xs text-gray-500 mt-0.5">{match.company}</div>
+                                        </td>
+
+                                        {/* Match bar */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                {/* .career-match-bar */}
+                                                <div className="w-20 bg-gray-200 h-2 rounded-full overflow-hidden">
+                                                    {/* .career-match-fill */}
+                                                    <div
+                                                        className="bg-green-500 h-full rounded-full transition-all duration-500"
+                                                        style={{ width: `${match.skillMatchPercentage}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs font-bold text-green-700">
+                                                    {match.skillMatchPercentage}%
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        {/* Experience */}
+                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                            {match.experience}
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td className="px-6 py-4">
+                                            <button
+                                                onClick={() => setSelectedMatch(match)}
+                                                className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-semibold transition-colors duration-150"
+                                            >
+                                                Details <ExternalLink size={14} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </main>
+
+            {/* ── Detail Modal ── */}
+            {selectedMatch && (
+                // .profile-modal-overlay
+                <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    onClick={() => setSelectedMatch(null)}
+                >
+                    {/* .profile-modal */}
+                    <div
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* .profile-modal-header */}
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
+                            <h2 className="text-xl font-bold text-gray-900">Career Details</h2>
+                            <button
+                                onClick={() => setSelectedMatch(null)}
+                                className="text-2xl leading-none text-gray-400 hover:text-gray-700 transition-colors"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        {/* Modal body */}
+                        <div className="p-6">
+
+                            {/* Profile overview */}
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                                    {selectedMatch.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">{selectedMatch.name}</h3>
+                                    <p className="text-gray-600 text-sm">
+                                        {selectedMatch.jobTitle} @ {selectedMatch.company}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        Experience: {selectedMatch.experience}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Skill Match Bar */}
+                            <div className="mb-6">
+                                <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                                    <span>Skill Match</span>
+                                    <span className="text-green-600 font-bold">
+                                        {selectedMatch.skillMatchPercentage}%
+                                    </span>
+                                </div>
+                                {/* .career-match-bar */}
+                                <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+                                    {/* .career-match-fill */}
+                                    <div
+                                        className="bg-green-500 h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${selectedMatch.skillMatchPercentage}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Skills grid */}
+                            <div className="grid grid-cols-2 gap-4">
+
+                                {/* Skills they have */}
+                                <div>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-1 text-gray-800 text-sm">
+                                        <Award size={16} className="text-indigo-600" />
+                                        Skills They Have
+                                    </h4>
+                                    {/* .skills-list */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedMatch.skills?.map((s, i) => (
+                                            // .skill-badge
+                                            <span
+                                                key={i}
+                                                className="px-3 py-1 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-full text-xs text-blue-700 font-medium"
+                                            >
+                                                {s}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Skills to learn */}
+                                <div>
+                                    <h4 className="font-semibold mb-2 text-orange-600 text-sm">
+                                        Skills to Learn
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedMatch.missingSkills?.length > 0 ? (
+                                            selectedMatch.missingSkills.map((s, i) => (
+                                                <span
+                                                    key={i}
+                                                    className="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-100 rounded-full text-xs font-medium"
+                                                >
+                                                    {s}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            // .career-perfect
+                                            <span className="text-sm text-green-700 font-medium bg-green-50 border border-green-200 px-3 py-2 rounded-lg">
+                                                🎯 You have all required skills!
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* .profile-modal-footer */}
+                        <div className="flex items-center justify-end gap-3 px-6 py-5 border-t border-gray-200">
+                            <button
+                                onClick={() => setSelectedMatch(null)}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors text-sm"
+                            >
+                                Close
+                            </button>
+                            <button className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm">
+                                Connect Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default CareerPathVisualizer;
