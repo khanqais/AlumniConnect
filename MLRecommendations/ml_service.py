@@ -39,8 +39,10 @@ def career_path():
             }
         )
 
+    # Only return alumni with at least one matched skill
+    filtered = [r for r in results if r["skillMatchPercentage"] > 0]
     return jsonify(
-        sorted(results, key=lambda x: x["skillMatchPercentage"], reverse=True)
+        sorted(filtered, key=lambda x: x["skillMatchPercentage"], reverse=True)
     )
 
 
@@ -66,6 +68,9 @@ def target_skills():
             (len(matched) / len(target_skills_set) * 100) if target_skills_set else 0
         )
 
+        # Skills the alumni has that the student doesn't have yet (skills to learn)
+        missing_skills = [s for s in alum_skills_raw if s.lower() not in target_skills_set]
+
         results.append(
             {
                 "name": alum.get("name"),
@@ -75,12 +80,15 @@ def target_skills():
                 "skills": alum_skills_raw,
                 "skillMatchPercentage": round(match_pct, 2),
                 "matchedTargetSkills": list(matched),
+                "missingSkills": missing_skills,
                 "recommendationType": "target-skills",
             }
         )
 
+    # Only return alumni with at least one matched target skill
+    filtered = [r for r in results if r["skillMatchPercentage"] > 0]
     return jsonify(
-        sorted(results, key=lambda x: x["skillMatchPercentage"], reverse=True)
+        sorted(filtered, key=lambda x: x["skillMatchPercentage"], reverse=True)
     )
 
 

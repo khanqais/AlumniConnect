@@ -149,6 +149,8 @@ const loginUser = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isApproved: user.isApproved,
+                skills: user.skills,
+                target_skills: user.target_skills,
                 token: generateToken(user.id),
             });
             

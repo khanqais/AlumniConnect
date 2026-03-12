@@ -11,6 +11,7 @@ interface User {
     token: string;
     isApproved?: boolean;
     skills: string[];
+    target_skills?: string[];
 }
 
 interface AuthContextType {

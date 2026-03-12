@@ -66,6 +66,7 @@ const updateMyProfile = async (req, res) => {
             name,
             bio,
             skills,
+            target_skills,
             linkedin,
             github,
             twitter,
@@ -92,7 +93,16 @@ const updateMyProfile = async (req, res) => {
         if (website !== undefined) user.website = website;
         if (company !== undefined) user.company = company;
         if (jobTitle !== undefined) user.jobTitle = jobTitle;
-        
+
+        // Student-specific fields
+        if (user.role === 'student') {
+            if (target_skills !== undefined) {
+                user.target_skills = Array.isArray(target_skills)
+                    ? target_skills
+                    : target_skills.split(',').map(s => s.trim()).filter(s => s);
+            }
+        }
+
         // Alumni-specific fields
         if (user.role === 'alumni') {
             if (graduationYear) user.graduationYear = graduationYear;
@@ -111,6 +121,7 @@ const updateMyProfile = async (req, res) => {
                 role: user.role,
                 bio: user.bio,
                 skills: user.skills,
+                target_skills: user.target_skills,
                 linkedin: user.linkedin,
                 github: user.github,
                 twitter: user.twitter,

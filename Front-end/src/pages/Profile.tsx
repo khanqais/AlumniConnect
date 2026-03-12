@@ -22,6 +22,7 @@ interface UserProfile {
     collegeName: string;
     graduationYear?: number;
     skills: string[];
+    target_skills?: string[];
     bio: string;
     avatar: string;
     linkedin: string;
@@ -46,6 +47,7 @@ const Profile = () => {
         name: '',
         bio: '',
         skills: [] as string[],
+        target_skills: [] as string[],
         linkedin: '',
         github: '',
         twitter: '',
@@ -88,6 +90,7 @@ const Profile = () => {
                 name: userData.name || '',
                 bio: userData.bio || '',
                 skills: userData.skills || [],
+                target_skills: userData.target_skills || [],
                 linkedin: userData.linkedin || '',
                 github: userData.github || '',
                 twitter: userData.twitter || '',
@@ -115,6 +118,14 @@ const Profile = () => {
         setFormData({
             ...formData,
             skills: skillsArray
+        });
+    };
+
+    const handleTargetSkillsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const skillsArray = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+        setFormData({
+            ...formData,
+            target_skills: skillsArray
         });
     };
 
@@ -185,7 +196,11 @@ const Profile = () => {
             );
             
             setProfile(response.data.user);
-            updateUser({ name: formData.name });
+            updateUser({
+                name: formData.name,
+                skills: formData.skills,
+                target_skills: formData.target_skills,
+            });
             setIsEditing(false);
             alert('Profile updated successfully!');
         } catch (error) {
@@ -511,6 +526,47 @@ const Profile = () => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Target Skills (students only) */}
+                        {(profile.role === 'student' || isEditing) && (
+                            <div className="rounded-xl bg-white shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="border-b border-gray-200 bg-orange-50 px-6 py-4">
+                                    <h2 className="text-lg font-semibold text-gray-900">Target Skills</h2>
+                                    <p className="text-xs text-gray-500 mt-0.5">Skills you want to learn — used for mentor matching</p>
+                                </div>
+                                <div className="p-6">
+                                    {isEditing ? (
+                                        <div className="space-y-2">
+                                            <input
+                                                type="text"
+                                                value={formData.target_skills.join(', ')}
+                                                onChange={handleTargetSkillsChange}
+                                                placeholder="React, Node.js, Machine Learning, AWS (comma-separated)"
+                                                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                                            />
+                                            <p className="text-xs text-gray-500">Separate skills with commas</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {(profile.target_skills ?? []).length > 0 ? (
+                                                (profile.target_skills ?? []).map((skill, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="inline-flex items-center rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 px-4 py-2 text-sm font-medium text-orange-800 transition-all hover:from-orange-100 hover:to-amber-100"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <p className="text-gray-400 italic">
+                                                    No target skills added yet. {isOwnProfile && 'Click "Edit Profile" to set skills you want to learn.'}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Work Experience */}
                         <div className="rounded-xl bg-white shadow-sm border border-gray-200 overflow-hidden">

@@ -1,5 +1,6 @@
 // CareerPathVisualizer.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { Map, RefreshCw, ExternalLink, Award } from 'lucide-react';
 // ✅ CSS import removed — all styles are now inline Tailwind
 import { useAuth } from '../context/AuthContext';
@@ -16,28 +17,86 @@ interface CareerMatch {
 }
 
 const CareerPathVisualizer: React.FC = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [loading, setLoading] = useState<boolean>(true);
     const [matches, setMatches] = useState<CareerMatch[]>([]);
     const [selectedMatch, setSelectedMatch] = useState<CareerMatch | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    // Target skills inline editor
+    const [editingTargetSkills, setEditingTargetSkills] = useState(false);
+    const [targetSkillsInput, setTargetSkillsInput] = useState('');
+    const [savingTargetSkills, setSavingTargetSkills] = useState(false);
+
+    const saveTargetSkills = async () => {
+        if (!user?.token) return;
+        setSavingTargetSkills(true);
+        try {
+            const newSkills = targetSkillsInput.split(',').map(s => s.trim()).filter(s => s);
+            await axios.put(
+                'http://localhost:5000/api/profile/me/profile',
+                { target_skills: newSkills },
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            updateUser({ target_skills: newSkills });
+            setEditingTargetSkills(false);
+            fetchMatches();
+        } catch (err) {
+            console.error('Failed to save target skills:', err);
+        } finally {
+            setSavingTargetSkills(false);
+        }
+    };
+
+    const startEditingTargetSkills = () => {
+        setTargetSkillsInput((user?.target_skills ?? []).join(', '));
+        setEditingTargetSkills(true);
+    };
+
+    // Sync latest skills/target_skills from DB into auth context on mount
+    useEffect(() => {
+        if (!user?.token) return;
+        axios.get('http://localhost:5000/api/profile/me/profile', {
+            headers: { Authorization: `Bearer ${user.token}` }
+        }).then(res => {
+            const u = res.data.user;
+            if (u) {
+                updateUser({ skills: u.skills ?? [], target_skills: u.target_skills ?? [] });
+            }
+        }).catch(err => {
+            console.error('Failed to sync profile skills:', err);
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.token]);
+
+    const fetchMatches = useCallback(async () => {
+        if (!user?._id) return;
+        setLoading(true);
+        setError(null);
+        try {
+            // Use target-skills endpoint when target skills are set, otherwise fall back to career-path
+            const hasTargetSkills = (user?.target_skills ?? []).length > 0;
+            const endpoint = hasTargetSkills
+                ? `http://localhost:5000/api/recommend/target-skills/${user._id}`
+                : `http://localhost:5000/api/recommend/career-path/${user._id}`;
+            const res = await axios.get(
+                endpoint,
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            setMatches(res.data);
+        } catch (err: unknown) {
+            const e = err as { response?: { data?: { message?: string } } };
+            console.error('Failed to fetch career matches:', err);
+            setError(e.response?.data?.message || 'Failed to load career matches. Make sure the backend and ML service are running.');
+        } finally {
+            setLoading(false);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?._id, user?.token, (user?.target_skills ?? []).join(',')]);
 
     useEffect(() => {
-        const fetchMatches = async () => {
-            setLoading(true);
-            try {
-                // Replace with actual API call:
-                // const res = await fetch('/api/career-matches');
-                // const data = await res.json();
-                // setMatches(data);
-                setMatches([]);
-            } catch (err) {
-                console.error('Failed to fetch career matches:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchMatches();
-    }, []);
+    }, [fetchMatches]);
 
     return (
         // .recommendation-page / .career-path-page
@@ -72,13 +131,70 @@ const CareerPathVisualizer: React.FC = () => {
                                         {s}
                                     </span>
                                 ))}
+                                {(!user?.skills || user.skills.length === 0) && (
+                                    <span className="text-xs text-gray-400 italic">None set — go to Profile to add your skills</span>
+                                )}
                             </div>
+                        </div>
+
+                        {/* Target Skills row */}
+                        <div className="mt-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm text-gray-500">Target Skills:</span>
+                                {!editingTargetSkills && (
+                                    <button
+                                        onClick={startEditingTargetSkills}
+                                        className="text-xs text-orange-500 hover:text-orange-700 font-medium underline"
+                                    >
+                                        {(user?.target_skills ?? []).length === 0 ? '+ Add target skills' : 'Edit'}
+                                    </button>
+                                )}
+                            </div>
+                            {editingTargetSkills ? (
+                                <div className="flex flex-col gap-2 mt-1">
+                                    <input
+                                        type="text"
+                                        value={targetSkillsInput}
+                                        onChange={e => setTargetSkillsInput(e.target.value)}
+                                        placeholder="React, Node.js, Machine Learning, AWS (comma-separated)"
+                                        className="w-full rounded-lg border border-orange-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                                        autoFocus
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={saveTargetSkills}
+                                            disabled={savingTargetSkills}
+                                            className="px-4 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-semibold hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                                        >
+                                            {savingTargetSkills ? 'Saving…' : 'Save'}
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingTargetSkills(false)}
+                                            className="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-semibold hover:bg-gray-200 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-400">Separate skills with commas. These are used by the Mentor Recommendations page.</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {(user?.target_skills ?? []).map((s, i) => (
+                                        <span
+                                            key={i}
+                                            className="flex items-center gap-1 px-3 py-1 bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-200 rounded-full text-orange-600 text-xs font-medium"
+                                        >
+                                            {s}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     {/* .refresh-button */}
                     <button
-                        onClick={() => window.location.reload()}
+                        onClick={fetchMatches}
                         className="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-blue-600 to-blue-700 border-none rounded-lg text-white text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-200 self-start"
                     >
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -96,6 +212,18 @@ const CareerPathVisualizer: React.FC = () => {
                         <p className="text-gray-500 text-base">Mapping career paths...</p>
                     </div>
 
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-red-200 text-center">
+                        <p className="text-red-500 font-semibold mb-2">Error</p>
+                        <p className="text-sm text-gray-500 max-w-md">{error}</p>
+                        <button
+                            onClick={fetchMatches}
+                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+
                 ) : matches.length === 0 ? (
                     // .empty-state
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 text-center">
@@ -104,7 +232,15 @@ const CareerPathVisualizer: React.FC = () => {
                         {/* .empty-title */}
                         <h3 className="text-lg font-semibold text-gray-900 mb-1">No career matches found</h3>
                         {/* .empty-message */}
-                        <p className="text-sm text-gray-500">Make sure your skills are set in your profile.</p>
+                        {(user?.target_skills ?? []).length === 0 ? (
+                            <p className="text-sm text-gray-500">
+                                No target skills set. Add target skills above to find alumni whose career path matches where you want to go.
+                            </p>
+                        ) : (
+                            <p className="text-sm text-gray-500">
+                                No alumni match your target skills yet. Try broader skills or check back as more alumni join.
+                            </p>
+                        )}
                     </div>
 
                 ) : (
