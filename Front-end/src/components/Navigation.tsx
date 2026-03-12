@@ -35,6 +35,8 @@ const Navigation = () => {
     // ✅ Chat removed from here
     const navItems = [
         { name: 'Dashboard',       path: '/dashboard',      icon: Home },
+        { name: 'Resources',       path: '/resources',      icon: Home },
+
         { name: 'Career Path',     path: '/career-path',    icon: Map },
         { name: 'Blogs',           path: '/blogs',          icon: FileText },
         { name: 'Community',       path: '/community',      icon: Users },

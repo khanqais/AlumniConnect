@@ -27,6 +27,7 @@ def career_path():
 
         results.append(
             {
+                "alumniId": str(alum.get("_id", "")),
                 "name": alum.get("name"),
                 "experience": alum.get("experience", ""),
                 "jobTitle": alum.get("jobTitle", ""),
@@ -73,6 +74,7 @@ def target_skills():
 
         results.append(
             {
+                "alumniId": str(alum.get("_id", "")),
                 "name": alum.get("name"),
                 "experience": alum.get("experience", ""),
                 "jobTitle": alum.get("jobTitle", ""),

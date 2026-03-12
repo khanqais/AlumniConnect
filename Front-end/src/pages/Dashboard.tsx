@@ -422,7 +422,7 @@ const Dashboard = () => {
 
           </div>
           {/* Find Mentors for learning */}
-          <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md mt-4">
+          {/* <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md mt-4">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
               <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -435,7 +435,7 @@ const Dashboard = () => {
             <button className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800" onClick={() => navigate('/recommendations')}>
               Explore →
             </button>
-          </div>
+          </div> */}
            {/* Find Mentors for choosing career path */}
           <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md mt-4">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">

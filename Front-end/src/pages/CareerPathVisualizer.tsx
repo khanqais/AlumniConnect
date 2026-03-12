@@ -1,12 +1,14 @@
 // CareerPathVisualizer.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Map, RefreshCw, ExternalLink, Award } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Map, RefreshCw, ExternalLink, Award, MessageCircle } from 'lucide-react';
 // ✅ CSS import removed — all styles are now inline Tailwind
 import { useAuth } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 
 interface CareerMatch {
+    alumniId: string;
     name: string;
     jobTitle: string;
     company: string;
@@ -18,6 +20,7 @@ interface CareerMatch {
 
 const CareerPathVisualizer: React.FC = () => {
     const { user, updateUser } = useAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState<boolean>(true);
     const [matches, setMatches] = useState<CareerMatch[]>([]);
     const [selectedMatch, setSelectedMatch] = useState<CareerMatch | null>(null);
@@ -306,12 +309,22 @@ const CareerPathVisualizer: React.FC = () => {
 
                                         {/* Actions */}
                                         <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => setSelectedMatch(match)}
-                                                className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-semibold transition-colors duration-150"
-                                            >
-                                                Details <ExternalLink size={14} />
-                                            </button>
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => setSelectedMatch(match)}
+                                                    className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-semibold transition-colors duration-150"
+                                                >
+                                                    Details <ExternalLink size={14} />
+                                                </button>
+                                                {match.alumniId && (
+                                                    <button
+                                                        onClick={() => navigate(`/chat/${match.alumniId}`)}
+                                                        className="flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-semibold transition-colors duration-150"
+                                                    >
+                                                        Chat <MessageCircle size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -438,8 +451,15 @@ const CareerPathVisualizer: React.FC = () => {
                             >
                                 Close
                             </button>
-                            <button className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm">
-                                Connect Now
+                            <button
+                                onClick={() => {
+                                    if (selectedMatch?.alumniId) {
+                                        navigate(`/chat/${selectedMatch.alumniId}`);
+                                    }
+                                }}
+                                className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm flex items-center gap-2"
+                            >
+                                <MessageCircle size={16} /> Connect Now
                             </button>
                         </div>
                     </div>
