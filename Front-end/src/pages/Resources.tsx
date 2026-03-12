@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import ATSChecker from '../components/ATSChecker';
 
 interface Resource {
     _id: string;
@@ -49,7 +50,7 @@ const Resources = () => {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [showUploadModal, setShowUploadModal] = useState(false);
-    const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
+    const [activeTab, setActiveTab] = useState<'all' | 'my' | 'ats'>('all');
     const [showCommentsModal, setShowCommentsModal] = useState(false);
     const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
     const [newComment, setNewComment] = useState('');
@@ -320,6 +321,17 @@ const Resources = () => {
                             My Uploads ({myResources.length})
                         </button>
                     )}
+                    <button
+                        onClick={() => setActiveTab('ats')}
+                        className={`rounded-t-lg px-6 py-3 text-sm font-medium transition-all flex items-center gap-2 ${
+                            activeTab === 'ats'
+                                ? 'border-b-2 border-indigo-600 bg-indigo-50 text-indigo-600'
+                                : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                        🤖 ATS Checker
+                        <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700">NEW</span>
+                    </button>
                 </div>
 
                 {/* Search & Filter - Only show for 'all' tab */}
@@ -351,12 +363,17 @@ const Resources = () => {
                     </div>
                 )}
 
+                {/* ATS Checker Tab */}
+                {activeTab === 'ats' && (
+                    <ATSChecker />
+                )}
+
                 {/* Resources Grid */}
-                {loading ? (
+                {activeTab !== 'ats' && loading ? (
                     <div className="flex justify-center py-20">
                         <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
                     </div>
-                ) : (
+                ) : activeTab !== 'ats' ? (
                     <>
                         {activeTab === 'my' && user?.role === 'alumni' ? (
                             // My Resources
@@ -550,7 +567,7 @@ const Resources = () => {
                             )
                         )}
                     </>
-                )}
+                ) : null}
             </main>
 
             {/* Upload Modal */}
