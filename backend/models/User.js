@@ -76,6 +76,10 @@ const userSchema = mongoose.Schema(
             type: String,
             default: '',
         },
+        branch: {
+            type: String,
+            default: '',
+        },
         jobTitle: {
             type: String,
             default: '',

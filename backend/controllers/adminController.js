@@ -111,8 +111,9 @@ const updateUserStatus = async (req, res) => {
         }
 
         if (status === 'approved') {
-            // Approve the user
+            // Approve the user and mark email as verified so they can log in
             user.isApproved = true;
+            user.isEmailVerified = true;
             await user.save();
 
             res.json({
@@ -385,6 +386,62 @@ const deleteBlogAdmin = async (req, res) => {
 };
 
 
+// @desc Search & filter alumni database
+// @route GET /api/admin/alumni/search
+// @access Private/Admin
+const searchAlumni = async (req, res) => {
+    try {
+        const { name, graduationYear, branch, company, skills, page = 1, limit = 20 } = req.query;
+
+        const filter = { role: 'alumni', isApproved: true };
+
+        if (name && name.trim()) {
+            filter.$or = [
+                { name: { $regex: name.trim(), $options: 'i' } },
+                { email: { $regex: name.trim(), $options: 'i' } },
+            ];
+        }
+
+        if (graduationYear) {
+            const year = parseInt(graduationYear);
+            if (!isNaN(year)) filter.graduationYear = year;
+        }
+
+        if (branch && branch.trim()) {
+            filter.branch = { $regex: branch.trim(), $options: 'i' };
+        }
+
+        if (company && company.trim()) {
+            filter.company = { $regex: company.trim(), $options: 'i' };
+        }
+
+        if (skills && skills.trim()) {
+            const skillList = skills.split(',').map((s) => s.trim()).filter(Boolean);
+            if (skillList.length > 0) {
+                filter.skills = { $in: skillList.map((s) => new RegExp(s, 'i')) };
+            }
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const total = await User.countDocuments(filter);
+        const alumni = await User.find(filter)
+            .select('-password -emailVerificationToken -emailVerificationExpires')
+            .sort({ graduationYear: -1, name: 1 })
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        res.json({
+            total,
+            page: parseInt(page),
+            pages: Math.ceil(total / parseInt(limit)),
+            alumni,
+        });
+    } catch (error) {
+        console.error('Search alumni error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     adminLogin,
     getPendingUsers,
@@ -400,5 +457,5 @@ module.exports = {
     getPublishedBlogs,
     updateBlogStatus,
     deleteBlogAdmin,
-
+    searchAlumni,
 };

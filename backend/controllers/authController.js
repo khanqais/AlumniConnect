@@ -17,7 +17,7 @@ const generateToken = (id) => {
 // @access Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, role, collegeName, graduationYear, skills, experience } = req.body;
+        const { name, email, password, role, collegeName, graduationYear, skills, experience, branch } = req.body;
 
         // Validation
         if (!name || !email || !password || !collegeName) {
@@ -68,6 +68,7 @@ const registerUser = async (req, res) => {
             collegeName,
             graduationYear: role === 'alumni' ? graduationYear : undefined,
             experience: role === 'alumni' ? experience : undefined,
+            branch: role === 'alumni' ? (branch || '') : undefined,
             skills: skillsArray,
             isApproved: false,
             isEmailVerified: false,

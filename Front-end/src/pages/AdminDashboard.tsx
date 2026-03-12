@@ -65,6 +65,20 @@ interface Stats {
     approvalRate: string;
 }
 
+interface AlumniResult {
+    _id: string;
+    name: string;
+    email: string;
+    collegeName: string;
+    graduationYear: number;
+    branch: string;
+    company: string;
+    jobTitle: string;
+    skills: string[];
+    linkedin: string;
+    experience: string;
+}
+
 const AdminDashboard = () => {
     const [pendingUsers, setPendingUsers] = useState<User[]>([]);
     const [approvedUsers, setApprovedUsers] = useState<User[]>([]);
@@ -74,12 +88,19 @@ const AdminDashboard = () => {
     const [publishedBlogs, setPublishedBlogs] = useState<Blog[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'pendingResources' | 'approvedResources' | 'pendingBlogs' | 'publishedBlogs'>('pending');
+    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'pendingResources' | 'approvedResources' | 'pendingBlogs' | 'publishedBlogs' | 'commandCenter'>('pending');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [userToReject, setUserToReject] = useState<User | null>(null);
+    const [alumniResults, setAlumniResults] = useState<AlumniResult[]>([]);
+    const [alumniTotal, setAlumniTotal] = useState(0);
+    const [alumniPage, setAlumniPage] = useState(1);
+    const [alumniPages, setAlumniPages] = useState(1);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchFilters, setSearchFilters] = useState({ name: '', graduationYear: '', branch: '', company: '', skills: '' });
+    const [hasSearched, setHasSearched] = useState(false);
     
     const navigate = useNavigate();
 
@@ -256,6 +277,40 @@ const AdminDashboard = () => {
         navigate('/admin');
     };
 
+    const handleAlumniSearch = async (page = 1) => {
+        try {
+            setIsSearching(true);
+            setHasSearched(true);
+            const params = new URLSearchParams();
+            if (searchFilters.name) params.append('name', searchFilters.name);
+            if (searchFilters.graduationYear) params.append('graduationYear', searchFilters.graduationYear);
+            if (searchFilters.branch) params.append('branch', searchFilters.branch);
+            if (searchFilters.company) params.append('company', searchFilters.company);
+            if (searchFilters.skills) params.append('skills', searchFilters.skills);
+            params.append('page', String(page));
+            params.append('limit', '20');
+            const res = await axios.get(`http://localhost:5000/api/admin/alumni/search?${params.toString()}`);
+            setAlumniResults(res.data.alumni);
+            setAlumniTotal(res.data.total);
+            setAlumniPage(res.data.page);
+            setAlumniPages(res.data.pages);
+        } catch (err) {
+            console.error('Alumni search error:', err);
+            alert('Failed to search alumni. Please try again.');
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSearchReset = () => {
+        setSearchFilters({ name: '', graduationYear: '', branch: '', company: '', skills: '' });
+        setAlumniResults([]);
+        setAlumniTotal(0);
+        setAlumniPage(1);
+        setAlumniPages(1);
+        setHasSearched(false);
+    };
+
     const adminEmail = localStorage.getItem('adminEmail') || 'Admin';
 
     if (loading) {
@@ -424,6 +479,16 @@ const AdminDashboard = () => {
                                 }`}
                             >
                                 Published Blogs ({publishedBlogs.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('commandCenter')}
+                                className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                                    activeTab === 'commandCenter'
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Command Center
                             </button>
                         </nav>
                     </div>
@@ -718,6 +783,232 @@ const AdminDashboard = () => {
                                 </tbody>
                             </table>
                         </div>
+                    )}
+                </div>
+                )}
+
+                {/* Command Center */}
+                {activeTab === 'commandCenter' && (
+                <div className="space-y-6">
+                    {/* Filter Card */}
+                    <div className="rounded-lg bg-white shadow">
+                        <div className="border-b border-gray-200 px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600">
+                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-900">Alumni Command Center</h2>
+                                    <p className="text-sm text-gray-500">Search and filter the alumni database</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700">Name / Email</label>
+                                    <input
+                                        type="text"
+                                        value={searchFilters.name}
+                                        onChange={(e) => setSearchFilters((f) => ({ ...f, name: e.target.value }))}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAlumniSearch(1)}
+                                        placeholder="Search by name or email..."
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700">Graduation Year (Batch)</label>
+                                    <input
+                                        type="number"
+                                        value={searchFilters.graduationYear}
+                                        onChange={(e) => setSearchFilters((f) => ({ ...f, graduationYear: e.target.value }))}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAlumniSearch(1)}
+                                        placeholder="e.g. 2022"
+                                        min={1950}
+                                        max={2100}
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700">Branch / Department</label>
+                                    <input
+                                        type="text"
+                                        value={searchFilters.branch}
+                                        onChange={(e) => setSearchFilters((f) => ({ ...f, branch: e.target.value }))}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAlumniSearch(1)}
+                                        placeholder="e.g. Computer Science"
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700">Current Employer</label>
+                                    <input
+                                        type="text"
+                                        value={searchFilters.company}
+                                        onChange={(e) => setSearchFilters((f) => ({ ...f, company: e.target.value }))}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAlumniSearch(1)}
+                                        placeholder="e.g. Google"
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700">Skills (comma-separated)</label>
+                                    <input
+                                        type="text"
+                                        value={searchFilters.skills}
+                                        onChange={(e) => setSearchFilters((f) => ({ ...f, skills: e.target.value }))}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAlumniSearch(1)}
+                                        placeholder="e.g. React, Node.js"
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div className="flex items-end gap-2">
+                                    <button
+                                        onClick={() => handleAlumniSearch(1)}
+                                        disabled={isSearching}
+                                        className="flex-1 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                                    >
+                                        {isSearching ? 'Searching...' : 'Search'}
+                                    </button>
+                                    <button
+                                        onClick={handleSearchReset}
+                                        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Results */}
+                    {hasSearched && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                        <div className="border-b border-gray-200 px-6 py-4">
+                            <p className="text-sm font-medium text-gray-700">
+                                {isSearching ? 'Searching...' : `${alumniTotal} result${alumniTotal !== 1 ? 's' : ''} found`}
+                            </p>
+                        </div>
+
+                        {alumniResults.length === 0 && !isSearching ? (
+                            <div className="px-6 py-16 text-center">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <p className="mt-4 text-lg font-medium text-gray-900">No alumni found</p>
+                                <p className="mt-2 text-sm text-gray-500">Try adjusting your filters</p>
+                            </div>
+                        ) : (
+                            <>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Alumni</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Batch</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Branch</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Current Employer</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Skills</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Connect</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 bg-white">
+                                        {alumniResults.map((a) => (
+                                            <tr key={a._id} className="hover:bg-gray-50">
+                                                <td className="whitespace-nowrap px-6 py-4">
+                                                    <div className="flex items-center">
+                                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 font-semibold text-white">
+                                                            {a.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div className="ml-4">
+                                                            <div className="font-medium text-gray-900">{a.name}</div>
+                                                            <div className="text-sm text-gray-500">{a.email}</div>
+                                                            {a.collegeName && <div className="text-xs text-gray-400">{a.collegeName}</div>}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4">
+                                                    {a.graduationYear ? (
+                                                        <span className="inline-flex rounded-full bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-800">
+                                                            Class of {a.graduationYear}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                                    {a.branch || <span className="text-xs text-gray-400">—</span>}
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4">
+                                                    {a.company ? (
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">{a.company}</div>
+                                                            {a.jobTitle && <div className="text-xs text-gray-500">{a.jobTitle}</div>}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {a.skills?.slice(0, 3).map((skill, idx) => (
+                                                            <span key={idx} className="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800">
+                                                                {skill}
+                                                            </span>
+                                                        ))}
+                                                        {a.skills?.length > 3 && (
+                                                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">+{a.skills.length - 3}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4">
+                                                    {a.linkedin ? (
+                                                        <a
+                                                            href={a.linkedin}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                                                        >
+                                                            LinkedIn
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">—</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {/* Pagination */}
+                            {alumniPages > 1 && (
+                                <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
+                                    <p className="text-sm text-gray-700">
+                                        Page {alumniPage} of {alumniPages} &mdash; {alumniTotal} total alumni
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleAlumniSearch(alumniPage - 1)}
+                                            disabled={alumniPage <= 1}
+                                            className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                                        >
+                                            Previous
+                                        </button>
+                                        <button
+                                            onClick={() => handleAlumniSearch(alumniPage + 1)}
+                                            disabled={alumniPage >= alumniPages}
+                                            className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            </>
+                        )}
+                    </div>
                     )}
                 </div>
                 )}

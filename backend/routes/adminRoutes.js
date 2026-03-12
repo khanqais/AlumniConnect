@@ -1,21 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const {
-    adminLogin,  // Add this
+    adminLogin,
     getPendingUsers,
     getApprovedUsers,
     getUserById,
     updateUserStatus,
     getAdminStats,
-    getPendingResources,      // Add
-    getApprovedResources,     // Add
-    updateResourceStatus,     // Add
-    deleteResourceAdmin,      // Add
-    getPendingBlogs,          // Add
-    getPublishedBlogs,        // Add
-    updateBlogStatus,         // Add
-    deleteBlogAdmin,          // Add
-
+    getPendingResources,
+    getApprovedResources,
+    updateResourceStatus,
+    deleteResourceAdmin,
+    getPendingBlogs,
+    getPublishedBlogs,
+    updateBlogStatus,
+    deleteBlogAdmin,
+    searchAlumni,
 } = require('../controllers/adminController');
 
 // Admin login route (no authentication needed)
@@ -38,5 +38,6 @@ router.get('/blogs/published', getPublishedBlogs);
 router.put('/blogs/status/:id', updateBlogStatus);
 router.delete('/blogs/:id', deleteBlogAdmin);
 
+router.get('/alumni/search', searchAlumni);
 
 module.exports = router;
