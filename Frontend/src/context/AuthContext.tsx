@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext, type ReactNode } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 
 /* eslint-disable react-refresh/only-export-components */
 
@@ -45,13 +45,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = (userData: User) => {
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     };
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
-        delete axios.defaults.headers.common['Authorization'];
+        delete api.defaults.headers.common['Authorization'];
     };
 
     const updateUser = (userData: Partial<User>) => {
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (user?.token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
+            api.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
         }
     }, [user]);
 
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const hydrateAvatar = async () => {
             if (!user?.token || user.avatar) return;
             try {
-                const { data } = await axios.get('http://localhost:5000/api/profile/me/profile', {
+                const { data } = await api.get('/profile/me/profile', {
                     headers: { Authorization: `Bearer ${user.token}` },
                 });
                 const fetchedAvatar = data?.user?.avatar;

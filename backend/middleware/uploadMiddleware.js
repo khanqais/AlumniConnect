@@ -1,15 +1,9 @@
 const multer = require('multer');
 const path = require('path');
 
-// Set storage engine
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
+// Set storage engine to memory storage for Vercel compatibility
+// Files will be available as req.file.buffer
+const storage = multer.memoryStorage();
 
 // Check file type
 function checkFileType(file, cb) {

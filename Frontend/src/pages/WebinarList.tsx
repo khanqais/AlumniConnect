@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -48,7 +48,7 @@ const WebinarList = () => {
         setLoading(true);
         try {
             const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-            const res = await axios.get('http://localhost:5000/api/webinars', {
+            const res = await api.get('/webinars', {
                 params: { status, search },
                 headers,
             });
@@ -65,7 +65,7 @@ const WebinarList = () => {
         if (!user?.token || user?.role !== 'alumni') return;
         try {
             const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-            const res = await axios.get('http://localhost:5000/api/webinars', {
+            const res = await api.get('/webinars', {
                 headers,
             });
             const myWebinars = (res.data || []).filter((event: Event) => event.organizer?._id === user._id);
@@ -80,7 +80,7 @@ const WebinarList = () => {
         if (!user?.token) return;
         try {
             const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-            const res = await axios.get('http://localhost:5000/api/webinars', { headers });
+            const res = await api.get('/webinars', { headers });
             const registered = (res.data || []).filter((event: Event) =>
                 event.registeredUsers?.includes(user._id)
             );
@@ -115,8 +115,8 @@ const WebinarList = () => {
 
         try {
             const headers = { Authorization: `Bearer ${user.token}` };
-            await axios.post(
-                `http://localhost:5000/api/webinars/register/${eventId}`,
+            await api.post(
+                `/webinars/register/${eventId}`,
                 {},
                 { headers }
             );
@@ -135,7 +135,7 @@ const WebinarList = () => {
 
         try {
             const headers = { Authorization: `Bearer ${user.token}` };
-            await axios.delete(`http://localhost:5000/api/webinars/${eventId}`, { headers });
+            await api.delete(`/webinars/${eventId}`, { headers });
             fetchEvents();
             fetchMyEvents();
             alert('Event deleted successfully!');

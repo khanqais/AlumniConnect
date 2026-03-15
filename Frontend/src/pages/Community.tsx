@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -56,7 +56,7 @@ const Community = () => {
     const fetchQuestions = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/questions', {
+            const res = await api.get('/questions', {
                 params: { category, search, filter: filter === 'all' ? undefined : filter },
             });
             setQuestions(res.data);
@@ -71,7 +71,7 @@ const Community = () => {
         if (!user?.token) return;
         
         try {
-            const res = await axios.get('http://localhost:5000/api/questions');
+            const res = await api.get('/questions');
             const filtered = res.data.filter((q: Question) => q.askedBy._id === user._id);
             setMyQuestions(filtered);
         } catch (error) {
@@ -368,7 +368,7 @@ const QuestionCard = ({ question, onVoted }: { question: Question; onVoted: () =
     const handleVote = async (optionIndex: number) => {
         try {
             if (!user?.token) return;
-            await axios.post(`http://localhost:5000/api/questions/poll/vote/${question._id}`,
+            await api.post(`/questions/poll/vote/${question._id}`,
                 { optionIndex },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -514,7 +514,7 @@ const AskQuestionModal = ({ onClose, onSuccess }: { onClose: () => void; onSucce
 
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/questions/ask', formData, {
+            await api.post('/questions/ask', formData, {
                 headers: {
                     Authorization: `Bearer ${user.token}`,
                 },
@@ -654,7 +654,7 @@ const CreatePollModal = ({ onClose, onSuccess }: { onClose: () => void; onSucces
 
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/questions/poll',
+            await api.post('/questions/poll',
                 {
                     title: formData.title,
                     category: formData.category,

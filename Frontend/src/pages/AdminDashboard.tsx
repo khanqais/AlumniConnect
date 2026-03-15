@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useNavigate } from 'react-router-dom';
 
 interface User {
@@ -110,11 +110,11 @@ const AdminDashboard = () => {
         try {
             setLoading(true);
             const [pendingRes, approvedRes, statsRes, referralStatsRes, announcementsRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/admin/pending'),
-                axios.get('http://localhost:5000/api/admin/approved'),
-                axios.get('http://localhost:5000/api/admin/stats'),
-                axios.get('http://localhost:5000/api/admin/referral-stats'),
-                axios.get('http://localhost:5000/api/admin/announcements'),
+                api.get('/admin/pending'),
+                api.get('/admin/approved'),
+                api.get('/admin/stats'),
+                api.get('/admin/referral-stats'),
+                api.get('/admin/announcements'),
             ]);
             
             setPendingUsers(pendingRes.data);
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
         if (!window.confirm(`Are you sure you want to approve ${userName}?`)) return;
 
         try {
-            await axios.put(`http://localhost:5000/api/admin/status/${id}`, { 
+            await api.put(`/admin/status/${id}`, { 
                 status: 'approved' 
             });
             
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
         if (!userToReject) return;
 
         try {
-            await axios.put(`http://localhost:5000/api/admin/status/${userToReject._id}`, { 
+            await api.put(`/admin/status/${userToReject._id}`, { 
                 status: 'rejected',
                 reason: rejectionReason 
             });
@@ -194,7 +194,7 @@ const AdminDashboard = () => {
             if (searchFilters.skills) params.append('skills', searchFilters.skills);
             params.append('page', String(page));
             params.append('limit', '20');
-            const res = await axios.get(`http://localhost:5000/api/admin/alumni/search?${params.toString()}`);
+            const res = await api.get(`/admin/alumni/search?${params.toString()}`);
             setAlumniResults(res.data.alumni);
             setAlumniTotal(res.data.total);
             setAlumniPage(res.data.page);
@@ -224,7 +224,7 @@ const AdminDashboard = () => {
         }
 
         try {
-            await axios.put(`http://localhost:5000/api/admin/user/${userId}/cgpa`, {
+            await api.put(`/admin/user/${userId}/cgpa`, {
                 cgpa: Number(rawValue),
             });
             alert(`Updated CGPA for ${userName}`);
@@ -243,7 +243,7 @@ const AdminDashboard = () => {
         }
 
         try {
-            await axios.put(`http://localhost:5000/api/admin/user/${user._id}/ban`, {
+            await api.put(`/admin/user/${user._id}/ban`, {
                 ban,
                 reason,
             });
@@ -266,7 +266,7 @@ const AdminDashboard = () => {
             const adminEmail = localStorage.getItem('adminEmail') || 'admin@domain.com';
             const adminId = localStorage.getItem('adminId') || 'admin';
 
-            await axios.post('http://localhost:5000/api/admin/announcements', {
+            await api.post('/admin/announcements', {
                 title: announcementTitle,
                 content: announcementContent,
                 category: announcementCategory,
@@ -294,7 +294,7 @@ const AdminDashboard = () => {
         if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/admin/announcements/${id}`);
+            await api.delete(`/admin/announcements/${id}`);
             alert('Announcement deleted successfully!');
             fetchData();
         } catch (err) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -78,7 +78,7 @@ const Resources = () => {
     const fetchResources = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/resources', {
+            const res = await api.get('/resources', {
                 params: { category, search },
             });
             setResources(res.data);
@@ -93,7 +93,7 @@ const Resources = () => {
         if (!user?.token) return;
         
         try {
-            const res = await axios.get('http://localhost:5000/api/resources/my-resources', {
+            const res = await api.get('/resources/my-resources', {
                 headers: {
                     Authorization: `Bearer ${user.token}`,
                 },
@@ -119,7 +119,7 @@ const Resources = () => {
 
     const handleDownload = async (id: string, filePath: string) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/resources/download/${id}`, {
+            const res = await api.get(`/resources/download/${id}`, {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
                 },
@@ -141,7 +141,7 @@ const Resources = () => {
 
     const handleLike = async (id: string) => {
         try {
-            await axios.post(`http://localhost:5000/api/resources/like/${id}`, {}, {
+            await api.post(`/resources/like/${id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
                 },
@@ -155,7 +155,7 @@ const Resources = () => {
 
     const handleDislike = async (id: string) => {
         try {
-            await axios.post(`http://localhost:5000/api/resources/dislike/${id}`, {}, {
+            await api.post(`/resources/dislike/${id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
                 },
@@ -173,7 +173,7 @@ const Resources = () => {
         }
 
         try {
-            await axios.delete(`http://localhost:5000/api/resources/${id}`, {
+            await api.delete(`/resources/${id}`, {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
                 },
@@ -197,8 +197,8 @@ const Resources = () => {
         if (!selectedResource || !newComment.trim()) return;
 
         try {
-            await axios.post(
-                `http://localhost:5000/api/resources/comment/${selectedResource._id}`,
+            await api.post(
+                `/resources/comment/${selectedResource._id}`,
                 { text: newComment },
                 {
                     headers: {
@@ -211,8 +211,8 @@ const Resources = () => {
             await fetchMyResources();
             
             // Update selected resource with new comments
-            const updatedResource = await axios.get(
-                `http://localhost:5000/api/resources/${selectedResource._id}`
+            const updatedResource = await api.get(
+                `/resources/${selectedResource._id}`
             );
             setSelectedResource(updatedResource.data);
         } catch (error) {
@@ -225,8 +225,8 @@ const Resources = () => {
         if (!selectedResource) return;
 
         try {
-            await axios.delete(
-                `http://localhost:5000/api/resources/comment/${selectedResource._id}/${commentId}`,
+            await api.delete(
+                `/resources/comment/${selectedResource._id}/${commentId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${user?.token}`,
@@ -237,8 +237,8 @@ const Resources = () => {
             await fetchMyResources();
             
             // Update selected resource
-            const updatedResource = await axios.get(
-                `http://localhost:5000/api/resources/${selectedResource._id}`
+            const updatedResource = await api.get(
+                `/resources/${selectedResource._id}`
             );
             setSelectedResource(updatedResource.data);
         } catch (error) {
@@ -261,7 +261,7 @@ const Resources = () => {
                 formData.append('file', uploadFile);
             }
 
-            await axios.post('http://localhost:5000/api/resources/upload', formData, {
+            await api.post('/resources/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${user?.token}`,

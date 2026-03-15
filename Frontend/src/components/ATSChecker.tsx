@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 
 /* ================================================================
    Types
@@ -295,8 +295,8 @@ const ATSChecker = () => {
         try {
             const formData = new FormData();
             formData.append('resume', selectedFile);
-            const res = await axios.post<ATSResult>(
-                'http://localhost:5000/api/resources/ats-check',
+            const res = await api.post<ATSResult>(
+                '/resources/ats-check',
                 formData,
                 { headers: { 'Content-Type': 'multipart/form-data' } }
             );

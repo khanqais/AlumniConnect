@@ -1,6 +1,6 @@
 const Resource = require('../models/Resource');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
+const { uploadToCloudinary } = require('../services/uploadService');
 const { notifyAllUsers } = require('../utils/notifications');
 
 // Upload resource
@@ -24,11 +24,33 @@ const uploadResource = async (req, res) => {
         // Auto-approve all resources (no admin approval needed)
         const isApproved = true;
 
+        // Upload to Cloudinary
+        let fileUrl = '';
+        let filePublicId = '';
+        
+        try {
+            const timestamp = Date.now();
+            const safeFilename = `resource-${timestamp}`;
+            
+            const uploadResult = await uploadToCloudinary(
+                req.file.buffer,
+                'alumniconnect/resources',
+                safeFilename,
+                'raw'
+            );
+            fileUrl = uploadResult.secure_url;
+            filePublicId = uploadResult.public_id;
+        } catch (uploadError) {
+            console.error('Error uploading resource:', uploadError);
+            return res.status(500).json({ message: 'Failed to upload file. Please try again.' });
+        }
+
         const resource = await Resource.create({
             title,
             description,
             category,
-            file: req.file.path,
+            file: fileUrl,
+            filePublicId: filePublicId,
             uploadedBy: req.user._id,
             uploaderName: req.user.name,
             uploaderRole: req.user.role,
@@ -104,7 +126,7 @@ const getResourceById = async (req, res) => {
     }
 };
 
-// Download resource
+// Download resource (redirect to Cloudinary URL)
 const downloadResource = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id);
@@ -113,12 +135,9 @@ const downloadResource = async (req, res) => {
             return res.status(404).json({ message: 'Resource not found' });
         }
 
-        // Check if file exists
-        const filePath = path.join(__dirname, '../', resource.file);
-        
-        if (!fs.existsSync(filePath)) {
+        if (!resource.file) {
             return res.status(404).json({ 
-                message: 'File not found on server. It may have been deleted.' 
+                'message': 'File not available.' 
             });
         }
 
@@ -327,6 +346,15 @@ const deleteResource = async (req, res) => {
         // Check if user owns the resource
         if (resource.uploadedBy.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Not authorized to delete this resource' });
+        }
+
+        // Delete file from Cloudinary if exists
+        if (resource.filePublicId) {
+            try {
+                await cloudinary.uploader.destroy(resource.filePublicId, { resource_type: 'raw' });
+            } catch (error) {
+                console.error('Error deleting file from Cloudinary:', error);
+            }
         }
 
         await Resource.findByIdAndDelete(req.params.id);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -28,7 +28,7 @@ const Login = () => {
         setError('');
 
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+            const res = await api.post('/auth/login', formData);
 
             console.log('✅ User Login Response:', res.data);
             //anshu putting to save in localStorage

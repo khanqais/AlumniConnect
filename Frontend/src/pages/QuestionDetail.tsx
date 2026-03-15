@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -59,7 +59,7 @@ const QuestionDetail = () => {
     const fetchQuestion = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/questions/${id}`);
+            const res = await api.get(`/questions/${id}`);
             setQuestion(res.data);
         } catch (error) {
             console.error('Error fetching question:', error);
@@ -76,8 +76,8 @@ const QuestionDetail = () => {
 
         setSubmitting(true);
         try {
-            await axios.post(
-                `http://localhost:5000/api/questions/answer/${id}`,
+            await api.post(
+                `/questions/answer/${id}`,
                 { answer: answerText },
                 {
                     headers: {
@@ -100,8 +100,8 @@ const QuestionDetail = () => {
         if (!user?.token) return;
 
         try {
-            await axios.post(
-                `http://localhost:5000/api/questions/upvote/${id}`,
+            await api.post(
+                `/questions/upvote/${id}`,
                 { answerId },
                 {
                     headers: {
@@ -119,8 +119,8 @@ const QuestionDetail = () => {
         if (!user?.token) return;
 
         try {
-            await axios.post(
-                `http://localhost:5000/api/questions/accept/${id}`,
+            await api.post(
+                `/questions/accept/${id}`,
                 { answerId },
                 {
                     headers: {
@@ -140,8 +140,8 @@ const QuestionDetail = () => {
         if (!user?.token) return;
 
         try {
-            await axios.post(
-                `http://localhost:5000/api/questions/toggle-solved/${id}`,
+            await api.post(
+                `/questions/toggle-solved/${id}`,
                 {},
                 {
                     headers: {

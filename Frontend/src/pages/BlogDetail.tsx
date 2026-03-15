@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 
@@ -61,7 +61,7 @@ const BlogDetail = () => {
 
     const fetchBlog = useCallback(async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+            const res = await api.get(`/blogs/${id}`);
             setBlog(res.data);
             
             // Check if user has liked this blog
@@ -86,7 +86,7 @@ const BlogDetail = () => {
         if (!user?.token || !blog) return;
 
         try {
-            const res = await axios.post(`http://localhost:5000/api/blogs/like/${blog._id}`, {}, {
+            const res = await api.post(`/blogs/like/${blog._id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${user.token}`,
                 },
@@ -112,7 +112,7 @@ const BlogDetail = () => {
 
         setCommentLoading(true);
         try {
-            const res = await axios.post(`http://localhost:5000/api/blogs/comment/${blog._id}`, 
+            const res = await api.post(`/blogs/comment/${blog._id}`, 
                 { comment: comment.trim() },
                 {
                     headers: {
@@ -142,7 +142,7 @@ const BlogDetail = () => {
         }
 
         try {
-            await axios.delete(`http://localhost:5000/api/blogs/${blog._id}`, {
+            await api.delete(`/blogs/${blog._id}`, {
                 headers: {
                     Authorization: `Bearer ${user.token}`,
                 },

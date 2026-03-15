@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs/promises');
 const path = require('path');
 const User = require('../models/User');
 const Resource = require('../models/Resource');
 const Blog = require('../models/Blog');
+const { uploadToCloudinary } = require('../services/uploadService');
 const { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, convertToOutlookEmail } = require('../utils/emailService');
 
 const ALUMNI_RECORDS_PATH = path.join(__dirname, '..', 'config', 'alumniRecords.json');
@@ -117,6 +117,29 @@ const registerUser = async (req, res) => {
         const verificationToken = generateVerificationToken();
         const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
+        // Upload alumni proof to Cloudinary if provided
+        let alumniProofDocument = '';
+        let alumniProofOriginalName = '';
+        
+        if (role === 'alumni' && alumniProofFile?.buffer) {
+            try {
+                const timestamp = Date.now();
+                const safeFilename = `alumni-proof-${timestamp}`;
+                
+                const uploadResult = await uploadToCloudinary(
+                    alumniProofFile.buffer,
+                    'alumniconnect/alumni-proofs',
+                    safeFilename,
+                    'raw'
+                );
+                alumniProofDocument = uploadResult.secure_url;
+                alumniProofOriginalName = alumniProofFile.originalname;
+            } catch (uploadError) {
+                console.error('Error uploading alumni proof:', uploadError);
+                // Continue without failing - log error but don't block registration
+            }
+        }
+
         // Create user
         const user = await User.create({
             name,
@@ -127,8 +150,8 @@ const registerUser = async (req, res) => {
             graduationYear: role === 'alumni' ? graduationYear : undefined,
             experience: role === 'alumni' ? experience : undefined,
             linkedin: role === 'alumni' ? linkedin : '',
-            alumniProofDocument: role === 'alumni' && alumniProofFile ? `/uploads/${alumniProofFile.filename}` : '',
-            alumniProofOriginalName: role === 'alumni' && alumniProofFile ? alumniProofFile.originalname : '',
+            alumniProofDocument: alumniProofDocument,
+            alumniProofOriginalName: alumniProofOriginalName,
             branch: role === 'alumni' ? (branch || '') : undefined,
             cgpa: role === 'student' ? Number(cgpa) : null,
             skills: skillsArray,

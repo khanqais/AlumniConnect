@@ -1,6 +1,6 @@
 // Blogs.tsx — Full Tailwind Version (Blogs.css removed)
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -47,7 +47,7 @@ const Blogs = () => {
     const fetchBlogs = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/blogs', {
+            const res = await api.get('/blogs', {
                 params: { category, search },
             });
             setBlogs(res.data);
@@ -61,7 +61,7 @@ const Blogs = () => {
     const fetchMyBlogs = useCallback(async () => {
         if (!user?.token || user.role !== 'alumni') return;
         try {
-            const res = await axios.get('http://localhost:5000/api/blogs/my-blogs', {
+            const res = await api.get('/blogs/my-blogs', {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             setMyBlogs(res.data);
@@ -77,7 +77,7 @@ const Blogs = () => {
 
     const handleLike = async (id: string) => {
         try {
-            await axios.post(`http://localhost:5000/api/blogs/like/${id}`, {}, {
+            await api.post(`/blogs/like/${id}`, {}, {
                 headers: { Authorization: `Bearer ${user?.token}` },
             });
             await fetchBlogs();
@@ -93,7 +93,7 @@ const Blogs = () => {
         }
 
         try {
-            await axios.delete(`http://localhost:5000/api/blogs/${id}`, {
+            await api.delete(`/blogs/${id}`, {
                 headers: { Authorization: `Bearer ${user?.token}` },
             });
             await fetchBlogs();
@@ -542,7 +542,7 @@ const CreateBlogModal = ({ onClose, onSuccess }: { onClose: () => void; onSucces
             Object.entries(formData).forEach(([key, value]) => submitData.append(key, value));
             if (coverImage) submitData.append('coverImage', coverImage);
 
-            await axios.post('http://localhost:5000/api/blogs/create', submitData, {
+            await api.post('/blogs/create', submitData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${user.token}`,

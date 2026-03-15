@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { Send, Search, ArrowLeft, MoreVertical, Paperclip, X, Trash2 } from 'lucide-react';
 
@@ -103,7 +103,7 @@ const Chat = () => {
 
     const fetchConversations = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/messages/conversations', {
+            const res = await api.get('/messages/conversations', {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
                 },
@@ -119,7 +119,7 @@ const Chat = () => {
     const fetchMyGroups = async () => {
         try {
             setLoadingGroups(true);
-            const res = await axios.get('http://localhost:5000/api/groups/my', {
+            const res = await api.get('/groups/my', {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
                 },
@@ -136,7 +136,7 @@ const Chat = () => {
     const loadConversationFromUserId = async (userId: string) => {
         try {
             // Fetch user details
-            const userRes = await axios.get(`http://localhost:5000/api/profile/${userId}`, {
+            const userRes = await api.get(`/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
                 },
@@ -150,7 +150,7 @@ const Chat = () => {
 
     const fetchMessages = async (userId: string) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/messages/conversation/${userId}`, {
+            const res = await api.get(`/messages/conversation/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
                 },
@@ -166,7 +166,7 @@ const Chat = () => {
 
     const fetchGroupMessages = async (groupId: string) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/messages/groups/${groupId}`, {
+            const res = await api.get(`/messages/groups/${groupId}`, {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
                 },
@@ -206,8 +206,8 @@ const Chat = () => {
         setSending(true);
         try {
             if (selectedGroup) {
-                const res = await axios.post(
-                    `http://localhost:5000/api/messages/groups/${selectedGroup._id}/send`,
+                const res = await api.post(
+                    `/messages/groups/${selectedGroup._id}/send`,
                     { content: trimmedMessage },
                     {
                         headers: {
@@ -224,8 +224,8 @@ const Chat = () => {
                     formData.append('media', selectedFile);
                 }
 
-                const res = await axios.post(
-                    'http://localhost:5000/api/messages/send',
+                const res = await api.post(
+                    '/messages/send',
                     formData,
                     {
                         headers: {
@@ -300,7 +300,7 @@ const Chat = () => {
 
         setDeletingMessageId(messageId);
         try {
-            await axios.delete(`http://localhost:5000/api/messages/${messageId}`, {
+            await api.delete(`/messages/${messageId}`, {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
                 },

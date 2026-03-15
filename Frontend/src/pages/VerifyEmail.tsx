@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 
 const VerifyEmail = () => {
     const { token } = useParams<{ token: string }>();
@@ -12,7 +12,7 @@ const VerifyEmail = () => {
     useEffect(() => {
         const verifyEmail = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/auth/verify-email/${token}`);
+                const response = await api.get(`/auth/verify-email/${token}`);
                 
                 setStatus('success');
                 setMessage(response.data.message);

@@ -27,10 +27,10 @@ const Dashboard = () => {
 
             try {
                 const [feedRes, profileRes] = await Promise.all([
-                    fetch('http://localhost:5000/api/feed?filter=all&page=1&limit=50', {
+                    fetch('/feed?filter=all&page=1&limit=50', {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
-                    fetch('http://localhost:5000/api/profile/me/profile', {
+                    fetch('/profile/me/profile', {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
                 ]);
@@ -104,7 +104,7 @@ const Dashboard = () => {
             const startTime = new Date(Date.now() + 10 * 60 * 1000);
             const endTime = new Date(startTime.getTime() + 30 * 60000);
 
-            const res = await fetch('http://localhost:5000/api/availability/create', {
+            const res = await fetch('/availability/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

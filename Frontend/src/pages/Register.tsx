@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Register = () => {
@@ -157,7 +157,7 @@ const Register = () => {
                 }
             }
 
-            await axios.post('http://localhost:5000/api/auth/register', dataToSend, {
+            await api.post('/auth/register', dataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

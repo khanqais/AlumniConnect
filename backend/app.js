@@ -208,8 +208,14 @@ io.on("connection", (socket) => {
 
 /* ============================
    START SERVER
-============================ */
+ ============================ */
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+
+// Vercel serverless export
+if (process.env.VERCEL === 'true') {
+    module.exports = app;
+} else {
+    server.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
+}

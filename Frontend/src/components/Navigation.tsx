@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useRef, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import {
     Home,
     Map,
@@ -45,7 +45,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     const fetchNotifications = useCallback(async () => {
         if (!user?.token) return;
         try {
-            const { data } = await axios.get('http://localhost:5000/api/notifications?limit=15', {
+            const { data } = await api.get('/notifications?limit=15', {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             setNotifications(data.data || []);
@@ -57,7 +57,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     const fetchUnreadNotifCount = useCallback(async () => {
         if (!user?.token) return;
         try {
-            const { data } = await axios.get('http://localhost:5000/api/notifications/unread-count', {
+            const { data } = await api.get('/notifications/unread-count', {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             setUnreadNotifCount(data.count || 0);
@@ -69,7 +69,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     const fetchUnreadMsgCount = useCallback(async () => {
         if (!user?.token) return;
         try {
-            const { data } = await axios.get('http://localhost:5000/api/messages/unread-count', {
+            const { data } = await api.get('/messages/unread-count', {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             setUnreadCount(data.count || 0);
@@ -81,7 +81,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     const markNotificationRead = async (id: string) => {
         if (!user?.token) return;
         try {
-            await axios.patch(`http://localhost:5000/api/notifications/${id}/read`, {}, {
+            await api.patch(`/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
@@ -94,7 +94,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     const markAllNotificationsRead = useCallback(async () => {
         if (!user?.token) return;
         try {
-            await axios.patch('http://localhost:5000/api/notifications/read-all', {}, {
+            await api.patch('/notifications/read-all', {}, {
                 headers: { Authorization: `Bearer ${user.token}` },
             });
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));

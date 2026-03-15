@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -237,7 +237,7 @@ export default function Referrals() {
     const downloadResume = async (applicationId: string, resumeUrl?: string) => {
         if (!applicationId) return;
         try {
-            const response = await axios.get(
+            const response = await api.get(
                 `${API_BASE}/api/referrals/applications/${applicationId}/resume/download`,
                 {
                     headers: authHeaders,
@@ -274,7 +274,7 @@ export default function Referrals() {
             const params = new URLSearchParams();
             params.append('limit', '30');
 
-            const { data } = await axios.get(`${API_BASE}/api/referrals?${params.toString()}`, {
+            const { data } = await api.get(`${API_BASE}/api/referrals?${params.toString()}`, {
                 headers: authHeaders,
             });
             setReferrals(data?.referrals || []);
@@ -289,7 +289,7 @@ export default function Referrals() {
     const fetchMyListings = useCallback(async () => {
         if (!user?.token || role !== 'alumni') return;
         try {
-            const { data } = await axios.get(`${API_BASE}/api/referrals/my-listings`, {
+            const { data } = await api.get(`${API_BASE}/api/referrals/my-listings`, {
                 headers: authHeaders,
             });
             setMyListings(data?.referrals || []);
@@ -302,7 +302,7 @@ export default function Referrals() {
     const fetchMyApplications = useCallback(async () => {
         if (!user?.token || role !== 'student') return;
         try {
-            const { data } = await axios.get(`${API_BASE}/api/referrals/my-applications`, {
+            const { data } = await api.get(`${API_BASE}/api/referrals/my-applications`, {
                 headers: authHeaders,
             });
             setMyApplications(data?.applications || []);
@@ -347,7 +347,7 @@ export default function Referrals() {
 
         try {
             setLoadingDetail(true);
-            const { data } = await axios.get(`${API_BASE}/api/referrals/${referral._id}`, {
+            const { data } = await api.get(`${API_BASE}/api/referrals/${referral._id}`, {
                 headers: authHeaders,
             });
             setExistingApplication(data?.existingApplication || null);
@@ -364,7 +364,7 @@ export default function Referrals() {
 
         try {
             setCreateSubmitting(true);
-            await axios.post(
+            await api.post(
                 `${API_BASE}/api/referrals`,
                 {
                     company: createForm.company,
@@ -422,7 +422,7 @@ export default function Referrals() {
             formData.append('skillSelfRatings', JSON.stringify(skillRatings));
             formData.append('cgpaConfirmed', String(cgpaConfirmed));
 
-            const { data } = await axios.post(
+            const { data } = await api.post(
                 `${API_BASE}/api/referrals/${selectedReferral._id}/apply`,
                 formData,
                 {
@@ -448,7 +448,7 @@ export default function Referrals() {
         try {
             setSelectedListing(listing);
             setLoadingApplications(true);
-            const { data } = await axios.get(`${API_BASE}/api/referrals/${listing._id}/applications?sortBy=totalScore&limit=10&page=1`, {
+            const { data } = await api.get(`${API_BASE}/api/referrals/${listing._id}/applications?sortBy=totalScore&limit=10&page=1`, {
                 headers: authHeaders,
             });
             const sorted = [...(data?.applications || [])].sort(
@@ -466,7 +466,7 @@ export default function Referrals() {
     const handleUpdateApplicationStatus = async (appId: string, status: AppStatus) => {
         if (!user?.token || role !== 'alumni') return;
         try {
-            await axios.put(
+            await api.put(
                 `${API_BASE}/api/referrals/applications/${appId}/status`,
                 { status },
                 { headers: authHeaders }
@@ -484,7 +484,7 @@ export default function Referrals() {
         if (!window.confirm('Delete/close this referral listing?')) return;
 
         try {
-            const { data } = await axios.delete(`${API_BASE}/api/referrals/${listingId}`, { headers: authHeaders });
+            const { data } = await api.delete(`${API_BASE}/api/referrals/${listingId}`, { headers: authHeaders });
 
             if (data?.action === 'deleted') {
                 setMyListings((prev) => prev.filter((listing) => listing._id !== listingId));
@@ -521,7 +521,7 @@ export default function Referrals() {
     const handleListingStatusUpdate = async (listing: Referral, status: ReferralStatus) => {
         if (!user?.token || role !== 'alumni') return;
         try {
-            await axios.put(
+            await api.put(
                 `${API_BASE}/api/referrals/${listing._id}`,
                 { status },
                 { headers: authHeaders }

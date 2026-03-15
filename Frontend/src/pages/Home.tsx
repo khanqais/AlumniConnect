@@ -141,7 +141,7 @@ const Home = () => {
 
 
         {/* HERO SECTION */}
-        <section className="relative z-10 pt-40 pb-20 px-4 min-h-[90vh] flex flex-col justify-center">
+        <section className="relative z-10 pt-20 pb-20 px-4 min-h-[90vh] flex flex-col justify-center">
           <div className="max-w-5xl mx-auto w-full grid lg:grid-cols-[1.2fr_1fr] gap-12 items-center">
             
             <motion.div

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 
@@ -77,10 +77,10 @@ const Profile = () => {
     const fetchProfile = async () => {
         try {
             const endpoint = userId 
-                ? `http://localhost:5000/api/profile/${userId}`
-                : 'http://localhost:5000/api/profile/me/profile';
+                ? `/profile/${userId}`
+                : '/profile/me/profile';
                 
-            const response = await axios.get(endpoint, {
+            const response = await api.get(endpoint, {
                 headers: currentUser?.token ? {
                     Authorization: `Bearer ${currentUser.token}`
                 } : {}
@@ -187,8 +187,8 @@ const Profile = () => {
 
     const handleSave = async () => {
         try {
-            const response = await axios.put(
-                'http://localhost:5000/api/profile/me/profile',
+            const response = await api.put(
+                '/profile/me/profile',
                 formData,
                 {
                     headers: {
@@ -219,8 +219,8 @@ const Profile = () => {
         formData.append('avatar', e.target.files[0]);
 
         try {
-            const response = await axios.post(
-                'http://localhost:5000/api/profile/me/avatar',
+            const response = await api.post(
+                '/profile/me/avatar',
                 formData,
                 {
                     headers: {
@@ -251,8 +251,8 @@ const Profile = () => {
         formData.append('banner', e.target.files[0]);
 
         try {
-            const response = await axios.post(
-                'http://localhost:5000/api/profile/me/banner',
+            const response = await api.post(
+                '/profile/me/banner',
                 formData,
                 {
                     headers: {

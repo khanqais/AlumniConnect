@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../config/api';
 import FeedCard, { type FeedItem } from './FeedCard';
 
 type FilterType = 'all' | 'resource' | 'blog' | 'question' | 'event' | 'announcement';
@@ -29,8 +30,8 @@ const ActivityFeed = () => {
             else setLoadingMore(true);
 
             const token = user?.token ?? localStorage.getItem('token');
-            const res = await fetch(
-                `http://localhost:5000/api/feed?filter=${selectedFilter}&page=${pageNum}&limit=10`,
+            const res = await api.get(
+                `/feed?filter=${selectedFilter}&page=${pageNum}&limit=10`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -38,13 +39,10 @@ const ActivityFeed = () => {
                 }
             );
 
-            if (!res.ok) throw new Error('Failed to fetch feed');
-
-            const json = await res.json();
-            const data: FeedItem[] = json.data ?? [];
+            const data: FeedItem[] = res.data?.data ?? [];
 
             setItems(prev => replace ? data : [...prev, ...data]);
-            setHasMore(json.pagination?.hasMore ?? false);
+            setHasMore(res.data?.pagination?.hasMore ?? false);
         } catch (err: unknown) {
             const error = err as { message?: string };
             setError(error.message ?? 'Failed to load feed');

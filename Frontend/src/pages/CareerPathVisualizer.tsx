@@ -1,6 +1,6 @@
 // CareerPathVisualizer.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import { Map, RefreshCw, ExternalLink, Award, MessageCircle, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -61,8 +61,8 @@ const CareerPathVisualizer: React.FC = () => {
         setSavingTargetSkills(true);
         try {
             const newSkills = targetSkillsInput.split(',').map(s => s.trim()).filter(s => s);
-            await axios.put(
-                'http://localhost:5000/api/profile/me/profile',
+            await api.put(
+                '/profile/me/profile',
                 { target_skills: newSkills },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -84,7 +84,7 @@ const CareerPathVisualizer: React.FC = () => {
     // Sync latest skills/target_skills from DB into auth context on mount
     useEffect(() => {
         if (!user?.token) return;
-        axios.get('http://localhost:5000/api/profile/me/profile', {
+        api.get('/profile/me/profile', {
             headers: { Authorization: `Bearer ${user.token}` }
         }).then(res => {
             const u = res.data.user;
@@ -105,9 +105,9 @@ const CareerPathVisualizer: React.FC = () => {
             // Use target-skills endpoint when target skills are set, otherwise fall back to career-path
             const hasTargetSkills = (user?.target_skills ?? []).length > 0;
             const endpoint = hasTargetSkills
-                ? `http://localhost:5000/api/recommend/target-skills/${user._id}`
-                : `http://localhost:5000/api/recommend/career-path/${user._id}`;
-            const res = await axios.get(
+                ? `/recommend/target-skills/${user._id}`
+                : `/recommend/career-path/${user._id}`;
+            const res = await api.get(
                 endpoint,
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );
@@ -136,7 +136,7 @@ const CareerPathVisualizer: React.FC = () => {
         setLoadingAllAlumni(true);
         setAllAlumniError(null);
         try {
-            const res = await axios.get('http://localhost:5000/api/auth/alumni', {
+            const res = await api.get('/auth/alumni', {
                 headers: user?.token ? { Authorization: `Bearer ${user.token}` } : undefined,
             });
             setAllAlumni(Array.isArray(res.data) ? res.data : []);
@@ -201,8 +201,8 @@ const CareerPathVisualizer: React.FC = () => {
         setGroupActionMessage(null);
 
         try {
-            const { data } = await axios.post(
-                'http://localhost:5000/api/groups',
+            const { data } = await api.post(
+                '/groups',
                 {
                     name: normalizedName,
                     description: groupDescription.trim(),
@@ -235,8 +235,8 @@ const CareerPathVisualizer: React.FC = () => {
         setSendingInvites(true);
         setGroupActionMessage(null);
         try {
-            const { data } = await axios.post(
-                `http://localhost:5000/api/groups/${currentGroupId}/invites`,
+            const { data } = await api.post(
+                `/groups/${currentGroupId}/invites`,
                 {
                     recipientIds: selectedInviteeIds,
                     message: `Please join my alumni batch group: ${groupName.trim()}`,

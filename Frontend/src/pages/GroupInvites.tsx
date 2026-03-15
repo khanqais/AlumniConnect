@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../context/AuthContext';
 
@@ -42,10 +42,10 @@ const GroupInvites: React.FC = () => {
 
         try {
             const [inviteRes, groupRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/groups/invites', {
+                api.get('/groups/invites', {
                     headers: { Authorization: `Bearer ${user.token}` },
                 }),
-                axios.get('http://localhost:5000/api/groups/my', {
+                api.get('/groups/my', {
                     headers: { Authorization: `Bearer ${user.token}` },
                 }),
             ]);
@@ -69,8 +69,8 @@ const GroupInvites: React.FC = () => {
 
         setBusyInviteId(inviteId);
         try {
-            await axios.patch(
-                `http://localhost:5000/api/groups/invites/${inviteId}/respond`,
+            await api.patch(
+                `/groups/invites/${inviteId}/respond`,
                 { action },
                 { headers: { Authorization: `Bearer ${user.token}` } }
             );

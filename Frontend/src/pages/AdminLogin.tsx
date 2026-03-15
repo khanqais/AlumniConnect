@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,7 +27,7 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            const res = await axios.post('http://localhost:5000/api/admin/login', formData);
+            const res = await api.post('/admin/login', formData);
             
             console.log('✅ Admin Login Response:', res.data);
             

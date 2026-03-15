@@ -24,7 +24,7 @@ const { startTime } = location.state || {};
   const markJoin = async () => {
     try {
       await fetch(
-        `http://localhost:5000/api/webinars/attendance/join/${roomId}`,
+        `/webinars/attendance/join/${roomId}`,
         {
           method: "POST",
           headers: {
@@ -267,7 +267,7 @@ const { startTime } = location.state || {};
 //     if (!roomId) return;
 
 //     fetch(
-//       `http://localhost:5000/api/webinars/attendance/leave/${roomId}`,
+//       `/webinars/attendance/leave/${roomId}`,
 //       {
 //         method: "POST",
 //         headers: {

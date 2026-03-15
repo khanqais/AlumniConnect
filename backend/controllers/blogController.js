@@ -1,6 +1,6 @@
 const Blog = require('../models/Blog');
 const cloudinary = require('../config/cloudinary');
-const fs = require('fs/promises');
+const { uploadToCloudinary } = require('../services/uploadService');
 const { notifyAllUsers } = require('../utils/notifications');
 
 // Create blog post
@@ -18,18 +18,18 @@ const createBlog = async (req, res) => {
         const isPublished = true;
 
         let coverImageUrl = null;
-        if (req.file?.path) {
-            const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'alumniconnect/blog-covers',
-                resource_type: 'image',
-            });
+        if (req.file?.buffer) {
+            // Generate a safe filename
+            const timestamp = Date.now();
+            const safeFilename = `blog-cover-${timestamp}`;
+            
+            const uploadResult = await uploadToCloudinary(
+                req.file.buffer,
+                'alumniconnect/blog-covers',
+                safeFilename,
+                'image'
+            );
             coverImageUrl = uploadResult.secure_url;
-
-            try {
-                await fs.unlink(req.file.path);
-            } catch (error) {
-                console.error('Error removing local cover image:', error);
-            }
         }
 
         const blog = await Blog.create({

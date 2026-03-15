@@ -117,7 +117,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     const response = await fetch(
-      "http://localhost:5000/api/webinars/schedule",
+      "/webinars/schedule",
       {
         method: "POST",
         headers: {
