@@ -10,6 +10,7 @@ const {
     addComment,
     deleteComment,
     getMyResources,
+    deleteResource,
 } = require('../controllers/resourceController');
 const { checkATS, atsUpload } = require('../controllers/atsController');
 const { protect } = require('../middleware/authMiddleware');
@@ -24,6 +25,7 @@ router.post('/like/:id', protect, likeResource);
 router.post('/dislike/:id', protect, dislikeResource);
 router.post('/comment/:id', protect, addComment);
 router.delete('/comment/:id/:commentId', protect, deleteComment);
+router.delete('/:id', protect, deleteResource);
 
 // ATS Resume Checker — no auth required (public tool)
 router.post('/ats-check', atsUpload.single('resume'), checkATS);

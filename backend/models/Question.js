@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const questionSchema = mongoose.Schema(
     {
+        type: {
+            type: String,
+            enum: ['question', 'poll'],
+            default: 'question',
+        },
         title: {
             type: String,
             required: true,
@@ -10,6 +15,19 @@ const questionSchema = mongoose.Schema(
             type: String,
             required: true,
         },
+        pollOptions: [
+            {
+                optionText: {
+                    type: String,
+                },
+                votes: [
+                    {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'User',
+                    },
+                ],
+            },
+        ],
         askedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

@@ -1,6 +1,38 @@
+import os
+import json
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
+from openai import OpenAI
 
 app = Flask(__name__)
+CORS(app)
+
+load_dotenv()
+
+client = OpenAI(
+    api_key=os.environ.get("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
+)
+
+
+def ask_ai(prompt: str) -> str:
+    response = client.responses.create(
+        model="openai/gpt-oss-20b",
+        input=prompt,
+    )
+
+    text = response.output_text.strip()
+
+    if text.startswith("```"):
+        text = text.split("```")[1]
+
+    text = text.replace("json", "").strip()
+
+    start = text.find("{")
+    end = text.rfind("}") + 1
+
+    return text[start:end]
 
 
 # --------------------------------------------------
@@ -29,6 +61,7 @@ def career_path():
             {
                 "alumniId": str(alum.get("_id", "")),
                 "name": alum.get("name"),
+                "avatar": alum.get("avatar", ""),
                 "experience": alum.get("experience", ""),
                 "jobTitle": alum.get("jobTitle", ""),
                 "company": alum.get("company", ""),
@@ -76,6 +109,7 @@ def target_skills():
             {
                 "alumniId": str(alum.get("_id", "")),
                 "name": alum.get("name"),
+                "avatar": alum.get("avatar", ""),
                 "experience": alum.get("experience", ""),
                 "jobTitle": alum.get("jobTitle", ""),
                 "company": alum.get("company", ""),
@@ -92,6 +126,91 @@ def target_skills():
     return jsonify(
         sorted(filtered, key=lambda x: x["skillMatchPercentage"], reverse=True)
     )
+
+
+# --------------------------------------------------
+# 3️⃣ QUIZ LEVELS GENERATION
+# --------------------------------------------------
+@app.route("/get-levels", methods=["POST"])
+def get_levels():
+    data = request.get_json() or {}
+    topic = data.get("topic", "")
+
+    if not topic:
+        return jsonify({"message": "Topic is required"}), 400
+
+    prompt = f'''
+Generate difficulty levels and subtopics for the topic "{topic}".
+
+Return ONLY JSON in this format:
+
+{{
+ "topic":"{topic}",
+ "levels":[
+  {{"difficulty":"easy","subtopics":[]}},
+  {{"difficulty":"medium","subtopics":[]}},
+  {{"difficulty":"hard","subtopics":[]}},
+  {{"difficulty":"hardest","subtopics":[]}}
+ ]
+}}
+'''
+
+    try:
+        result = ask_ai(prompt)
+        parsed = json.loads(result)
+        return jsonify(parsed)
+    except Exception as error:
+        return jsonify({"message": f"Failed to generate levels: {str(error)}"}), 500
+
+
+# --------------------------------------------------
+# 4️⃣ QUIZ GENERATION
+# --------------------------------------------------
+@app.route("/generate-quiz", methods=["POST"])
+def generate_quiz():
+    data = request.get_json() or {}
+
+    topic = data.get("topic", "")
+    difficulty = data.get("difficulty", "easy")
+    num_questions = int(data.get("num_questions", 5))
+    time_limit = int(data.get("time_limit", 10))
+
+    if not topic:
+        return jsonify({"message": "Topic is required"}), 400
+
+    prompt = f'''
+Generate {num_questions} multiple choice questions.
+
+Topic: {topic}
+Difficulty: {difficulty}
+
+Return JSON:
+
+{{
+ "topic":"{topic}",
+ "difficulty":"{difficulty}",
+ "time_limit":{time_limit},
+ "questions":[
+  {{
+   "question":"",
+   "options":["","","",""],
+   "correct_answer":""
+  }}
+ ]
+}}
+
+Rules:
+- Exactly {num_questions} questions
+- Each question must have 4 options
+- correct_answer must match one option exactly
+'''
+
+    try:
+        result = ask_ai(prompt)
+        parsed = json.loads(result)
+        return jsonify(parsed)
+    except Exception as error:
+        return jsonify({"message": f"Failed to generate quiz: {str(error)}"}), 500
 
 
 # --------------------------------------------------

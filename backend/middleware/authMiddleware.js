@@ -45,4 +45,12 @@ const alumniOnly = (req, res, next) => {
     }
 };
 
-module.exports = { protect, admin, alumniOnly };
+const studentOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'student') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Only students can perform this action' });
+    }
+};
+
+module.exports = { protect, admin, alumniOnly, studentOnly };

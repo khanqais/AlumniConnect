@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Resource = require('../models/Resource');
 const Blog = require('../models/Blog');
+const Announcement = require('../models/Announcement');
+const Notification = require('../models/Notification');
 
 // @desc Admin login (check against .env)
 // @route POST /api/admin/login
@@ -442,6 +444,267 @@ const searchAlumni = async (req, res) => {
     }
 };
 
+// @desc Update student CGPA (admin-verified)
+// @route PUT /api/admin/user/:id/cgpa
+// @access Private/Admin
+const updateStudentCGPA = async (req, res) => {
+    try {
+        const { cgpa } = req.body;
+
+        if (cgpa === undefined || cgpa === null) {
+            return res.status(400).json({ message: 'CGPA value is required' });
+        }
+
+        const cgpaNum = parseFloat(cgpa);
+        if (isNaN(cgpaNum) || cgpaNum < 0 || cgpaNum > 10) {
+            return res.status(400).json({ message: 'CGPA must be between 0 and 10' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.role === 'admin') {
+            return res.status(403).json({ message: 'Cannot modify admin accounts' });
+        }
+
+        user.cgpa = cgpaNum;
+        await user.save();
+
+        res.json({
+            success: true,
+            message: `CGPA updated to ${cgpaNum} for ${user.name}`,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                cgpa: user.cgpa,
+            },
+        });
+    } catch (error) {
+        console.error('Update CGPA error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Ban or unban a user
+// @route PUT /api/admin/user/:id/ban
+// @access Private/Admin
+const toggleUserBan = async (req, res) => {
+    try {
+        const { ban, reason } = req.body;
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.role === 'admin') {
+            return res.status(403).json({ message: 'Cannot ban admin accounts' });
+        }
+
+        user.isBanned = !!ban;
+        user.banReason = ban ? (reason || 'Violation of platform policies') : '';
+        await user.save();
+
+        res.json({
+            success: true,
+            message: ban
+                ? `${user.name} has been banned: ${user.banReason}`
+                : `${user.name} has been unbanned`,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                isBanned: user.isBanned,
+                banReason: user.banReason,
+            },
+        });
+    } catch (error) {
+        console.error('Toggle ban error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Get referral system stats
+// @route GET /api/admin/referral-stats
+// @access Private/Admin
+const getReferralStats = async (req, res) => {
+    try {
+        const Referral = require('../models/Referral');
+        const ReferralApplication = require('../models/ReferralApplication');
+
+        const totalReferrals = await Referral.countDocuments();
+        const openReferrals = await Referral.countDocuments({ status: 'open' });
+        const totalApplications = await ReferralApplication.countDocuments();
+        const referredCount = await ReferralApplication.countDocuments({ status: 'referred' });
+        const flaggedApplications = await ReferralApplication.countDocuments({
+            'fraudFlags.0': { $exists: true },
+        });
+
+        res.json({
+            success: true,
+            stats: {
+                totalReferrals,
+                openReferrals,
+                totalApplications,
+                referredCount,
+                flaggedApplications,
+            },
+        });
+    } catch (error) {
+        console.error('Referral stats error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Create college announcement
+// @route POST /api/admin/announcements
+// @access Private/Admin
+const createAnnouncement = async (req, res) => {
+    try {
+        const { title, content, category } = req.body;
+        const adminEmail = req.headers['admin-email'];
+        const adminId = req.headers['admin-id'];
+
+        if (!title || !content || !category) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Create announcement without postedBy reference for now
+        const announcement = new Announcement({
+            title,
+            content,
+            category,
+            postedBy: null, // Will be fixed if needed with a system admin user
+            adminName: 'Admin',
+            adminEmail: adminEmail || 'admin@college.edu',
+        });
+
+        await announcement.save();
+
+        // Create notifications for all approved users
+        try {
+            const allUsers = await User.find({ isApproved: true });
+            const notifications = allUsers.map(user => ({
+                recipient: user._id,
+                sender: null,
+                type: 'announcement',
+                title: `New ${category} Announcement`,
+                message: `New ${category} announcement: ${title}`,
+                link: '/dashboard',
+                relatedId: announcement._id,
+                read: false,
+            }));
+
+            if (notifications.length > 0) {
+                await Notification.insertMany(notifications);
+            }
+        } catch (notifError) {
+            // Log notification error but don't fail the announcement creation
+            console.warn('Error creating notifications:', notifError);
+        }
+
+        res.json({
+            success: true,
+            message: 'Announcement created successfully',
+            announcement,
+        });
+    } catch (error) {
+        console.error('Create announcement error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc Get all announcements
+// @route GET /api/admin/announcements
+// @access Private
+const getAnnouncements = async (req, res) => {
+    try {
+        const announcements = await Announcement.find()
+            .populate('postedBy', 'name email')
+            .sort({ createdAt: -1 });
+
+        res.json(announcements);
+    } catch (error) {
+        console.error('Get announcements error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Get announcements by category
+// @route GET /api/admin/announcements/:category
+// @access Private
+const getAnnouncementsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+        const announcements = await Announcement.find({ category, isPublished: true })
+            .populate('postedBy', 'name email')
+            .sort({ createdAt: -1 });
+
+        res.json(announcements);
+    } catch (error) {
+        console.error('Get announcements by category error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Delete announcement
+// @route DELETE /api/admin/announcements/:id
+// @access Private/Admin
+const deleteAnnouncement = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const announcement = await Announcement.findByIdAndDelete(id);
+
+        if (!announcement) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+
+        // Delete related notifications
+        await Notification.deleteMany({ announcement: id });
+
+        res.json({
+            success: true,
+            message: 'Announcement deleted successfully',
+        });
+    } catch (error) {
+        console.error('Delete announcement error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc Update announcement
+// @route PUT /api/admin/announcements/:id
+// @access Private/Admin
+const updateAnnouncement = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, content, category, isPublished } = req.body;
+
+        const announcement = await Announcement.findByIdAndUpdate(
+            id,
+            { title, content, category, isPublished, updatedAt: Date.now() },
+            { new: true }
+        );
+
+        if (!announcement) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+
+        res.json({
+            success: true,
+            message: 'Announcement updated successfully',
+            announcement,
+        });
+    } catch (error) {
+        console.error('Update announcement error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     adminLogin,
     getPendingUsers,
@@ -458,4 +721,12 @@ module.exports = {
     updateBlogStatus,
     deleteBlogAdmin,
     searchAlumni,
+    updateStudentCGPA,
+    toggleUserBan,
+    getReferralStats,
+    createAnnouncement,
+    getAnnouncements,
+    getAnnouncementsByCategory,
+    deleteAnnouncement,
+    updateAnnouncement,
 };

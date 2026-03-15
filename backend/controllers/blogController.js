@@ -1,4 +1,7 @@
 const Blog = require('../models/Blog');
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs/promises');
+const { notifyAllUsers } = require('../utils/notifications');
 
 // Create blog post
 const createBlog = async (req, res) => {
@@ -14,6 +17,21 @@ const createBlog = async (req, res) => {
         // Auto-publish all blogs (no admin approval needed)
         const isPublished = true;
 
+        let coverImageUrl = null;
+        if (req.file?.path) {
+            const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'alumniconnect/blog-covers',
+                resource_type: 'image',
+            });
+            coverImageUrl = uploadResult.secure_url;
+
+            try {
+                await fs.unlink(req.file.path);
+            } catch (error) {
+                console.error('Error removing local cover image:', error);
+            }
+        }
+
         const blog = await Blog.create({
             title,
             content,
@@ -22,10 +40,21 @@ const createBlog = async (req, res) => {
             tags: tagsArray,
             author: req.user._id,
             authorName: req.user.name,
-            coverImage: req.file ? req.file.path : null,
+            coverImage: coverImageUrl,
             readTime,
             isPublished,
         });
+
+        // Notify all users about the new blog (fire-and-forget)
+        notifyAllUsers({
+            sender: req.user._id,
+            type: 'blog',
+            title: 'New Blog Published',
+            message: `${req.user.name} published "${title}"`,
+            link: '/blogs',
+            relatedId: blog._id,
+            excludeUserId: req.user._id,
+        }).catch(() => {});
 
         res.status(201).json({
             success: true,
@@ -71,7 +100,7 @@ const getBlogById = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id)
             .populate('author', 'name email role collegeName graduationYear avatar bio company jobTitle linkedin github twitter website')
-            .populate('comments.user', 'name role');
+            .populate('comments.user', 'name role avatar');
 
         if (!blog) {
             return res.status(404).json({ message: 'Blog not found' });
@@ -164,6 +193,41 @@ const getMyBlogs = async (req, res) => {
     }
 };
 
+// Delete blog
+const deleteBlog = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog not found' });
+        }
+
+        // Check if user owns the blog or is admin
+        if (blog.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to delete this blog' });
+        }
+
+        // Delete cover image from Cloudinary if it exists
+        if (blog.coverImage) {
+            try {
+                const publicId = blog.coverImage.match(/\/([^/]+)\.\w+$/)?.[1];
+                if (publicId) {
+                    await cloudinary.uploader.destroy(`alumniconnect/blog-covers/${publicId}`);
+                }
+            } catch (error) {
+                console.error('Error deleting cover image from Cloudinary:', error);
+            }
+        }
+
+        await Blog.findByIdAndDelete(req.params.id);
+
+        res.json({ success: true, message: 'Blog deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     createBlog,
     getBlogs,
@@ -171,4 +235,5 @@ module.exports = {
     likeBlog,
     addComment,
     getMyBlogs,
+    deleteBlog,
 };

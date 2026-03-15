@@ -1,9 +1,31 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs/promises');
+const path = require('path');
 const User = require('../models/User');
 const Resource = require('../models/Resource');
 const Blog = require('../models/Blog');
 const { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, convertToOutlookEmail } = require('../utils/emailService');
+
+const ALUMNI_RECORDS_PATH = path.join(__dirname, '..', 'config', 'alumniRecords.json');
+
+const getAllowedAlumniEmails = async () => {
+    try {
+        const recordsRaw = await fs.readFile(ALUMNI_RECORDS_PATH, 'utf-8');
+        const recordsJson = JSON.parse(recordsRaw);
+
+        if (!Array.isArray(recordsJson.allowedAlumniEmails)) {
+            return [];
+        }
+
+        return recordsJson.allowedAlumniEmails
+            .filter((recordEmail) => typeof recordEmail === 'string')
+            .map((recordEmail) => recordEmail.trim().toLowerCase());
+    } catch (error) {
+        console.error('Failed to load alumni records:', error.message);
+        return [];
+    }
+};
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -17,23 +39,41 @@ const generateToken = (id) => {
 // @access Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, role, collegeName, graduationYear, skills, experience, branch } = req.body;
+        const { name, email, password, role, collegeName, graduationYear, skills, experience, branch, cgpa, linkedin } = req.body;
+        const alumniProofFile = req.file;
+        const normalizedEmail = String(email || '').trim().toLowerCase();
 
         // Validation
         if (!name || !email || !password || !collegeName) {
             return res.status(400).json({ message: 'Please fill all required fields' });
         }
 
-        // Email domain validation - only allow institute email
-        const emailDomain = email.split('@')[1];
-        if (!emailDomain || emailDomain !== 'tsecedu.org') {
-            return res.status(400).json({ 
-                message: 'Please use your institute email (e.g., yourname@tsecedu.org)' 
-            });
+        const emailDomain = normalizedEmail.split('@')[1];
+
+        // Role-based email validation
+        if (role === 'alumni') {
+            if (!emailDomain || emailDomain !== 'gmail.com') {
+                return res.status(400).json({
+                    message: 'Alumni must register using a Gmail address (e.g., yourname@gmail.com)'
+                });
+            }
+
+            const allowedAlumniEmails = await getAllowedAlumniEmails();
+            if (!allowedAlumniEmails.includes(normalizedEmail)) {
+                return res.status(400).json({
+                    message: 'This alumni email is not in the official alumni record.'
+                });
+            }
+        } else {
+            if (!emailDomain || emailDomain !== 'tsecedu.org') {
+                return res.status(400).json({
+                    message: 'Please use your institute email (e.g., yourname@tsecedu.org)'
+                });
+            }
         }
 
         // Check if user exists
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: normalizedEmail });
 
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
@@ -41,10 +81,28 @@ const registerUser = async (req, res) => {
 
         // Alumni-specific validation
         if (role === 'alumni') {
-            if (!graduationYear || !experience) {
+            if (!graduationYear || !experience || !linkedin) {
                 return res.status(400).json({ 
-                    message: 'Alumni must provide graduation year and experience' 
+                    message: 'Alumni must provide graduation year, experience, and LinkedIn profile' 
                 });
+            }
+
+            if (!alumniProofFile) {
+                return res.status(400).json({
+                    message: 'Alumni must upload marksheet or graduation certificate'
+                });
+            }
+        }
+
+        // Student-specific validation
+        if (role === 'student') {
+            if (cgpa === undefined || cgpa === null || cgpa === '') {
+                return res.status(400).json({ message: 'CGPA is required for student registration' });
+            }
+
+            const cgpaNumber = Number(cgpa);
+            if (Number.isNaN(cgpaNumber) || cgpaNumber < 0 || cgpaNumber > 10) {
+                return res.status(400).json({ message: 'CGPA must be between 0 and 10' });
             }
         }
 
@@ -62,13 +120,17 @@ const registerUser = async (req, res) => {
         // Create user
         const user = await User.create({
             name,
-            email,
+            email: normalizedEmail,
             password: hashedPassword,
             role,
             collegeName,
             graduationYear: role === 'alumni' ? graduationYear : undefined,
             experience: role === 'alumni' ? experience : undefined,
+            linkedin: role === 'alumni' ? linkedin : '',
+            alumniProofDocument: role === 'alumni' && alumniProofFile ? `/uploads/${alumniProofFile.filename}` : '',
+            alumniProofOriginalName: role === 'alumni' && alumniProofFile ? alumniProofFile.originalname : '',
             branch: role === 'alumni' ? (branch || '') : undefined,
+            cgpa: role === 'student' ? Number(cgpa) : null,
             skills: skillsArray,
             isApproved: false,
             isEmailVerified: false,
@@ -149,6 +211,7 @@ const loginUser = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                avatar: user.avatar,
                 isApproved: user.isApproved,
                 skills: user.skills,
                 target_skills: user.target_skills,
@@ -265,7 +328,7 @@ const getAllAlumni = async (req, res) => {
             role: 'alumni',
             isApproved: true,
             isEmailVerified: true
-        }).select('name email company jobTitle graduationYear skills')
+                }).select('name email company jobTitle graduationYear skills avatar experience')
           .sort({ name: 1 });
 
         res.json(alumni);

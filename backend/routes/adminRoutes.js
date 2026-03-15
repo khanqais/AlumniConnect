@@ -16,6 +16,14 @@ const {
     updateBlogStatus,
     deleteBlogAdmin,
     searchAlumni,
+    updateStudentCGPA,
+    toggleUserBan,
+    getReferralStats,
+    createAnnouncement,
+    getAnnouncements,
+    getAnnouncementsByCategory,
+    deleteAnnouncement,
+    updateAnnouncement,
 } = require('../controllers/adminController');
 
 // Admin login route (no authentication needed)
@@ -39,5 +47,19 @@ router.put('/blogs/status/:id', updateBlogStatus);
 router.delete('/blogs/:id', deleteBlogAdmin);
 
 router.get('/alumni/search', searchAlumni);
+
+// CGPA & Ban management
+router.put('/user/:id/cgpa', updateStudentCGPA);
+router.put('/user/:id/ban', toggleUserBan);
+
+// Referral stats
+router.get('/referral-stats', getReferralStats);
+
+// College Announcements
+router.post('/announcements', createAnnouncement);
+router.get('/announcements', getAnnouncements);
+router.get('/announcements/:category', getAnnouncementsByCategory);
+router.put('/announcements/:id', updateAnnouncement);
+router.delete('/announcements/:id', deleteAnnouncement);
 
 module.exports = router;

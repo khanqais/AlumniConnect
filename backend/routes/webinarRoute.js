@@ -336,6 +336,11 @@ router.post("/register/:id", protect, async (req, res) => {
       return res.status(404).json({ error: "Webinar not found" });
     }
 
+    // Only students can register for webinars
+    if (req.user.role !== 'student') {
+      return res.status(403).json({ error: "Only students can register for webinars" });
+    }
+
     if (webinar.registeredUsers.includes(req.user._id)) {
       return res.status(400).json({ error: "Already registered" });
     }

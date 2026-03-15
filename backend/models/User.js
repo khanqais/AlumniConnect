@@ -36,6 +36,14 @@ const userSchema = mongoose.Schema(
                 return this.role === 'alumni';
             }
         },
+        alumniProofDocument: {
+            type: String,
+            default: '',
+        },
+        alumniProofOriginalName: {
+            type: String,
+            default: '',
+        },
         skills: {
             type: [String],
             default: [],
@@ -53,6 +61,18 @@ const userSchema = mongoose.Schema(
             maxlength: 500,
         },
         avatar: {
+            type: String,
+            default: '',
+        },
+        avatarPublicId: {
+            type: String,
+            default: '',
+        },
+        banner: {
+            type: String,
+            default: '',
+        },
+        bannerPublicId: {
             type: String,
             default: '',
         },
@@ -80,7 +100,59 @@ const userSchema = mongoose.Schema(
             type: String,
             default: '',
         },
+        cgpa: {
+            type: Number,
+            min: 0,
+            max: 10,
+            default: null,
+            required: function() {
+                return this.role === 'student';
+            }
+        },
         jobTitle: {
+            type: String,
+            default: '',
+        },
+        workExperience: {
+            type: [
+                {
+                    id: {
+                        type: String,
+                        default: '',
+                    },
+                    company: {
+                        type: String,
+                        default: '',
+                    },
+                    jobTitle: {
+                        type: String,
+                        default: '',
+                    },
+                    startDate: {
+                        type: String,
+                        default: '',
+                    },
+                    endDate: {
+                        type: String,
+                        default: '',
+                    },
+                    currentlyWorking: {
+                        type: Boolean,
+                        default: false,
+                    },
+                    description: {
+                        type: String,
+                        default: '',
+                    },
+                },
+            ],
+            default: [],
+        },
+        isBanned: {
+            type: Boolean,
+            default: false,
+        },
+        banReason: {
             type: String,
             default: '',
         },

@@ -8,10 +8,10 @@ exports.getCareerPathRecommendations = async (req, res) => {
     try {
         const studentId = req.params.id;
 
-        // Get student
+        // Get user (students and alumni can both use career path)
         const student = await User.findById(studentId).lean();
-        if (!student || student.role !== 'student') {
-            return res.status(400).json({ message: 'Invalid student ID' });
+        if (!student || student.role === 'admin') {
+            return res.status(400).json({ message: 'Invalid user ID' });
         }
 
         // Get all alumni (approved or not — approval governs platform access, not matching)
@@ -49,10 +49,10 @@ exports.getTargetSkillRecommendations = async (req, res) => {
     try {
         const studentId = req.params.id;
 
-        // Get student
+        // Get user (students and alumni can both use target skills)
         const student = await User.findById(studentId).lean();
-        if (!student || student.role !== 'student') {
-            return res.status(400).json({ message: 'Invalid student ID' });
+        if (!student || student.role === 'admin') {
+            return res.status(400).json({ message: 'Invalid user ID' });
         }
 
         // Get all alumni

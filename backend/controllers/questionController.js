@@ -7,6 +7,7 @@ const askQuestion = async (req, res) => {
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
 
         const question = await Question.create({
+            type: 'question',
             title,
             description,
             category,
@@ -19,6 +20,48 @@ const askQuestion = async (req, res) => {
             success: true,
             message: 'Question posted successfully!',
             question,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Create a poll
+const createPoll = async (req, res) => {
+    try {
+        const { title, options, category, tags } = req.body;
+
+        if (!Array.isArray(options) || options.length < 2) {
+            return res.status(400).json({ message: 'Poll must have at least two options' });
+        }
+
+        const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
+        const pollOptions = options
+            .map((optionText) => String(optionText || '').trim())
+            .filter(Boolean)
+            .map(optionText => ({ optionText, votes: [] }));
+
+        if (pollOptions.length < 2) {
+            return res.status(400).json({ message: 'Poll must have at least two valid options' });
+        }
+
+        const poll = await Question.create({
+            type: 'poll',
+            title,
+            description: 'Poll',
+            category,
+            tags: tagsArray,
+            pollOptions,
+            askedBy: req.user._id,
+            askedByName: req.user.name,
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Poll created successfully!'
+            ,
+            poll,
         });
     } catch (error) {
         console.error(error);
@@ -50,7 +93,7 @@ const getQuestions = async (req, res) => {
         }
 
         const questions = await Question.find(query)
-            .populate('askedBy', 'name role')
+            .populate('askedBy', 'name role avatar')
             .sort({ createdAt: -1 });
 
         res.json(questions);
@@ -64,8 +107,8 @@ const getQuestions = async (req, res) => {
 const getQuestionById = async (req, res) => {
     try {
         const question = await Question.findById(req.params.id)
-            .populate('askedBy', 'name role collegeName')
-            .populate('answers.user', 'name role');
+            .populate('askedBy', 'name role collegeName avatar')
+            .populate('answers.user', 'name role avatar');
 
         if (!question) {
             return res.status(404).json({ message: 'Question not found' });
@@ -216,12 +259,55 @@ const toggleSolved = async (req, res) => {
     }
 };
 
+// Vote in a poll
+const votePoll = async (req, res) => {
+    try {
+        const { optionIndex } = req.body;
+        const poll = await Question.findById(req.params.id);
+
+        if (!poll) {
+            return res.status(404).json({ message: 'Poll not found' });
+        }
+
+        if (poll.type !== 'poll') {
+            return res.status(400).json({ message: 'This item is not a poll' });
+        }
+
+        const index = Number(optionIndex);
+        if (Number.isNaN(index) || index < 0 || index >= poll.pollOptions.length) {
+            return res.status(400).json({ message: 'Invalid poll option' });
+        }
+
+        const alreadyVoted = poll.pollOptions.some(option => option.votes.some(
+            (userId) => userId.toString() === req.user._id.toString()
+        ));
+
+        if (alreadyVoted) {
+            return res.status(400).json({ message: 'You have already voted' });
+        }
+
+        poll.pollOptions[index].votes.push(req.user._id);
+        await poll.save();
+
+        res.json({
+            success: true,
+            message: 'Vote recorded',
+            poll,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     askQuestion,
+    createPoll,
     getQuestions,
     getQuestionById,
     postAnswer,
     acceptAnswer,
     upvoteAnswer,
     toggleSolved,
+    votePoll,
 };

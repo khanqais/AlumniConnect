@@ -1,6 +1,7 @@
 const Resource = require('../models/Resource');
 const path = require('path');
 const fs = require('fs');
+const { notifyAllUsers } = require('../utils/notifications');
 
 // Upload resource
 const uploadResource = async (req, res) => {
@@ -34,6 +35,17 @@ const uploadResource = async (req, res) => {
             tags: tagsArray,
             isApproved: isApproved,
         });
+
+        // Notify all users about the new resource (fire-and-forget)
+        notifyAllUsers({
+            sender: req.user._id,
+            type: 'resource',
+            title: 'New Resource Shared',
+            message: `${req.user.name} shared "${title}"`,
+            link: '/resources',
+            relatedId: resource._id,
+            excludeUserId: req.user._id,
+        }).catch(() => {});
 
         res.status(201).json({
             success: true,

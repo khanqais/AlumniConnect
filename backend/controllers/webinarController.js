@@ -1,5 +1,6 @@
 const Webinar = require("../models/Webinar");
 const { v4: uuidv4 } = require("uuid");
+const { notifyAllUsers } = require("../utils/notifications");
 
 // Schedule a webinar (alumni only)
 const scheduleWebinar = async (req, res) => {
@@ -25,6 +26,17 @@ const scheduleWebinar = async (req, res) => {
       createdBy: req.user._id,
       roomId: uuidv4(),
     });
+
+    // Notify all users about the new webinar (fire-and-forget)
+    notifyAllUsers({
+      sender: req.user._id,
+      type: 'webinar',
+      title: 'New Webinar Scheduled',
+      message: `${req.user.name} scheduled "${webinarName}"`,
+      link: '/webinars',
+      relatedId: newWebinar._id,
+      excludeUserId: req.user._id,
+    }).catch(() => {});
 
     res.status(201).json({ webinar: newWebinar });
   } catch (err) {
@@ -120,6 +132,11 @@ const registerWebinar = async (req, res) => {
   try {
     const webinar = await Webinar.findById(req.params.id);
     if (!webinar) return res.status(404).json({ message: "Webinar not found" });
+
+    // Only students can register for webinars
+    if (req.user.role !== 'student') {
+      return res.status(403).json({ message: "Only students can register for webinars" });
+    }
 
     const userId = req.user._id;
     const isRegistered = webinar.registeredUsers.includes(userId);

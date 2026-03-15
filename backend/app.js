@@ -13,20 +13,34 @@ const User = require("./models/User");
 
 dotenv.config();
 connectDB();
-require("./cron/webinarReminder");
-
+require("./corn/webinarReminder");
 
 const app = express();
+
+const defaultAllowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const envAllowedOrigins = (process.env.FRONTEND_URLS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...envAllowedOrigins])];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser tools (Postman/curl) and approved browser origins.
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "admin-id", "admin-email"],
+};
 
 /* ============================
    MIDDLEWARE
 ============================ */
 // app.use(cors({ origin: "*" }));
-app.use(cors({
-  origin: "http://localhost:5173", // your frontend
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"] // <--- important
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -36,11 +50,11 @@ app.use(express.urlencoded({ extended: false }));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
-
 
 /* ============================
    UPLOADS
@@ -65,6 +79,10 @@ app.use("/api/availability", require("./routes/availabiltyRoutes"));
 app.use("/api/recommend", require("./routes/recommendationRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/feed", require("./routes/feedRoutes"));
+app.use("/api/referrals", require("./routes/referralRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoutes"));
+app.use("/api/announcements", require("./routes/announcementRoutes"));
+app.use('/api/groups', require('./routes/groupRoutes'));
 // app.use("/api/webinars", require('./routes/webinarRoutes'));
 
 /* ============================
@@ -99,7 +117,6 @@ io.use(async (socket, next) => {
   }
 });
 
-
 /* ============================
    SOCKET EVENTS
 ============================ */
@@ -133,7 +150,6 @@ io.on("connection", (socket) => {
       });
     }
   });
-
 
   // socket.on("offer", ({ room, offer }) => {
   //   socket.to(room).emit("offer", { offer });
@@ -188,7 +204,6 @@ io.on("connection", (socket) => {
 });
 
 });
-
 
 
 /* ============================

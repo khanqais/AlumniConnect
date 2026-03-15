@@ -1,0 +1,35 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components"; 
+@import "tailwindcss/utilities";
+
+@layer base {
+	html,
+	body,
+	#root {
+		font-family: 'Montserrat', sans-serif;
+	}
+
+	select {
+		background-color: rgba(255, 255, 255, 0.05);
+		color: #f9fafb;
+	}
+
+	select option,
+	select optgroup {
+		background-color: #121620;
+		color: #f9fafb;
+	}
+
+	select option:disabled {
+		color: #94a3b8;
+	}
+
+	.font-syne {
+		font-family: 'Playfair Display', serif;
+	}
+
+	.font-dm {
+		font-family: 'Montserrat', sans-serif;
+	}
+}
+
