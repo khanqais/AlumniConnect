@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm install",
+  "version": 2,
+  "buildCommand": "",
   "installCommand": "npm install",
   "framework": null,
   "routes": [
