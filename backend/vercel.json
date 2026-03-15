@@ -1,13 +1,9 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "",
-  "installCommand": "npm install",
-  "framework": null,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/app.js"
+      "source": "/(.*)",
+      "destination": "/api/index.js"
     }
   ]
 }

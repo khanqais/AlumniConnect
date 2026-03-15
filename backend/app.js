@@ -12,10 +12,11 @@ const User = require("./models/User");
 
 dotenv.config();
 
+connectDB();
+
 // Only run these if NOT on Vercel serverless
-if (process.env.VERCEL !== 'true') {
+if (!process.env.VERCEL) {
     const { Server } = require("socket.io");
-    connectDB();
     require("./corn/webinarReminder");
 }
 
@@ -55,7 +56,7 @@ const server = http.createServer(app);
 
 // Only initialize Socket.IO if NOT on Vercel
 let io;
-if (process.env.VERCEL !== 'true') {
+if (!process.env.VERCEL) {
     const { Server } = require("socket.io");
     io = new Server(server, {
       cors: {
@@ -71,7 +72,7 @@ if (process.env.VERCEL !== 'true') {
 /* ============================
    UPLOADS (skip on Vercel - files are in Cloudinary)
  ============================ */
-if (process.env.VERCEL !== 'true') {
+if (!process.env.VERCEL) {
     const uploadsDir = path.join(__dirname, "uploads");
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
@@ -208,9 +209,10 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-if (process.env.VERCEL === 'true') {
-  module.exports = app;
-} else {
+// Vercel / Module export
+module.exports = app;
+
+if (require.main === module) {
   server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });
