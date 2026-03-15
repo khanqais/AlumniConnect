@@ -6,14 +6,18 @@ const fs = require("fs");
 const connectDB = require("./config/db");
 const jwt = require("jsonwebtoken");
 const http = require("http");
-const { Server } = require("socket.io");
 
 // ✅ IMPORT USER MODEL
 const User = require("./models/User");
 
 dotenv.config();
-connectDB();
-require("./corn/webinarReminder");
+
+// Only run these if NOT on Vercel serverless
+if (process.env.VERCEL !== 'true') {
+    const { Server } = require("socket.io");
+    connectDB();
+    require("./corn/webinarReminder");
+}
 
 const app = express();
 
@@ -46,24 +50,34 @@ app.use(express.urlencoded({ extended: false }));
 
 /* ============================
    HTTP + SOCKET SERVER
-============================ */
+ ============================ */
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
+
+// Only initialize Socket.IO if NOT on Vercel
+let io;
+if (process.env.VERCEL !== 'true') {
+    const { Server } = require("socket.io");
+    io = new Server(server, {
+      cors: {
+        origin: allowedOrigins,
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
+    });
+    
+    // Socket.IO logic here if needed
+}
 
 /* ============================
-   UPLOADS
-============================ */
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+   UPLOADS (skip on Vercel - files are in Cloudinary)
+ ============================ */
+if (process.env.VERCEL !== 'true') {
+    const uploadsDir = path.join(__dirname, "uploads");
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    app.use("/uploads", express.static(uploadsDir));
 }
-app.use("/uploads", express.static(uploadsDir));
 
 /* ============================
    ROUTES
@@ -93,8 +107,9 @@ app.get("/health", (req, res) => {
 });
 
 /* ============================
-   SOCKET AUTH MIDDLEWARE
-============================ */
+   SOCKET AUTH MIDDLEWARE (only if not Vercel)
+ ============================ */
+if (io) {
 io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
@@ -210,16 +225,14 @@ app.get("/",(req,res)=>{
 })
 
 
-/* ============================
-   START SERVER
- ============================ */
+
 const PORT = process.env.PORT || 5000;
 
-// Vercel serverless export
+
 if (process.env.VERCEL === 'true') {
     module.exports = app;
 } else {
     server.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
-    });
-}
+    })
+}}

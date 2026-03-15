@@ -1,5 +1,20 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const pusher = require('../config/pusher');
+
+/**
+ * Trigger Pusher event for real-time notification
+ */
+async function triggerPusherNotification(recipientId, notification) {
+    if (!pusher) return;
+    
+    try {
+        const channel = `user-${recipientId}`;
+        pusher.trigger(channel, 'notification', notification);
+    } catch (error) {
+        console.error('Error triggering Pusher notification:', error);
+    }
+}
 
 /**
  * Create a single notification for one user.
@@ -18,6 +33,10 @@ async function createNotification({ recipient, sender, type, title, message, lin
             link: link || '',
             relatedId: relatedId || null,
         });
+
+        // Trigger real-time notification via Pusher
+        await triggerPusherNotification(recipient, notification);
+
         return notification;
     } catch (error) {
         console.error('Error creating notification:', error);
