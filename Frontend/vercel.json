@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "outputDirectory": "dist",
+  "env": {
+    "VITE_PUSHER_KEY": "@pusher-key",
+    "VITE_PUSHER_CLUSTER": "@pusher-cluster"
+  }
+}
