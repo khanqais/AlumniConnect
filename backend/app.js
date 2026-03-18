@@ -22,7 +22,11 @@ if (!process.env.VERCEL) {
 
 const app = express();
 
-const defaultAllowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const defaultAllowedOrigins = [
+  "http://localhost:5173", 
+  "http://127.0.0.1:5173",
+  "https://alumniconnect-alpha.vercel.app"
+];
 const envAllowedOrigins = (process.env.FRONTEND_URLS || "")
   .split(",")
   .map((origin) => origin.trim())

@@ -203,49 +203,106 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
+    // Edge case: validate input existence
+    if (!email || !password) {
+        console.warn('Login attempt with missing credentials:', { 
+            hasEmail: !!email, 
+            hasPassword: !!password,
+            emailType: typeof email,
+            passwordType: typeof password
+        });
+        return res.status(400).json({ 
+            message: email ? 'Password is required' : 'Email is required'
+        });
+    }
+
+    // Log environment info for debugging
+    console.log('🔍 Login debug info:', {
+        env: process.env.NODE_ENV || 'development',
+        jwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
+        email: email,
+        mongoConnected: mongoose.connection.readyState === 1
+    });
+
     try {
+        // Find user by email (case-sensitive as stored in DB)
         const user = await User.findOne({ email });
 
-        if (user && (await bcrypt.compare(password, user.password))) {
-            
-            // Block admin from logging in here
-            if (user.role === 'admin') {
-                return res.status(403).json({ 
-                    message: 'Admin users must login at /admin' 
-                });
-            }
-
-            // Check if email is verified
-            if (!user.isEmailVerified) {
-                return res.status(403).json({ 
-                    message: 'Please verify your email before logging in. Check your inbox for the verification link.' 
-                });
-            }
-
-            // Check if user is approved (auto-approved after email verification, but keeping this check)
-            if (!user.isApproved) {
-                return res.status(403).json({ 
-                    message: 'Your account is pending approval by admin. Please check back later.' 
-                });
-            }
-
-            res.json({
-                _id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                avatar: user.avatar,
-                isApproved: user.isApproved,
-                skills: user.skills,
-                target_skills: user.target_skills,
-                token: generateToken(user.id),
-            });
-            
-        } else {
-            res.status(400).json({ message: 'Invalid credentials' });
+        if (!user) {
+            console.warn('❌ Login failed - User not found:', { email });
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
+
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        
+        if (!isPasswordValid) {
+            console.warn('❌ Login failed - Invalid password:', { 
+                email: user.email,
+                userId: user._id,
+                role: user.role
+            });
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        // Block admin from logging in here
+        if (user.role === 'admin') {
+            console.warn('❌ Admin login attempt on user endpoint:', { email: user.email });
+            return res.status(403).json({ 
+                message: 'Admin users must login at /admin' 
+            });
+        }
+
+        // Check if email is verified
+        if (!user.isEmailVerified) {
+            console.warn('❌ Login blocked - Email not verified:', { 
+                email: user.email,
+                userId: user._id,
+                createdAt: user.createdAt
+            });
+            return res.status(403).json({ 
+                message: 'Please verify your email before logging in. Check your inbox for the verification link.' 
+            });
+        }
+
+        // Check if user is approved
+        if (!user.isApproved) {
+            console.warn('❌ Login blocked - Account not approved:', { 
+                email: user.email,
+                userId: user._id,
+                role: user.role
+            });
+            return res.status(403).json({ 
+                message: 'Your account is pending approval by admin. Please check back later.' 
+            });
+        }
+
+        // Generate token and return success
+        console.log('✅ Login successful:', { 
+            email: user.email,
+            userId: user._id,
+            role: user.role
+        });
+
+        res.json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+            isApproved: user.isApproved,
+            skills: user.skills,
+            target_skills: user.target_skills,
+            token: generateToken(user.id),
+        });
+            
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('🔥 Login error (critical):', {
+            message: error.message,
+            stack: error.stack,
+            email: email,
+            mongoError: error.name === 'MongoNetworkError' || error.name === 'MongooseServerSelectionError'
+        });
         res.status(500).json({ message: 'Server error' });
     }
 };
