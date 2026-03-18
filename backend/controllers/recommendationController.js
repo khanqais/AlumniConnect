@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const axios = require('axios');
 
+const ML_SERVICE_BASE_URL = (process.env.ML_SERVICE_URL || 'http://127.0.0.1:5001').replace(/\/$/, '');
+
 // ----------------------------------------
 // 1️⃣ CAREER PATH (CURRENT SKILLS)
 // ----------------------------------------
@@ -25,13 +27,13 @@ exports.getCareerPathRecommendations = async (req, res) => {
         let mlResponse;
         try {
             mlResponse = await axios.post(
-                'http://127.0.0.1:5001/career-path',
+                `${ML_SERVICE_BASE_URL}/career-path`,
                 { student, alumni },
                 { timeout: 10000 }
             );
         } catch (mlError) {
             console.error('ML service unreachable:', mlError.message);
-            return res.status(503).json({ message: 'ML service is not running. Please start the Python service on port 5001.' });
+            return res.status(503).json({ message: 'ML service is unreachable. Check ML_SERVICE_URL configuration.' });
         }
 
         res.json(mlResponse.data);
@@ -66,13 +68,13 @@ exports.getTargetSkillRecommendations = async (req, res) => {
         let mlResponse;
         try {
             mlResponse = await axios.post(
-                'http://127.0.0.1:5001/target-skills',
+                `${ML_SERVICE_BASE_URL}/target-skills`,
                 { student, alumni },
                 { timeout: 10000 }
             );
         } catch (mlError) {
             console.error('ML service unreachable:', mlError.message);
-            return res.status(503).json({ message: 'ML service is not running. Please start the Python service on port 5001.' });
+            return res.status(503).json({ message: 'ML service is unreachable. Check ML_SERVICE_URL configuration.' });
         }
 
         res.json(mlResponse.data);

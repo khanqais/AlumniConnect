@@ -43,6 +43,7 @@ interface AIQuizResponse {
 }
 
 const QUESTIONS_PER_PAGE = 5;
+const ML_SERVICE_URL = (import.meta.env.VITE_ML_SERVICE_URL || 'http://127.0.0.1:5001').replace(/\/$/, '');
 
 const getPaginationItems = (currentPage: number, totalPages: number): Array<number | 'ellipsis'> => {
     if (totalPages <= 5) {
@@ -465,7 +466,7 @@ const Quiz = () => {
         if (!topic.trim()) return;
         setLoadingLevels(true);
         try {
-            const res = await fetch('http://127.0.0.1:5001/get-levels', {
+            const res = await fetch(`${ML_SERVICE_URL}/get-levels`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ topic }),
@@ -473,7 +474,7 @@ const Quiz = () => {
             const data = await res.json();
             setLevelsData(data.levels || []);
         } catch {
-            alert('Unable to fetch levels. Ensure ML service is running on port 5001.');
+            alert('Unable to fetch levels. Check VITE_ML_SERVICE_URL and ML service availability.');
         } finally {
             setLoadingLevels(false);
         }
@@ -487,7 +488,7 @@ const Quiz = () => {
 
         setLoadingQuiz(true);
         try {
-            const res = await fetch('http://127.0.0.1:5001/generate-quiz', {
+            const res = await fetch(`${ML_SERVICE_URL}/generate-quiz`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -502,7 +503,7 @@ const Quiz = () => {
             setAiQuiz(data);
             setAiAnswers({});
         } catch {
-            alert('Unable to generate AI quiz. Ensure ML service and GROQ key are configured.');
+            alert('Unable to generate AI quiz. Check VITE_ML_SERVICE_URL and ML service/GROQ configuration.');
         } finally {
             setLoadingQuiz(false);
         }
