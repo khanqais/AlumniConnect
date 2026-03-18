@@ -23,41 +23,41 @@ const Register = () => {
 
     const { name, email, password, role, collegeName, cgpa, graduationYear, skills, experience, linkedin } = formData;
 
-    // Tech skills array
+
     const techSkills = [
-        // Programming Languages
+
         "Java", "Python", "C", "C++", "JavaScript", "TypeScript", "Go", "Rust", 
         "Kotlin", "Swift", "C#", "PHP", "Ruby", "Scala",
         
-        // Backend Frameworks
+
         "Spring Boot", "Node.js", "Express.js", "Django", "Flask", "FastAPI", 
         "ASP.NET", "Ruby on Rails", "Laravel",
         
-        // Frontend Technologies
+
         "React", "Angular", "Vue.js", "HTML/CSS", "Tailwind CSS", "Bootstrap", 
         "SASS/SCSS", "Redux", "Next.js",
         
-        // DevOps & Cloud
+
         "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Jenkins", 
         "GitLab CI/CD", "GitHub Actions", "Ansible",
         
-        // Databases
+
         "MySQL", "PostgreSQL", "MongoDB", "Redis", "Oracle", "SQL Server", 
         "Cassandra", "Elasticsearch",
         
-        // Architecture & Concepts
+
         "Microservices", "REST APIs", "GraphQL", "gRPC", "System Design", 
         "Design Patterns", "OOP", "Functional Programming", "Agile/Scrum",
         
-        // Tools & Platforms
+
         "Git", "Linux", "Shell Scripting", "Jira", "Confluence", "Postman", 
         "Swagger", "Apache Kafka", "RabbitMQ",
         
-        // Data Science & AI/ML
+
         "Machine Learning", "Deep Learning", "TensorFlow", "PyTorch", "Pandas", 
         "NumPy", "Data Analysis", "Computer Vision", "NLP",
         
-        // Soft Skills
+
         "Leadership", "Communication", "Problem Solving", "Team Management", 
         "Project Management", "Public Speaking", "Mentoring"
     ];
@@ -103,7 +103,7 @@ const Register = () => {
         setLoading(true);
         setError('');
 
-        // Role-based email domain validation
+
         const normalizedEmail = email.trim().toLowerCase();
         const emailDomain = normalizedEmail.split('@')[1];
 
@@ -119,7 +119,7 @@ const Register = () => {
             return;
         }
 
-        // Validation
+
         if (role === 'alumni' && (!graduationYear || !experience || !linkedin || !alumniProofFile)) {
             setError('Alumni must provide graduation year, experience, LinkedIn profile, and marksheet/graduation certificate');
             setLoading(false);

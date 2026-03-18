@@ -3,23 +3,23 @@ const cloudinary = require('../config/cloudinary');
 const { uploadToCloudinary } = require('../services/uploadService');
 const { notifyAllUsers } = require('../utils/notifications');
 
-// Create blog post
+
 const createBlog = async (req, res) => {
     try {
         const { title, content, excerpt, category, tags } = req.body;
 
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
         
-        // Calculate read time (approx 200 words per minute)
+
         const wordCount = content.split(' ').length;
         const readTime = Math.ceil(wordCount / 200);
 
-        // Auto-publish all blogs (no admin approval needed)
+
         const isPublished = true;
 
         let coverImageUrl = null;
         if (req.file?.buffer) {
-            // Generate a safe filename
+
             const timestamp = Date.now();
             const safeFilename = `blog-cover-${timestamp}`;
             
@@ -45,7 +45,7 @@ const createBlog = async (req, res) => {
             isPublished,
         });
 
-        // Notify all users about the new blog (fire-and-forget)
+
         notifyAllUsers({
             sender: req.user._id,
             type: 'blog',
@@ -67,7 +67,7 @@ const createBlog = async (req, res) => {
     }
 };
 
-// Get all blogs
+
 const getBlogs = async (req, res) => {
     try {
         const { category, search } = req.query;
@@ -95,7 +95,7 @@ const getBlogs = async (req, res) => {
     }
 };
 
-// Get single blog
+
 const getBlogById = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id)
@@ -106,7 +106,7 @@ const getBlogById = async (req, res) => {
             return res.status(404).json({ message: 'Blog not found' });
         }
 
-        // Increment views
+
         blog.views += 1;
         await blog.save();
 
@@ -117,7 +117,7 @@ const getBlogById = async (req, res) => {
     }
 };
 
-// Like blog
+
 const likeBlog = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -151,7 +151,7 @@ const likeBlog = async (req, res) => {
     }
 };
 
-// Add comment
+
 const addComment = async (req, res) => {
     try {
         const { comment } = req.body;
@@ -180,7 +180,7 @@ const addComment = async (req, res) => {
     }
 };
 
-// Get user's blogs
+
 const getMyBlogs = async (req, res) => {
     try {
         const blogs = await Blog.find({ author: req.user._id })
@@ -193,7 +193,7 @@ const getMyBlogs = async (req, res) => {
     }
 };
 
-// Delete blog
+
 const deleteBlog = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -202,12 +202,12 @@ const deleteBlog = async (req, res) => {
             return res.status(404).json({ message: 'Blog not found' });
         }
 
-        // Check if user owns the blog or is admin
+
         if (blog.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Not authorized to delete this blog' });
         }
 
-        // Delete cover image from Cloudinary if it exists
+
         if (blog.coverImage) {
             try {
                 const publicId = blog.coverImage.match(/\/([^/]+)\.\w+$/)?.[1];

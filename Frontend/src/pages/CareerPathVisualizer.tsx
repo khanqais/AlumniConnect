@@ -1,4 +1,4 @@
-// CareerPathVisualizer.tsx
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../config/api';
 import { useNavigate } from 'react-router-dom';
@@ -51,7 +51,7 @@ const CareerPathVisualizer: React.FC = () => {
     const [sendingInvites, setSendingInvites] = useState(false);
     const [groupActionMessage, setGroupActionMessage] = useState<string | null>(null);
 
-    // Target skills inline editor
+
     const [editingTargetSkills, setEditingTargetSkills] = useState(false);
     const [targetSkillsInput, setTargetSkillsInput] = useState('');
     const [savingTargetSkills, setSavingTargetSkills] = useState(false);
@@ -81,7 +81,7 @@ const CareerPathVisualizer: React.FC = () => {
         setEditingTargetSkills(true);
     };
 
-    // Sync latest skills/target_skills from DB into auth context on mount
+
     useEffect(() => {
         if (!user?.token) return;
         api.get('/profile/me/profile', {
@@ -94,7 +94,7 @@ const CareerPathVisualizer: React.FC = () => {
         }).catch(err => {
             console.error('Failed to sync profile skills:', err);
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [user?.token]);
 
     const fetchMatches = useCallback(async () => {
@@ -102,7 +102,7 @@ const CareerPathVisualizer: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            // Use target-skills endpoint when target skills are set, otherwise fall back to career-path
+
             const hasTargetSkills = (user?.target_skills ?? []).length > 0;
             const endpoint = hasTargetSkills
                 ? `/recommend/target-skills/${user._id}`
@@ -119,7 +119,7 @@ const CareerPathVisualizer: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [user?._id, user?.token, (user?.target_skills ?? []).join(',')]);
 
     const resolveAvatarUrl = (avatar?: string): string => {
@@ -285,7 +285,7 @@ const CareerPathVisualizer: React.FC = () => {
     };
 
     return (
-        // .recommendation-page / .career-path-page
+
         <div className="career-theme min-h-screen bg-[#0A0D14] text-gray-200 relative overflow-x-hidden">
             <style>
                 {`
@@ -357,7 +357,7 @@ const CareerPathVisualizer: React.FC = () => {
                             <span className="text-sm text-gray-500 mr-2">Your Skills:</span>
                             <div className="flex flex-wrap gap-2 mt-1">
                                 {user?.skills?.map((s, i) => (
-                                    // .skill-pill
+
                                     <span
                                         key={i}
                                         className="flex items-center gap-1 px-3 py-1 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-full text-blue-600 text-xs font-medium"
@@ -438,7 +438,7 @@ const CareerPathVisualizer: React.FC = () => {
 
                 {/* Content States */}
                 {loading ? (
-                    // .loading-container
+
                     <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-md text-center border border-gray-100">
                         {/* .loading-spinner */}
                         <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4" />
@@ -459,7 +459,7 @@ const CareerPathVisualizer: React.FC = () => {
                     </div>
 
                 ) : matches.length === 0 ? (
-                    // .empty-state
+
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 text-center">
                         {/* .empty-icon */}
                         <Map className="w-12 h-12 text-gray-400 mb-4" />
@@ -478,7 +478,7 @@ const CareerPathVisualizer: React.FC = () => {
                     </div>
 
                 ) : (
-                    // .recommendations-table-container
+
                     <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
                         {/* .recommendations-table */}
                         <table className="w-full border-collapse">
@@ -496,7 +496,7 @@ const CareerPathVisualizer: React.FC = () => {
                             </thead>
                             <tbody>
                                 {matches.map((match, idx) => (
-                                    // .table-row
+
                                     <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
 
                                         {/* Alumni column */}
@@ -742,7 +742,7 @@ const CareerPathVisualizer: React.FC = () => {
 
             {/* ── Detail Modal ── */}
             {selectedMatch && (
-                // .profile-modal-overlay
+
                 <div
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                     onClick={() => setSelectedMatch(null)}
@@ -828,7 +828,7 @@ const CareerPathVisualizer: React.FC = () => {
                                     {/* .skills-list */}
                                     <div className="flex flex-wrap gap-2">
                                         {selectedMatch.skills?.map((s, i) => (
-                                            // .skill-badge
+
                                             <span
                                                 key={i}
                                                 className="px-3 py-1 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-full text-xs text-blue-700 font-medium"
@@ -855,7 +855,7 @@ const CareerPathVisualizer: React.FC = () => {
                                                 </span>
                                             ))
                                         ) : (
-                                            // .career-perfect
+
                                             <span className="text-sm text-green-700 font-medium bg-green-50 border border-green-200 px-3 py-2 rounded-lg">
                                                 🎯 You have all required skills!
                                             </span>

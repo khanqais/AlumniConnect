@@ -62,7 +62,7 @@ const ForgotPassword: React.FC = () => {
       setIsSubmitting(true);
       
       try {
-        // Simulate API call
+
         await new Promise(resolve => setTimeout(resolve, 1500));
         
         console.log('Password reset link sent to:', formData.email);

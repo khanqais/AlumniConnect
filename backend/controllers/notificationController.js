@@ -1,6 +1,6 @@
 const Notification = require('../models/Notification');
 
-// Get notifications for the logged-in user
+
 const getNotifications = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 20;
@@ -34,7 +34,7 @@ const getNotifications = async (req, res) => {
     }
 };
 
-// Get unread notification count
+
 const getUnreadCount = async (req, res) => {
     try {
         const count = await Notification.countDocuments({
@@ -49,7 +49,7 @@ const getUnreadCount = async (req, res) => {
     }
 };
 
-// Mark a single notification as read
+
 const markAsRead = async (req, res) => {
     try {
         const notification = await Notification.findOne({
@@ -72,7 +72,7 @@ const markAsRead = async (req, res) => {
     }
 };
 
-// Mark all notifications as read
+
 const markAllAsRead = async (req, res) => {
     try {
         await Notification.updateMany(
@@ -87,7 +87,7 @@ const markAllAsRead = async (req, res) => {
     }
 };
 
-// Delete a single notification
+
 const deleteNotification = async (req, res) => {
     try {
         const notification = await Notification.findOne({

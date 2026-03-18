@@ -70,7 +70,7 @@ const Chat = () => {
         fetchConversations();
         fetchMyGroups();
         
-        // If userId is in URL, load that conversation
+
         if (userId) {
             loadConversationFromUserId(userId);
         }
@@ -135,7 +135,7 @@ const Chat = () => {
 
     const loadConversationFromUserId = async (userId: string) => {
         try {
-            // Fetch user details
+
             const userRes = await api.get(`/profile/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${currentUser?.token}`,
@@ -157,7 +157,7 @@ const Chat = () => {
             });
             setMessages(res.data);
             
-            // Refresh conversations to update unread count
+
             fetchConversations();
         } catch (error) {
             console.error('Error fetching messages:', error);

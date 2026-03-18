@@ -1,4 +1,4 @@
-// Career Path: match student current skills with alumni current skills
+
 const careerPathRecommend = (student, alumniList) => {
   return alumniList
     .map(alumni => {

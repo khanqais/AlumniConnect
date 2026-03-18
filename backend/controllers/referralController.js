@@ -11,9 +11,6 @@ const {
 } = require('../services/referralScoring.service');
 const { notifyUsersByRole } = require('../utils/notifications');
 
-// ═══════════════════════════════════════════════════════════════
-// MULTER — memory storage for resume processing
-// ═══════════════════════════════════════════════════════════════
 
 const referralUpload = multer({
     storage: multer.memoryStorage(),
@@ -30,9 +27,6 @@ const referralUpload = multer({
     },
 });
 
-// ═══════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════
 
 async function parseResumeText(file) {
     let text = '';
@@ -78,7 +72,7 @@ function normalizeDeadline(deadlineInput) {
     if (!deadlineInput) return null;
     const raw = String(deadlineInput).trim();
 
-    // If date-only input from HTML <input type="date">, keep it valid through end of day
+
     if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
         return new Date(`${raw}T23:59:59.999`);
     }
@@ -110,11 +104,6 @@ function extractGithubUsername(url = '') {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ALUMNI: CREATE REFERRAL
-// @route POST /api/referrals
-// @access Private/Alumni
-// ═══════════════════════════════════════════════════════════════
 
 const createReferral = async (req, res) => {
     try {
@@ -189,11 +178,6 @@ const createReferral = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// LIST ALL OPEN REFERRALS (with filters)
-// @route GET /api/referrals
-// @access Private
-// ═══════════════════════════════════════════════════════════════
 
 const getAllReferrals = async (req, res) => {
     try {
@@ -263,11 +247,6 @@ const getAllReferrals = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// GET SINGLE REFERRAL
-// @route GET /api/referrals/:id
-// @access Private
-// ═══════════════════════════════════════════════════════════════
 
 const getReferralById = async (req, res) => {
     try {
@@ -280,7 +259,7 @@ const getReferralById = async (req, res) => {
             return res.status(404).json({ message: 'Referral not found' });
         }
 
-        // If student, check if they already applied
+
         let existingApplication = null;
         if (req.user.role === 'student') {
             existingApplication = await ReferralApplication.findOne({
@@ -300,11 +279,6 @@ const getReferralById = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ALUMNI: GET MY LISTINGS
-// @route GET /api/referrals/my-listings
-// @access Private/Alumni
-// ═══════════════════════════════════════════════════════════════
 
 const getMyListings = async (req, res) => {
     try {
@@ -318,11 +292,6 @@ const getMyListings = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ALUMNI: UPDATE REFERRAL
-// @route PUT /api/referrals/:id
-// @access Private/Alumni
-// ═══════════════════════════════════════════════════════════════
 
 const updateReferral = async (req, res) => {
     try {
@@ -382,11 +351,6 @@ const updateReferral = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ALUMNI: DELETE / CLOSE REFERRAL
-// @route DELETE /api/referrals/:id
-// @access Private/Alumni
-// ═══════════════════════════════════════════════════════════════
 
 const deleteReferral = async (req, res) => {
     try {
@@ -431,18 +395,13 @@ const deleteReferral = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// STUDENT: APPLY TO REFERRAL
-// @route POST /api/referrals/:id/apply
-// @access Private/Student
-// ═══════════════════════════════════════════════════════════════
 
 const applyToReferral = async (req, res) => {
     try {
         const referralId = req.params.id;
         const studentId = req.user._id;
 
-        // 1. Load referral and student
+
         const [referral, student] = await Promise.all([
             Referral.findById(referralId),
             User.findById(studentId),
@@ -452,7 +411,7 @@ const applyToReferral = async (req, res) => {
             return res.status(404).json({ message: 'Referral not found' });
         }
 
-        // 2. Eligibility gate
+
         const eligibility = checkEligibility(student, referral);
         if (!eligibility.eligible) {
             return res.status(403).json({
@@ -462,7 +421,7 @@ const applyToReferral = async (req, res) => {
             });
         }
 
-        // 3. Check duplicate application (same referral)
+
         const existingApp = await ReferralApplication.findOne({
             referral: referralId,
             student: studentId,
@@ -473,7 +432,7 @@ const applyToReferral = async (req, res) => {
             });
         }
 
-        // 4. Check spam: same company + same jobTitle from different alumni
+
         const spamCheck = await ReferralApplication.findOne({
             student: studentId,
             status: { $in: ['pending', 'referred'] },
@@ -495,14 +454,14 @@ const applyToReferral = async (req, res) => {
             }
         }
 
-        // 5. Resume file is required
+
         if (!req.file) {
             return res.status(400).json({
                 message: 'Please upload your resume (PDF, DOC, or DOCX)',
             });
         }
 
-        // 6. Parse body fields
+
         const {
             coverNote,
             projectLinks: projectLinksRaw,
@@ -510,7 +469,7 @@ const applyToReferral = async (req, res) => {
             cgpaConfirmed,
         } = req.body;
 
-        // CGPA consent required
+
         if (referral.minCGPA > 0 && cgpaConfirmed !== 'true' && cgpaConfirmed !== true) {
             return res.status(400).json({
                 message: 'You must confirm your CGPA accuracy to apply',
@@ -564,7 +523,7 @@ const applyToReferral = async (req, res) => {
             skillSelfRatings = [];
         }
 
-        // 7. Parse resume text
+
         let resumeText = '';
         try {
             resumeText = await parseResumeText(req.file);
@@ -581,7 +540,7 @@ const applyToReferral = async (req, res) => {
             });
         }
 
-        // 8. Upload resume to Cloudinary
+
         let uploadResult;
         try {
             uploadResult = await uploadResumeToCloudinary(
@@ -595,16 +554,16 @@ const applyToReferral = async (req, res) => {
             });
         }
 
-        // 9. Resume hash for dedup
+
         const resumeHash = generateResumeHash(resumeText);
 
-        // Check for hash collisions across this referral
+
         const existingHashes = await ReferralApplication.find({
             referral: referralId,
             resumeHash: { $ne: '' },
         }).distinct('resumeHash');
 
-        // 10. Calculate fit score
+
         const scoreResult = calculateFitScore({
             student,
             referral,
@@ -614,7 +573,7 @@ const applyToReferral = async (req, res) => {
             resumeHash,
         });
 
-        // 11. Create application
+
         const application = await ReferralApplication.create({
             referral: referralId,
             student: studentId,
@@ -632,7 +591,7 @@ const applyToReferral = async (req, res) => {
             isEligible: true,
         });
 
-        // 12. Increment application count
+
         await Referral.findByIdAndUpdate(referralId, {
             $inc: { applicationsCount: 1 },
         });
@@ -650,7 +609,7 @@ const applyToReferral = async (req, res) => {
             },
         });
     } catch (error) {
-        // Handle duplicate key error (unique index)
+
         if (error.code === 11000) {
             return res.status(409).json({
                 message: 'You have already applied to this referral',
@@ -661,11 +620,6 @@ const applyToReferral = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ALUMNI: VIEW APPLICATIONS FOR MY REFERRAL
-// @route GET /api/referrals/:id/applications
-// @access Private/Alumni
-// ═══════════════════════════════════════════════════════════════
 
 const getApplications = async (req, res) => {
     try {
@@ -717,11 +671,6 @@ const getApplications = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ALUMNI: UPDATE APPLICATION STATUS
-// @route PUT /api/referrals/applications/:appId/status
-// @access Private/Alumni
-// ═══════════════════════════════════════════════════════════════
 
 const updateApplicationStatus = async (req, res) => {
     try {
@@ -741,7 +690,7 @@ const updateApplicationStatus = async (req, res) => {
             return res.status(404).json({ message: 'Application not found' });
         }
 
-        // Verify the alumni owns the referral
+
         if (
             application.referral.postedBy.toString() !==
             req.user._id.toString()
@@ -755,13 +704,13 @@ const updateApplicationStatus = async (req, res) => {
         application.reviewedAt = new Date();
         await application.save();
 
-        // If status is 'filled' equivalent (referred), optionally mark referral
+
         if (status === 'referred') {
             const referredCount = await ReferralApplication.countDocuments({
                 referral: application.referral._id,
                 status: 'referred',
             });
-            // Auto-fill referral if many referred
+
             if (referredCount >= application.referral.maxApplications) {
                 await Referral.findByIdAndUpdate(application.referral._id, {
                     status: 'filled',
@@ -784,11 +733,6 @@ const updateApplicationStatus = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// STUDENT: MY APPLICATIONS
-// @route GET /api/referrals/my-applications
-// @access Private/Student
-// ═══════════════════════════════════════════════════════════════
 
 const getMyApplications = async (req, res) => {
     try {
@@ -813,11 +757,6 @@ const getMyApplications = async (req, res) => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// DOWNLOAD APPLICATION RESUME (FORCE ATTACHMENT)
-// @route GET /api/referrals/applications/:appId/resume/download
-// @access Private
-// ═══════════════════════════════════════════════════════════════
 
 const downloadApplicationResume = async (req, res) => {
     try {

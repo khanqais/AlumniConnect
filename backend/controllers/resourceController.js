@@ -3,10 +3,10 @@ const cloudinary = require('../config/cloudinary');
 const { uploadToCloudinary } = require('../services/uploadService');
 const { notifyAllUsers } = require('../utils/notifications');
 
-// Upload resource
+
 const uploadResource = async (req, res) => {
     try {
-        // Check if user is alumni
+
         if (req.user.role !== 'alumni') {
             return res.status(403).json({ 
                 message: 'Only alumni can upload resources' 
@@ -21,10 +21,10 @@ const uploadResource = async (req, res) => {
 
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
 
-        // Auto-approve all resources (no admin approval needed)
+
         const isApproved = true;
 
-        // Upload to Cloudinary
+
         let fileUrl = '';
         let filePublicId = '';
         
@@ -58,7 +58,7 @@ const uploadResource = async (req, res) => {
             isApproved: isApproved,
         });
 
-        // Notify all users about the new resource (fire-and-forget)
+
         notifyAllUsers({
             sender: req.user._id,
             type: 'resource',
@@ -80,7 +80,7 @@ const uploadResource = async (req, res) => {
     }
 };
 
-// Get all approved resources
+
 const getResources = async (req, res) => {
     try {
         const { category, search } = req.query;
@@ -108,7 +108,7 @@ const getResources = async (req, res) => {
     }
 };
 
-// Get single resource
+
 const getResourceById = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id)
@@ -126,7 +126,7 @@ const getResourceById = async (req, res) => {
     }
 };
 
-// Download resource (redirect to Cloudinary URL)
+
 const downloadResource = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id);
@@ -155,7 +155,7 @@ const downloadResource = async (req, res) => {
     }
 };
 
-// Like resource
+
 const likeResource = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id);
@@ -167,7 +167,7 @@ const likeResource = async (req, res) => {
         const alreadyLiked = resource.likedBy.includes(req.user._id);
         const alreadyDisliked = resource.dislikedBy.includes(req.user._id);
 
-        // Remove from disliked if previously disliked
+
         if (alreadyDisliked) {
             resource.dislikes -= 1;
             resource.dislikedBy = resource.dislikedBy.filter(
@@ -200,7 +200,7 @@ const likeResource = async (req, res) => {
     }
 };
 
-// Dislike resource
+
 const dislikeResource = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id);
@@ -212,7 +212,7 @@ const dislikeResource = async (req, res) => {
         const alreadyDisliked = resource.dislikedBy.includes(req.user._id);
         const alreadyLiked = resource.likedBy.includes(req.user._id);
 
-        // Remove from liked if previously liked
+
         if (alreadyLiked) {
             resource.likes -= 1;
             resource.likedBy = resource.likedBy.filter(
@@ -245,7 +245,7 @@ const dislikeResource = async (req, res) => {
     }
 };
 
-// Add comment to resource
+
 const addComment = async (req, res) => {
     try {
         const { text } = req.body;
@@ -271,7 +271,7 @@ const addComment = async (req, res) => {
         resource.comments.push(comment);
         await resource.save();
 
-        // Populate the resource to get full comment details
+
         await resource.populate('comments.user', 'name avatar');
 
         res.json({
@@ -285,7 +285,7 @@ const addComment = async (req, res) => {
     }
 };
 
-// Delete comment
+
 const deleteComment = async (req, res) => {
     try {
         const { commentId } = req.params;
@@ -302,7 +302,7 @@ const deleteComment = async (req, res) => {
             return res.status(404).json({ message: 'Comment not found' });
         }
 
-        // Check if user owns the comment or is admin
+
         if (comment.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Not authorized to delete this comment' });
         }
@@ -321,7 +321,7 @@ const deleteComment = async (req, res) => {
     }
 };
 
-// Get user's uploaded resources
+
 const getMyResources = async (req, res) => {
     try {
         const resources = await Resource.find({ uploadedBy: req.user._id })
@@ -334,7 +334,7 @@ const getMyResources = async (req, res) => {
     }
 };
 
-// Delete resource
+
 const deleteResource = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id);
@@ -343,12 +343,12 @@ const deleteResource = async (req, res) => {
             return res.status(404).json({ message: 'Resource not found' });
         }
 
-        // Check if user owns the resource
+
         if (resource.uploadedBy.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Not authorized to delete this resource' });
         }
 
-        // Delete file from Cloudinary if exists
+
         if (resource.filePublicId) {
             try {
                 await cloudinary.uploader.destroy(resource.filePublicId, { resource_type: 'raw' });

@@ -2,9 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('../config/cloudinary');
 
-// @desc Get user profile
-// @route GET /api/profile/:userId
-// @access Public
+
 const getUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.params.userId).select('-password -emailVerificationToken -emailVerificationExpires');
@@ -44,9 +42,7 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-// @desc Get current user's own profile
-// @route GET /api/profile/me
-// @access Private
+
 const getMyProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('-password -emailVerificationToken -emailVerificationExpires');
@@ -61,9 +57,7 @@ const getMyProfile = async (req, res) => {
     }
 };
 
-// @desc Update user profile
-// @route PUT /api/profile/me
-// @access Private
+
 const updateMyProfile = async (req, res) => {
     try {
         const {
@@ -166,9 +160,7 @@ const updateMyProfile = async (req, res) => {
     }
 };
 
-// @desc Upload profile avatar
-// @route POST /api/profile/avatar
-// @access Private
+
 const uploadAvatar = async (req, res) => {
     try {
         if (!req.file) {
@@ -218,9 +210,7 @@ const uploadAvatar = async (req, res) => {
     }
 };
 
-// @desc Upload profile banner
-// @route POST /api/profile/banner
-// @access Private
+
 const uploadBanner = async (req, res) => {
     try {
         if (!req.file) {
@@ -270,9 +260,7 @@ const uploadBanner = async (req, res) => {
     }
 };
 
-// @desc Change password
-// @route PUT /api/profile/password
-// @access Private
+
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;

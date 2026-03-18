@@ -4,19 +4,17 @@ const Blog = require('../models/Blog');
 const Announcement = require('../models/Announcement');
 const Notification = require('../models/Notification');
 
-// @desc Admin login (check against .env)
-// @route POST /api/admin/login
-// @access Public
+
 const adminLogin = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Check against environment variables
+
         if (
             email === process.env.ADMIN_EMAIL && 
             password === process.env.ADMIN_PASSWORD
         ) {
-            // Admin credentials are correct
+
             res.json({
                 success: true,
                 message: 'Admin login successful',
@@ -38,9 +36,7 @@ const adminLogin = async (req, res) => {
     }
 };
 
-// @desc Get all pending users (students/alumni)
-// @route GET /api/admin/pending
-// @access Private/Admin
+
 const getPendingUsers = async (req, res) => {
     try {
         const users = await User.find({ 
@@ -57,9 +53,7 @@ const getPendingUsers = async (req, res) => {
     }
 };
 
-// @desc Get all approved users
-// @route GET /api/admin/approved
-// @access Private/Admin
+
 const getApprovedUsers = async (req, res) => {
     try {
         const users = await User.find({ 
@@ -76,9 +70,7 @@ const getApprovedUsers = async (req, res) => {
     }
 };
 
-// @desc Get user by ID with document details
-// @route GET /api/admin/user/:id
-// @access Private/Admin
+
 const getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
@@ -95,9 +87,6 @@ const getUserById = async (req, res) => {
 };
 
 
-// @desc Update user approval status (approve/reject)
-// @route PUT /api/admin/status/:id
-// @access Private/Admin
 const updateUserStatus = async (req, res) => {
     try {
         const { status, reason } = req.body;
@@ -107,13 +96,13 @@ const updateUserStatus = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Prevent modifying admin accounts
+
         if (user.role === 'admin') {
             return res.status(403).json({ message: 'Cannot modify admin accounts' });
         }
 
         if (status === 'approved') {
-            // Approve the user and mark email as verified so they can log in
+
             user.isApproved = true;
             user.isEmailVerified = true;
             await user.save();
@@ -131,14 +120,14 @@ const updateUserStatus = async (req, res) => {
             });
 
         } else if (status === 'rejected') {
-            // Store user info before deletion
+
             const rejectedUser = {
                 name: user.name,
                 email: user.email,
                 role: user.role,
             };
 
-            // Delete the rejected user
+
             await User.findByIdAndDelete(req.params.id);
 
             res.json({
@@ -160,9 +149,7 @@ const updateUserStatus = async (req, res) => {
     }
 };
 
-// @desc Get admin dashboard statistics
-// @route GET /api/admin/stats
-// @access Private/Admin
+
 const getAdminStats = async (req, res) => {
     try {
         const totalUsers = await User.countDocuments({ 
@@ -187,7 +174,7 @@ const getAdminStats = async (req, res) => {
             role: 'alumni' 
         });
 
-        // Calculate approval rate
+
         const approvalRate = totalUsers > 0 
             ? ((approvedUsers / totalUsers) * 100).toFixed(2) 
             : 0;
@@ -219,9 +206,7 @@ const getPendingResources = async (req, res) => {
     }
 };
 
-// @desc Get all approved resources
-// @route GET /api/admin/resources/approved
-// @access Private/Admin
+
 const getApprovedResources = async (req, res) => {
     try {
         const resources = await Resource.find({ isApproved: true })
@@ -235,9 +220,7 @@ const getApprovedResources = async (req, res) => {
     }
 };
 
-// @desc Approve or reject resource
-// @route PUT /api/admin/resources/status/:id
-// @access Private/Admin
+
 const updateResourceStatus = async (req, res) => {
     try {
         const { status } = req.body;
@@ -275,9 +258,7 @@ const updateResourceStatus = async (req, res) => {
     }
 };
 
-// @desc Delete any resource (admin)
-// @route DELETE /api/admin/resources/:id
-// @access Private/Admin
+
 const deleteResourceAdmin = async (req, res) => {
     try {
         const resource = await Resource.findById(req.params.id);
@@ -295,9 +276,7 @@ const deleteResourceAdmin = async (req, res) => {
     }
 };
 
-// @desc Get all pending blogs
-// @route GET /api/admin/blogs/pending
-// @access Private/Admin
+
 const getPendingBlogs = async (req, res) => {
     try {
         const blogs = await Blog.find({ isPublished: false })
@@ -311,9 +290,7 @@ const getPendingBlogs = async (req, res) => {
     }
 };
 
-// @desc Get all published blogs
-// @route GET /api/admin/blogs/published
-// @access Private/Admin
+
 const getPublishedBlogs = async (req, res) => {
     try {
         const blogs = await Blog.find({ isPublished: true })
@@ -327,9 +304,7 @@ const getPublishedBlogs = async (req, res) => {
     }
 };
 
-// @desc Approve or reject blog
-// @route PUT /api/admin/blogs/status/:id
-// @access Private/Admin
+
 const updateBlogStatus = async (req, res) => {
     try {
         const { status } = req.body;
@@ -367,9 +342,7 @@ const updateBlogStatus = async (req, res) => {
     }
 };
 
-// @desc Delete any blog (admin)
-// @route DELETE /api/admin/blogs/:id
-// @access Private/Admin
+
 const deleteBlogAdmin = async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -388,9 +361,6 @@ const deleteBlogAdmin = async (req, res) => {
 };
 
 
-// @desc Search & filter alumni database
-// @route GET /api/admin/alumni/search
-// @access Private/Admin
 const searchAlumni = async (req, res) => {
     try {
         const { name, graduationYear, branch, company, skills, page = 1, limit = 20 } = req.query;
@@ -444,9 +414,7 @@ const searchAlumni = async (req, res) => {
     }
 };
 
-// @desc Update student CGPA (admin-verified)
-// @route PUT /api/admin/user/:id/cgpa
-// @access Private/Admin
+
 const updateStudentCGPA = async (req, res) => {
     try {
         const { cgpa } = req.body;
@@ -488,9 +456,7 @@ const updateStudentCGPA = async (req, res) => {
     }
 };
 
-// @desc Ban or unban a user
-// @route PUT /api/admin/user/:id/ban
-// @access Private/Admin
+
 const toggleUserBan = async (req, res) => {
     try {
         const { ban, reason } = req.body;
@@ -527,9 +493,7 @@ const toggleUserBan = async (req, res) => {
     }
 };
 
-// @desc Get referral system stats
-// @route GET /api/admin/referral-stats
-// @access Private/Admin
+
 const getReferralStats = async (req, res) => {
     try {
         const Referral = require('../models/Referral');
@@ -559,9 +523,7 @@ const getReferralStats = async (req, res) => {
     }
 };
 
-// @desc Create college announcement
-// @route POST /api/admin/announcements
-// @access Private/Admin
+
 const createAnnouncement = async (req, res) => {
     try {
         const { title, content, category } = req.body;
@@ -572,7 +534,7 @@ const createAnnouncement = async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // Create announcement without postedBy reference for now
+
         const announcement = new Announcement({
             title,
             content,
@@ -584,7 +546,7 @@ const createAnnouncement = async (req, res) => {
 
         await announcement.save();
 
-        // Create notifications for all approved users
+
         try {
             const allUsers = await User.find({ isApproved: true });
             const notifications = allUsers.map(user => ({
@@ -602,7 +564,7 @@ const createAnnouncement = async (req, res) => {
                 await Notification.insertMany(notifications);
             }
         } catch (notifError) {
-            // Log notification error but don't fail the announcement creation
+
             console.warn('Error creating notifications:', notifError);
         }
 
@@ -617,9 +579,7 @@ const createAnnouncement = async (req, res) => {
     }
 };
 
-// @desc Get all announcements
-// @route GET /api/admin/announcements
-// @access Private
+
 const getAnnouncements = async (req, res) => {
     try {
         const announcements = await Announcement.find()
@@ -633,9 +593,7 @@ const getAnnouncements = async (req, res) => {
     }
 };
 
-// @desc Get announcements by category
-// @route GET /api/admin/announcements/:category
-// @access Private
+
 const getAnnouncementsByCategory = async (req, res) => {
     try {
         const { category } = req.params;
@@ -650,9 +608,7 @@ const getAnnouncementsByCategory = async (req, res) => {
     }
 };
 
-// @desc Delete announcement
-// @route DELETE /api/admin/announcements/:id
-// @access Private/Admin
+
 const deleteAnnouncement = async (req, res) => {
     try {
         const { id } = req.params;
@@ -663,7 +619,7 @@ const deleteAnnouncement = async (req, res) => {
             return res.status(404).json({ message: 'Announcement not found' });
         }
 
-        // Delete related notifications
+
         await Notification.deleteMany({ announcement: id });
 
         res.json({
@@ -676,9 +632,7 @@ const deleteAnnouncement = async (req, res) => {
     }
 };
 
-// @desc Update announcement
-// @route PUT /api/admin/announcements/:id
-// @access Private/Admin
+
 const updateAnnouncement = async (req, res) => {
     try {
         const { id } = req.params;

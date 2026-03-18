@@ -43,7 +43,7 @@ const WebinarList = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // Fetch all webinars
+
     const fetchEvents = useCallback(async () => {
         setLoading(true);
         try {
@@ -60,7 +60,7 @@ const WebinarList = () => {
         }
     }, [status, search, user?.token]);
 
-    // Fetch webinars created by this user (alumni only)
+
     const fetchMyEvents = useCallback(async () => {
         if (!user?.token || user?.role !== 'alumni') return;
         try {
@@ -75,7 +75,7 @@ const WebinarList = () => {
         }
     }, [user?.token, user?.role, user?._id]);
 
-    // Fetch webinars the user registered for
+
     const fetchMyRegistrations = useCallback(async () => {
         if (!user?.token) return;
         try {
@@ -98,7 +98,7 @@ const WebinarList = () => {
         }
     }, [fetchEvents, fetchMyRegistrations, fetchMyEvents, user?.role]);
 
-    // Reset activeTab based on user role access
+
     useEffect(() => {
         if (user?.role === 'alumni' && activeTab === 'registered') {
             setActiveTab('my');
@@ -109,7 +109,7 @@ const WebinarList = () => {
         }
     }, [user?.role, activeTab]);
 
-    // Register/Unregister
+
     const handleRegister = async (eventId: string) => {
         if (!user?.token) return;
 
@@ -128,7 +128,7 @@ const WebinarList = () => {
         }
     };
 
-    // Delete event
+
     const handleDelete = async (eventId: string) => {
         if (!user?.token) return;
         if (!confirm('Are you sure you want to delete this event?')) return;
@@ -337,7 +337,7 @@ const WebinarList = () => {
     );
 };
 
-// Event Card Component
+
 const EventCard = ({
     event,
     onRegister,

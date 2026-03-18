@@ -55,7 +55,7 @@ const WebinarScheduler: React.FC = () => {
     prerequisites: ''
   });
 
-  // Auto-assign the webinar speaker to the currently logged-in alumni.
+
   useEffect(() => {
     if (!user) return;
 
@@ -66,7 +66,7 @@ const WebinarScheduler: React.FC = () => {
     }));
   }, [user]);
 
-  // Platform options
+
   const platformOptions = [
     { id: 'google-meet', name: 'Google Meet', icon: '📹' },
     { id: 'zoom', name: 'Zoom', icon: '🎥' },
@@ -74,7 +74,7 @@ const WebinarScheduler: React.FC = () => {
     { id: 'custom', name: 'Custom Link', icon: '🔗' }
   ];
 
-  // Duration options
+
   const durationOptions = [
     { value: '30', label: '30 minutes' },
     { value: '45', label: '45 minutes' }, 
@@ -134,7 +134,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           skillsCovered: formData.skillsCovered,
           recordingAllowed: formData.recordingAllowed,
           prerequisites: formData.prerequisites,
-          // ❌ alumniName & platform intentionally NOT sent
+
         }),
       }
     );
@@ -145,7 +145,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     console.log("✅ Webinar scheduled:", data.webinar);
     setSuccess(true);
 
-    // ✅ redirect to video room
+
     navigate(`/videocall/${data.webinar.roomId}`);
   } catch (err: any) {
     console.error(err);
@@ -155,36 +155,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-    
-  //   // Simulate API call
-  //   setTimeout(() => {
-  //     console.log('Webinar scheduled:', formData);
-  //     setLoading(false);
-  //     setSuccess(true);
-      
-  //     // Reset form after successful submission
-  //     setTimeout(() => {
-  //       setFormData({
-  //         alumniName: '',
-  //         webinarName: '',
-  //         date: '',
-  //         time: '',
-  //         duration: '60',
-  //         description: '',
-  //         platform: 'google-meet',
-  //         maxParticipants: 100,
-  //         skillsCovered: [],
-  //         skillInput: '',
-  //         recordingAllowed: true,
-  //         prerequisites: ''
-  //       });
-  //       setSuccess(false);
-  //     }, 3000);
-  //   }, 1500);
-  // };
 
   const getMinDate = () => {
     const tomorrow = new Date();

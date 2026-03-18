@@ -64,7 +64,7 @@ const BlogDetail = () => {
             const res = await api.get(`/blogs/${id}`);
             setBlog(res.data);
             
-            // Check if user has liked this blog
+
             if (user && res.data.likedBy.includes(user._id)) {
                 setIsLiked(true);
             }
@@ -165,7 +165,7 @@ const BlogDetail = () => {
     };
 
     const formatContent = (content: string) => {
-        // Simple formatting: convert line breaks to paragraphs
+
         return content.split('\n\n').map((paragraph, index) => (
             <p key={index} className="mb-4 leading-relaxed text-gray-300">
                 {paragraph}

@@ -51,7 +51,7 @@ const referralApplicationSchema = mongoose.Schema(
             required: true,
         },
 
-        // Resume
+
         resumeUrl: {
             type: String,
             required: [true, 'Please upload your resume'],
@@ -69,7 +69,7 @@ const referralApplicationSchema = mongoose.Schema(
             default: '',
         },
 
-        // Application details
+
         coverNote: {
             type: String,
             maxlength: 500,
@@ -88,7 +88,7 @@ const referralApplicationSchema = mongoose.Schema(
             default: false,
         },
 
-        // Scoring
+
         fitScore: {
             type: fitScoreSchema,
             default: () => ({}),
@@ -98,7 +98,7 @@ const referralApplicationSchema = mongoose.Schema(
             default: 0,
         },
 
-        // Eligibility
+
         isEligible: {
             type: Boolean,
             default: true,
@@ -108,13 +108,13 @@ const referralApplicationSchema = mongoose.Schema(
             default: '',
         },
 
-        // Fraud
+
         fraudFlags: {
             type: [String],
             default: [],
         },
 
-        // Status
+
         status: {
             type: String,
             enum: ['pending', 'reviewed', 'referred', 'rejected'],
@@ -129,16 +129,16 @@ const referralApplicationSchema = mongoose.Schema(
     }
 );
 
-// One application per student per referral
+
 referralApplicationSchema.index({ referral: 1, student: 1 }, { unique: true });
 
-// Index for spam detection: same student, same company+jobTitle across referrals
+
 referralApplicationSchema.index({ student: 1, status: 1 });
 
-// Index for resume hash deduplication
+
 referralApplicationSchema.index({ resumeHash: 1 });
 
-// Pre-save: generate resume hash if resumeText is present
+
 referralApplicationSchema.pre('save', function (next) {
     if (this.isModified('resumeText') && this.resumeText) {
         const normalized = this.resumeText

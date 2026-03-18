@@ -84,7 +84,7 @@ const Dashboard = () => {
                     }));
                 }
             } catch {
-                // Keep graceful fallback values
+
             }
         };
 

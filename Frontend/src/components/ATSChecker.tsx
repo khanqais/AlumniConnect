@@ -1,9 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import api from '../config/api';
 
-/* ================================================================
-   Types
-   ================================================================ */
 
 interface ATSBreakdown {
     quantifyImpact: number;
@@ -48,9 +45,6 @@ interface CategoryItem {
     score: number;
 }
 
-/* ================================================================
-   Score Ring — big sidebar ring matching Resume Worded style
-   ================================================================ */
 
 const ScoreRing = ({ score, size = 140, strokeWidth = 11 }: {
     score: number;
@@ -61,7 +55,7 @@ const ScoreRing = ({ score, size = 140, strokeWidth = 11 }: {
     const circ = 2 * Math.PI * r;
     const offset = circ - (score / 100) * circ;
 
-    // Orange-red gradient color like Resume Worded
+
     const strokeColor =
         score >= 80 ? '#22c55e' :
         score >= 65 ? '#3b82f6' :
@@ -91,9 +85,6 @@ const ScoreRing = ({ score, size = 140, strokeWidth = 11 }: {
     );
 };
 
-/* ================================================================
-   Color Spectrum Bar — "YOUR RESUME ▼ ... TOP RESUMES ┆"
-   ================================================================ */
 
 const SpectrumBar = ({ score }: { score: number }) => {
     return (
@@ -127,9 +118,6 @@ const SpectrumBar = ({ score }: { score: number }) => {
     );
 };
 
-/* ================================================================
-   Upload Zone
-   ================================================================ */
 
 const UploadZone = ({ onFile, loading }: { onFile: (f: File) => void; loading: boolean }) => {
     const [dragging, setDragging] = useState(false);
@@ -198,9 +186,6 @@ const UploadZone = ({ onFile, loading }: { onFile: (f: File) => void; loading: b
     );
 };
 
-/* ================================================================
-   Main ATSChecker Component — 3-panel Resume Worded layout
-   ================================================================ */
 
 const CATEGORIES: Omit<CategoryItem, 'score'>[] = [
     { key: 'quantifyImpact', label: 'Quantify impact',  icon: '📊', weight: '25%' },
@@ -236,7 +221,7 @@ const ATSChecker = () => {
     const [error, setError] = useState('');
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-    // Staged loading animation state
+
     const [showSteps, setShowSteps] = useState(false);
     const [currentStep, setCurrentStep] = useState(-1);
     const pendingResult = useRef<ATSResult | null>(null);
@@ -244,12 +229,12 @@ const ATSChecker = () => {
     const apiDone = useRef(false);
     const stepTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-    // Clean up blob URL on unmount / file change
+
     useEffect(() => {
         return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
     }, [previewUrl]);
 
-    // Clean up timers on unmount
+
     useEffect(() => {
         return () => { stepTimers.current.forEach(t => clearTimeout(t)); };
     }, []);
@@ -263,7 +248,7 @@ const ATSChecker = () => {
         pendingError.current = '';
         apiDone.current = false;
 
-        // Create preview URL for PDF
+
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         if (selectedFile.type === 'application/pdf' || selectedFile.name.endsWith('.pdf')) {
             setPreviewUrl(URL.createObjectURL(selectedFile));
@@ -271,16 +256,16 @@ const ATSChecker = () => {
             setPreviewUrl(null);
         }
 
-        // Start staged loading animation
+
         setShowSteps(true);
         setCurrentStep(-1);
         setLoading(true);
 
-        // Clear any prior timers
+
         stepTimers.current.forEach(t => clearTimeout(t));
         stepTimers.current = [];
 
-        // Kick off step progression — each step reveals after STEP_DELAY
+
         LOADING_STEPS.forEach((_, i) => {
             const t = setTimeout(() => {
                 setCurrentStep(i);
@@ -288,7 +273,7 @@ const ATSChecker = () => {
             stepTimers.current.push(t);
         });
 
-        // API call in parallel — track start time for animation sync
+
         const animStart = Date.now();
         const totalAnimTime = (LOADING_STEPS.length + 1) * STEP_DELAY + 800;
 
@@ -307,14 +292,14 @@ const ATSChecker = () => {
         }
         apiDone.current = true;
 
-        // Wait for remaining animation time (API may finish before steps complete)
+
         const elapsed = Date.now() - animStart;
         const waitMore = Math.max(0, totalAnimTime - elapsed);
         if (waitMore > 0) {
             await new Promise(resolve => setTimeout(resolve, waitMore));
         }
 
-        // Show results
+
         if (pendingResult.current) {
             setResult(pendingResult.current);
             const first = CATEGORIES.find(c =>
@@ -348,7 +333,7 @@ const ATSChecker = () => {
     const issueCount = (catKey: string) =>
         result ? Math.max(0, fixesForCategory(catKey).length) : 0;
 
-    // Score description text like Resume Worded
+
     const getScoreBlurb = (score: number) => {
         if (score >= 85) return { headline: `Your resume scored ${score} out of 100.`, body: `Excellent work! Your resume is highly optimized for ATS systems and hiring managers. Minor tweaks below can push it even higher.` };
         if (score >= 70) return { headline: `Your resume scored ${score} out of 100.`, body: `Good start! Your resume passes most ATS filters. It scored lower on a few criteria that hiring managers look for, but they can be improved.` };
@@ -356,7 +341,7 @@ const ATSChecker = () => {
         return { headline: `Your resume scored ${score} out of 100.`, body: `Your resume needs significant work before it's ready for ATS systems. Many hiring managers and resume screening tools will filter it out. Follow the fixes below — you could improve your score by ${Math.min(40, 100 - score)}+ points with targeted changes.` };
     };
 
-    /* ── PRE-UPLOAD VIEW ── */
+
     if (!result && !loading) {
         return (
             <div className="space-y-4">
@@ -394,7 +379,7 @@ const ATSChecker = () => {
         );
     }
 
-    /* ── LOADING — Staged steps overlay ── */
+
     if (loading && showSteps) {
         return (
             <div className="flex min-h-[600px] items-center justify-center rounded-2xl bg-[#1a1a40] p-8">
@@ -414,14 +399,14 @@ const ATSChecker = () => {
                                 {/* Circle icon */}
                                 <div className="shrink-0">
                                     {isDone ? (
-                                        /* Green completed check */
+
                                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30">
                                             <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
                                     ) : isActive ? (
-                                        /* Active spinner ring */
+
                                         <div className="relative flex h-9 w-9 items-center justify-center">
                                             <div className="absolute inset-0 rounded-full border-2 border-white/20" />
                                             <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-emerald-400 animate-spin" />
@@ -430,7 +415,7 @@ const ATSChecker = () => {
                                             </svg>
                                         </div>
                                     ) : (
-                                        /* Pending dimmed circle */
+
                                         <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/10">
                                             <svg className="h-4 w-4 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -455,7 +440,7 @@ const ATSChecker = () => {
         );
     }
 
-    /* ── RESULTS — 3-PANEL LAYOUT ── */
+
     const blurb = result ? getScoreBlurb(result.overall) : null;
     const totalIssues = result ? result.topFixes.length : 0;
 
@@ -768,7 +753,7 @@ const ATSChecker = () => {
                             style={{ background: '#f3f4f6' }}
                         />
                     ) : file ? (
-                        /* DOC/DOCX — no native preview */
+
                         <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
                             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100">
                                 <svg className="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

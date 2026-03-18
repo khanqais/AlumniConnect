@@ -139,13 +139,13 @@ const AlumniSignup: React.FC = () => {
 
     if (validateForm()) {
       console.log('Alumni signup form submitted:', formData);
-      // Form is valid - actual signup logic would go here
+
       alert('Alumni signup successful! Verification will be processed.');
       navigate('/login');
     }
   };
 
-  // Generate passout years (last 50 years)
+
   const currentYear = new Date().getFullYear();
   const passoutYears = Array.from({ length: 50 }, (_, i) => {
     const year = currentYear - i;

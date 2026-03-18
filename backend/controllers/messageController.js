@@ -122,7 +122,7 @@ const normalizeMessageForResponse = (messageDoc) => {
     return normalized;
 };
 
-// Send a message
+
 const sendMessage = async (req, res) => {
     try {
         const { receiverId, content } = req.body;
@@ -135,7 +135,7 @@ const sendMessage = async (req, res) => {
             });
         }
 
-        // Check if receiver exists
+
         const receiver = await User.findById(receiverId);
         if (!receiver) {
             return res.status(404).json({ message: 'Receiver not found' });
@@ -185,7 +185,7 @@ const sendMessage = async (req, res) => {
             .populate('sender', 'name avatar role')
             .populate('receiver', 'name avatar role');
 
-        // Notify the receiver about the new message (fire-and-forget)
+
         notifyUser(receiverId, {
             sender: req.user._id,
             type: 'message',
@@ -205,7 +205,7 @@ const sendMessage = async (req, res) => {
     }
 };
 
-// Get conversation between two users
+
 const getConversation = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -220,7 +220,7 @@ const getConversation = async (req, res) => {
             .populate('receiver', 'name avatar role')
             .sort({ createdAt: 1 });
 
-        // Mark messages as read
+
         await Message.updateMany(
             {
                 sender: userId,
@@ -240,10 +240,10 @@ const getConversation = async (req, res) => {
     }
 };
 
-// Get all conversations (list of users you've chatted with)
+
 const getConversations = async (req, res) => {
     try {
-        // Get all unique users the current user has messaged with
+
         const sentMessages = await Message.find({ sender: req.user._id })
             .select('receiver')
             .distinct('receiver');
@@ -252,15 +252,15 @@ const getConversations = async (req, res) => {
             .select('sender')
             .distinct('sender');
 
-        // Combine and get unique user IDs
+
         const userIds = [...new Set([...sentMessages, ...receivedMessages])];
 
-        // Get user details and last message for each conversation
+
         const conversations = await Promise.all(
             userIds.map(async (userId) => {
                 const user = await User.findById(userId).select('name avatar role company jobTitle');
                 
-                // Get last message
+
                 const lastMessage = await Message.findOne({
                     $or: [
                         { sender: req.user._id, receiver: userId },
@@ -270,7 +270,7 @@ const getConversations = async (req, res) => {
                     .sort({ createdAt: -1 })
                     .limit(1);
 
-                // Count unread messages
+
                 const unreadCount = await Message.countDocuments({
                     sender: userId,
                     receiver: req.user._id,
@@ -285,7 +285,7 @@ const getConversations = async (req, res) => {
             })
         );
 
-        // Sort by last message time
+
         conversations.sort((a, b) => {
             const timeA = a.lastMessage?.createdAt || 0;
             const timeB = b.lastMessage?.createdAt || 0;
@@ -299,7 +299,7 @@ const getConversations = async (req, res) => {
     }
 };
 
-// Delete a message
+
 const deleteMessage = async (req, res) => {
     try {
         const message = await Message.findById(req.params.id);
@@ -308,7 +308,7 @@ const deleteMessage = async (req, res) => {
             return res.status(404).json({ message: 'Message not found' });
         }
 
-        // Check if user is the sender
+
         if (message.sender.toString() !== req.user._id.toString()) {
             return res.status(403).json({ 
                 message: 'Not authorized to delete this message' 
@@ -327,7 +327,7 @@ const deleteMessage = async (req, res) => {
     }
 };
 
-// Get unread message count
+
 const getUnreadCount = async (req, res) => {
     try {
         const count = await Message.countDocuments({

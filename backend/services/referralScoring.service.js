@@ -1,20 +1,7 @@
-/* ============================================================
-   REFERRAL FIT SCORING ENGINE
-   ─────────────────────────────────────────────────────────────
-   Weights:
-     Required skills match        30%
-     Projects / experience depth  25%
-     Education match              15%
-     Resume completeness          10%
-     CGPA / eligibility           10%
-     Fraud risk penalty          -10%
-   ============================================================ */
+
 
 const crypto = require('crypto');
 
-// ═══════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════
 
 function countRegex(text, regex) {
     const g = new RegExp(
@@ -50,7 +37,7 @@ function extractGithubUsernamesFromText(text = '') {
     return Array.from(usernames);
 }
 
-/** Rough section splitter – returns text chunks by heading */
+
 function splitSections(text) {
     const lines = text.split(/\n/);
     const sections = {};
@@ -72,7 +59,7 @@ function splitSections(text) {
     return sections;
 }
 
-/** Extract bullet points (same logic as ATS controller) */
+
 function extractBullets(text) {
     return text
         .split(/\n/)
@@ -80,9 +67,6 @@ function extractBullets(text) {
         .filter((l) => l.length > 15);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SECTION DETECTION (reused from ATS patterns)
-// ═══════════════════════════════════════════════════════════════
 
 const SECTION_PATTERNS = {
     contact:
@@ -109,9 +93,6 @@ function detectSections(text) {
     return found;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 1. SKILLS MATCH (30%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreSkillsMatch(resumeText, profileSkills, requiredSkills) {
     if (!requiredSkills || requiredSkills.length === 0) {
@@ -121,7 +102,7 @@ function scoreSkillsMatch(resumeText, profileSkills, requiredSkills) {
     const resumeLower = resumeText.toLowerCase();
     const sections = splitSections(resumeText);
 
-    // Combine experience + projects sections for "contextual" check
+
     const contextSections = ['experience', 'workhistory', 'projects', 'project'].reduce(
         (acc, key) => {
             const match = Object.keys(sections).find((k) => k.includes(key));
@@ -130,7 +111,7 @@ function scoreSkillsMatch(resumeText, profileSkills, requiredSkills) {
         ''
     ).toLowerCase();
 
-    // Skills-only section
+
     const skillsSection = Object.keys(sections)
         .filter((k) => k.includes('skill') || k.includes('tech') || k.includes('competenc'))
         .map((k) => sections[k])
@@ -156,19 +137,19 @@ function scoreSkillsMatch(resumeText, profileSkills, requiredSkills) {
         const inResumeAnywhere = skillRe.test(resumeLower);
 
         if (inContext && inProfile) {
-            // Strong signal: skill appears in project/work context AND profile
+
             earnedWeight += 1.0;
             matchDetails.push({ skill, signal: 'strong', weight: 1.0 });
         } else if (inContext) {
-            // Good signal: in context but not in profile
+
             earnedWeight += 0.85;
             matchDetails.push({ skill, signal: 'good', weight: 0.85 });
         } else if (inSkillsList && inProfile) {
-            // Medium signal: in skills list and profile but no project evidence
+
             earnedWeight += 0.5;
             matchDetails.push({ skill, signal: 'medium', weight: 0.5 });
         } else if (inResumeAnywhere || inProfile) {
-            // Weak signal: mentioned somewhere but no context
+
             earnedWeight += 0.25;
             matchDetails.push({ skill, signal: 'weak', weight: 0.25 });
         } else {
@@ -183,9 +164,6 @@ function scoreSkillsMatch(resumeText, profileSkills, requiredSkills) {
     return { score: Math.min(100, score), matchDetails };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 2. PROJECTS / EXPERIENCE DEPTH (25%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreProjectDepth(resumeText, projectLinks) {
     let score = 0;
@@ -194,7 +172,7 @@ function scoreProjectDepth(resumeText, projectLinks) {
     const sections = splitSections(resumeText);
     const bullets = extractBullets(resumeText);
 
-    // --- Experience word count & quality ---
+
     const expSection = Object.keys(sections)
         .filter((k) => k.includes('experience') || k.includes('work'))
         .map((k) => sections[k])
@@ -206,7 +184,7 @@ function scoreProjectDepth(resumeText, projectLinks) {
     else if (expWordCount >= 50) score += 8;
     else score += 3;
 
-    // --- Projects section ---
+
     const projSection = Object.keys(sections)
         .filter((k) => k.includes('project'))
         .map((k) => sections[k])
@@ -217,7 +195,7 @@ function scoreProjectDepth(resumeText, projectLinks) {
     else if (projWordCount >= 80) score += 10;
     else if (projWordCount >= 30) score += 5;
 
-    // --- Measurable outcomes (numbers/percentages in bullets) ---
+
     const quantifiedBulletRe =
         /\d+[\s,]*(%|percent|users?|customers?|reduction|increase|improvement|growth|requests?|transactions?|hours?|x\s|x$|\$|€|£)/i;
     const quantifiedCount = bullets.filter((b) => quantifiedBulletRe.test(b)).length;
@@ -230,7 +208,7 @@ function scoreProjectDepth(resumeText, projectLinks) {
 
     if (quantifiedCount > 0) details.signals.push(`${quantifiedCount} quantified outcomes`);
 
-    // --- Verifiable project links ---
+
     const links = projectLinks || [];
     const githubLinks = links.filter((l) => l.type === 'github');
     const deployedLinks = links.filter((l) => l.type === 'deployed');
@@ -244,13 +222,13 @@ function scoreProjectDepth(resumeText, projectLinks) {
         details.signals.push(`${deployedLinks.length} deployed project(s)`);
     }
 
-    // No links at all → partial credit penalty
+
     if (links.length === 0) {
         score = Math.round(score * 0.7); // 30% penalty for no verifiable links
         details.missing.push('No project links provided — partial credit only');
     }
 
-    // --- Tech stack diversity ---
+
     const techKeywords =
         /\b(react|angular|vue|node|express|django|flask|spring|aws|gcp|azure|docker|kubernetes|mongodb|postgres|mysql|redis|graphql|rest\s*api|typescript|python|java|go|rust|swift|kotlin)\b/gi;
     const techCount = new Set(
@@ -267,34 +245,31 @@ function scoreProjectDepth(resumeText, projectLinks) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 3. EDUCATION MATCH (15%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreEducationMatch(student, referral) {
     let score = 0;
 
-    // Branch match (60% of education score)
+
     const eligibleBranches = (referral.eligibleBranches || []).map((b) =>
         b.toLowerCase().trim()
     );
     const studentBranch = (student.branch || '').toLowerCase().trim();
 
     if (eligibleBranches.length === 0) {
-        // No branch restriction — full marks
+
         score += 60;
     } else if (studentBranch && eligibleBranches.includes(studentBranch)) {
         score += 60;
     } else if (studentBranch) {
-        // Check partial/related branch match
+
         const related = eligibleBranches.some(
             (b) => studentBranch.includes(b) || b.includes(studentBranch)
         );
         if (related) score += 30;
-        // else 0 — wrong branch
+
     }
 
-    // Year match (40% of education score)
+
     const eligibleYears = referral.eligibleYears || [];
     const studentYear = student.graduationYear;
 
@@ -303,14 +278,11 @@ function scoreEducationMatch(student, referral) {
     } else if (studentYear && eligibleYears.includes(studentYear)) {
         score += 40;
     }
-    // else 0 — wrong year
+
 
     return { score: Math.min(100, score) };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 4. RESUME COMPLETENESS (10%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreResumeCompleteness(resumeText) {
     let score = 0;
@@ -320,7 +292,7 @@ function scoreResumeCompleteness(resumeText) {
     const wordCount = resumeText.split(/\s+/).filter(Boolean).length;
     const bullets = extractBullets(resumeText);
 
-    // Section coverage (0–40 points)
+
     const criticalSections = ['experience', 'education', 'skills'];
     const foundCritical = criticalSections.filter((s) => sections[s]).length;
 
@@ -330,13 +302,13 @@ function scoreResumeCompleteness(resumeText) {
     if (!sections.education) details.missing.push('Missing education section');
     if (!sections.skills) details.missing.push('Missing skills section');
 
-    // Optional sections bonus
+
     if (sections.projects) score += 8;
     if (sections.summary) score += 5;
     if (sections.certifications) score += 5;
     if (sections.contact) score += 3;
 
-    // Word count (0–20 points)
+
     if (wordCount >= 300 && wordCount <= 900) score += 20;
     else if (wordCount >= 200) score += 12;
     else if (wordCount >= 100) score += 6;
@@ -345,7 +317,7 @@ function scoreResumeCompleteness(resumeText) {
         details.missing.push(`Resume too short (${wordCount} words)`);
     }
 
-    // Bullet quality (0–20 points)
+
     if (bullets.length >= 8) score += 20;
     else if (bullets.length >= 5) score += 14;
     else if (bullets.length >= 3) score += 8;
@@ -354,7 +326,7 @@ function scoreResumeCompleteness(resumeText) {
         details.missing.push('Too few descriptive bullet points');
     }
 
-    // Vague/generic language penalty
+
     const vaguePatterns = [
         /responsible for/gi,
         /duties included/gi,
@@ -384,13 +356,10 @@ function scoreResumeCompleteness(resumeText) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 5. CGPA / ELIGIBILITY SCORE (10%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreCGPA(studentCGPA, minCGPA) {
     if (minCGPA <= 0) {
-        // No CGPA requirement
+
         return { score: 100 };
     }
 
@@ -402,7 +371,7 @@ function scoreCGPA(studentCGPA, minCGPA) {
         return { score: 0, note: `CGPA ${studentCGPA} below minimum ${minCGPA}` };
     }
 
-    // Graduated scaling: exactly at threshold = 60, well above = 100
+
     const buffer = studentCGPA - minCGPA;
     if (buffer >= 2) return { score: 100 };
     if (buffer >= 1) return { score: 85 };
@@ -410,9 +379,6 @@ function scoreCGPA(studentCGPA, minCGPA) {
     return { score: 60 };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 6. FRAUD RISK DETECTION (-10%)
-// ═══════════════════════════════════════════════════════════════
 
 function detectFraud({
     resumeText,
@@ -426,7 +392,7 @@ function detectFraud({
     const flags = [];
     let penalty = 0;
 
-    // --- 1. Skills claimed without supporting context ---
+
     const sections = splitSections(resumeText);
     const contextText = Object.keys(sections)
         .filter(
@@ -468,7 +434,7 @@ function detectFraud({
         penalty += unsupportedCount * 10;
     }
 
-    // --- 2. Generic / templated language (copy-paste JD) ---
+
     const genericPatterns = [
         /responsible for managing/gi,
         /duties included/gi,
@@ -500,7 +466,7 @@ function detectFraud({
         penalty += 5;
     }
 
-    // --- 3. Resume hash deduplication ---
+
     if (resumeHash && existingHashes && existingHashes.length > 0) {
         const duplicates = existingHashes.filter((h) => h === resumeHash);
         if (duplicates.length > 0) {
@@ -511,14 +477,14 @@ function detectFraud({
         }
     }
 
-    // --- 4. Extremely short resume ---
+
     const wordCount = resumeText.split(/\s+/).filter(Boolean).length;
     if (wordCount < 80) {
         flags.push('Extremely short resume — insufficient content for evaluation');
         penalty += 20;
     }
 
-    // --- 5. Repetitive content ---
+
     const sentences = resumeText
         .split(/[.!?\n]/)
         .map((s) => s.trim().toLowerCase())
@@ -529,7 +495,7 @@ function detectFraud({
         penalty += 15;
     }
 
-    // --- 6. Account identity vs resume identity ---
+
     const resumeLower = (resumeText || '').toLowerCase();
     const resumeHeader = (resumeText || '')
         .split(/\n/)
@@ -559,7 +525,7 @@ function detectFraud({
         penalty += 10;
     }
 
-    // --- 7. GitHub username consistency (account/profile/resume/project links) ---
+
     const projectGithubUsernames = (projectLinks || [])
         .map((link) => parseGithubUsername(link?.url || ''))
         .filter(Boolean);
@@ -595,28 +561,13 @@ function detectFraud({
         penalty += 8;
     }
 
-    // Cap penalty at 100
+
     penalty = Math.min(100, penalty);
 
     return { penalty, flags };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MAIN SCORING FUNCTION
-// ═══════════════════════════════════════════════════════════════
 
-/**
- * Calculate the full fit score for a referral application.
- *
- * @param {Object} params
- * @param {Object} params.student       - User document (student)
- * @param {Object} params.referral      - Referral document
- * @param {string} params.resumeText    - Parsed resume text
- * @param {Array}  params.projectLinks  - [{ title, url, type }]
- * @param {Array}  params.existingHashes - Existing resume hashes for dedup
- * @param {string} params.resumeHash    - This application's resume hash
- * @returns {Object} { fitScore, totalScore, fraudFlags }
- */
 function calculateFitScore({
     student,
     referral,
@@ -627,26 +578,26 @@ function calculateFitScore({
 }) {
     const text = resumeText || '';
 
-    // 1. Skills match (30%)
+
     const skills = scoreSkillsMatch(
         text,
         student.skills,
         referral.requiredSkills
     );
 
-    // 2. Projects / experience depth (25%)
+
     const projects = scoreProjectDepth(text, projectLinks);
 
-    // 3. Education match (15%)
+
     const education = scoreEducationMatch(student, referral);
 
-    // 4. Resume completeness (10%)
+
     const resume = scoreResumeCompleteness(text);
 
-    // 5. CGPA (10%)
+
     const cgpa = scoreCGPA(student.cgpa, referral.minCGPA);
 
-    // 6. Fraud detection (-10%)
+
     const fraud = detectFraud({
         resumeText: text,
         profileSkills: student.skills,
@@ -657,7 +608,7 @@ function calculateFitScore({
         projectLinks,
     });
 
-    // Weighted total
+
     const weightedTotal = Math.round(
         skills.score * 0.30 +
         projects.score * 0.25 +
@@ -693,36 +644,29 @@ function calculateFitScore({
     };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ELIGIBILITY GATE (pre-score hard checks)
-// ═══════════════════════════════════════════════════════════════
 
-/**
- * Check hard eligibility before scoring.
- * Returns { eligible: true } or { eligible: false, reason: string }
- */
 function checkEligibility(student, referral) {
-    // 1. Banned check
+
     if (student.isBanned) {
         return { eligible: false, reason: 'Your account has been suspended' };
     }
 
-    // 2. Referral still open
+
     if (referral.status !== 'open') {
         return { eligible: false, reason: 'This referral is no longer accepting applications' };
     }
 
-    // 3. Deadline passed
+
     if (new Date(referral.deadline) < new Date()) {
         return { eligible: false, reason: 'Application deadline has passed' };
     }
 
-    // 4. Max applications reached
+
     if (referral.applicationsCount >= referral.maxApplications) {
         return { eligible: false, reason: 'Maximum number of applications reached' };
     }
 
-    // 5. Branch check
+
     const eligibleBranches = (referral.eligibleBranches || []).map((b) =>
         b.toLowerCase().trim()
     );
@@ -739,7 +683,7 @@ function checkEligibility(student, referral) {
         }
     }
 
-    // 6. CGPA check
+
     if (referral.minCGPA > 0) {
         if (student.cgpa === null || student.cgpa === undefined) {
             return {
@@ -755,7 +699,7 @@ function checkEligibility(student, referral) {
         }
     }
 
-    // 7. Graduation year check
+
     const eligibleYears = referral.eligibleYears || [];
     if (eligibleYears.length > 0 && student.graduationYear) {
         if (!eligibleYears.includes(student.graduationYear)) {
@@ -769,9 +713,6 @@ function checkEligibility(student, referral) {
     return { eligible: true };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RESUME HASH UTILITY
-// ═══════════════════════════════════════════════════════════════
 
 function generateResumeHash(resumeText) {
     if (!resumeText) return '';
@@ -783,7 +724,7 @@ module.exports = {
     calculateFitScore,
     checkEligibility,
     generateResumeHash,
-    // Exported for testing
+
     scoreSkillsMatch,
     scoreProjectDepth,
     scoreEducationMatch,

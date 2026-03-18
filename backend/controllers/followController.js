@@ -1,6 +1,6 @@
 const User = require('../models/User');
 
-// Follow a user
+
 const followUser = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -18,11 +18,11 @@ const followUser = async (req, res) => {
 
         const currentUser = await User.findById(req.user._id);
 
-        // Check if already following
+
         const isFollowing = currentUser.following.includes(userId);
 
         if (isFollowing) {
-            // Unfollow
+
             currentUser.following = currentUser.following.filter(
                 (id) => id.toString() !== userId
             );
@@ -42,7 +42,7 @@ const followUser = async (req, res) => {
             });
         }
 
-        // Follow
+
         currentUser.following.push(userId);
         userToFollow.followers.push(req.user._id);
 
@@ -62,7 +62,7 @@ const followUser = async (req, res) => {
     }
 };
 
-// Get followers
+
 const getFollowers = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -83,7 +83,7 @@ const getFollowers = async (req, res) => {
     }
 };
 
-// Get following
+
 const getFollowing = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -104,7 +104,7 @@ const getFollowing = async (req, res) => {
     }
 };
 
-// Check if following
+
 const checkFollowing = async (req, res) => {
     try {
         const { userId } = req.params;

@@ -285,7 +285,7 @@ const Community = () => {
                 ) : (
                     <>
                         {activeTab === 'my' ? (
-                            // My Questions
+
                             myQuestions.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-20">
                                     <svg className="mb-4 h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,7 +307,7 @@ const Community = () => {
                                 </div>
                             )
                         ) : (
-                            // All Questions
+
                             questions.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-20">
                                     <svg className="mb-4 h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,7 +352,7 @@ const Community = () => {
     );
 };
 
-// Question Card Component
+
 const QuestionCard = ({ question, onVoted }: { question: Question; onVoted: () => void }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -497,7 +497,7 @@ const QuestionCard = ({ question, onVoted }: { question: Question; onVoted: () =
     );
 };
 
-// Ask Question Modal Component
+
 const AskQuestionModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) => {
     const [formData, setFormData] = useState({
         title: '',
@@ -617,7 +617,7 @@ const AskQuestionModal = ({ onClose, onSuccess }: { onClose: () => void; onSucce
     );
 };
 
-// Create Poll Modal Component
+
 const CreatePollModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) => {
     const [formData, setFormData] = useState({
         title: '',

@@ -2,7 +2,7 @@ const Webinar = require("../models/Webinar");
 const { v4: uuidv4 } = require("uuid");
 const { notifyAllUsers } = require("../utils/notifications");
 
-// Schedule a webinar (alumni only)
+
 const scheduleWebinar = async (req, res) => {
   try {
     const { webinarName, date, time, duration, description, maxParticipants, skillsCovered, recordingAllowed, prerequisites } = req.body;
@@ -11,7 +11,7 @@ const scheduleWebinar = async (req, res) => {
       return res.status(403).json({ message: "Only alumni can schedule webinars" });
     }
 
-    // Combine date + time into scheduledAt
+
     const scheduledAt = new Date(`${date}T${time}`);
 
     const newWebinar = await Webinar.create({
@@ -27,7 +27,7 @@ const scheduleWebinar = async (req, res) => {
       roomId: uuidv4(),
     });
 
-    // Notify all users about the new webinar (fire-and-forget)
+
     notifyAllUsers({
       sender: req.user._id,
       type: 'webinar',
@@ -45,7 +45,7 @@ const scheduleWebinar = async (req, res) => {
   }
 };
 
-// Get all webinars (with optional search & status filter)
+
 const getAllWebinars = async (req, res) => {
   try {
     const { search = "", status } = req.query;
@@ -66,7 +66,7 @@ const getAllWebinars = async (req, res) => {
       .populate("createdBy", "name email role")
       .sort({ scheduledAt: 1 });
 
-    // Map to match frontend "status" field and filter out webinars with missing organizers
+
     const mapped = webinars
       .filter(w => w.createdBy) // Only include webinars with valid organizers
       .map((w) => {
@@ -111,7 +111,7 @@ const getAllWebinars = async (req, res) => {
   }
 };
 
-// Get webinars created by logged-in alumni
+
 const getMyWebinars = async (req, res) => {
   try {
     if (req.user.role !== "alumni") return res.status(403).json({ message: "Only alumni can view their webinars" });
@@ -127,13 +127,13 @@ const getMyWebinars = async (req, res) => {
   }
 };
 
-// Register/unregister a webinar
+
 const registerWebinar = async (req, res) => {
   try {
     const webinar = await Webinar.findById(req.params.id);
     if (!webinar) return res.status(404).json({ message: "Webinar not found" });
 
-    // Only students can register for webinars
+
     if (req.user.role !== 'student') {
       return res.status(403).json({ message: "Only students can register for webinars" });
     }
@@ -142,7 +142,7 @@ const registerWebinar = async (req, res) => {
     const isRegistered = webinar.registeredUsers.includes(userId);
 
     if (isRegistered) {
-      // unregister
+
       webinar.registeredUsers = webinar.registeredUsers.filter((id) => id.toString() !== userId.toString());
     } else {
       if (webinar.registeredUsers.length >= webinar.maxParticipants) {
@@ -159,7 +159,7 @@ const registerWebinar = async (req, res) => {
   }
 };
 
-// Delete webinar
+
 const deleteWebinar = async (req, res) => {
   try {
     const webinar = await Webinar.findById(req.params.id);

@@ -52,7 +52,7 @@ const ActivityFeed = () => {
         }
     }, [user]);
 
-    // Refetch on filter change
+
     useEffect(() => {
         setPage(1);
         setItems([]);

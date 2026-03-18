@@ -35,9 +35,6 @@ def ask_ai(prompt: str) -> str:
     return text[start:end]
 
 
-# --------------------------------------------------
-# 1️⃣ CAREER PATH (CURRENT SKILLS COLLABORATIVE FILTERING)
-# --------------------------------------------------
 @app.route("/career-path", methods=["POST"])
 def career_path():
     data = request.json
@@ -73,16 +70,13 @@ def career_path():
             }
         )
 
-    # Only return alumni with at least one matched skill
+
     filtered = [r for r in results if r["skillMatchPercentage"] > 0]
     return jsonify(
         sorted(filtered, key=lambda x: x["skillMatchPercentage"], reverse=True)
     )
 
 
-# --------------------------------------------------
-# 2️⃣ TARGET SKILLS (TARGET SKILLS COLLABORATIVE FILTERING)
-# --------------------------------------------------
 @app.route("/target-skills", methods=["POST"])
 def target_skills():
     data = request.json
@@ -102,7 +96,7 @@ def target_skills():
             (len(matched) / len(target_skills_set) * 100) if target_skills_set else 0
         )
 
-        # Skills the alumni has that the student doesn't have yet (skills to learn)
+
         missing_skills = [s for s in alum_skills_raw if s.lower() not in target_skills_set]
 
         results.append(
@@ -121,16 +115,13 @@ def target_skills():
             }
         )
 
-    # Only return alumni with at least one matched target skill
+
     filtered = [r for r in results if r["skillMatchPercentage"] > 0]
     return jsonify(
         sorted(filtered, key=lambda x: x["skillMatchPercentage"], reverse=True)
     )
 
 
-# --------------------------------------------------
-# 3️⃣ QUIZ LEVELS GENERATION
-# --------------------------------------------------
 @app.route("/get-levels", methods=["POST"])
 def get_levels():
     data = request.get_json() or {}
@@ -163,9 +154,6 @@ Return ONLY JSON in this format:
         return jsonify({"message": f"Failed to generate levels: {str(error)}"}), 500
 
 
-# --------------------------------------------------
-# 4️⃣ QUIZ GENERATION
-# --------------------------------------------------
 @app.route("/generate-quiz", methods=["POST"])
 def generate_quiz():
     data = request.get_json() or {}
@@ -213,8 +201,5 @@ Rules:
         return jsonify({"message": f"Failed to generate quiz: {str(error)}"}), 500
 
 
-# --------------------------------------------------
-# RUN ML SERVICE
-# --------------------------------------------------
 if __name__ == "__main__":
     app.run(port=5001, debug=False)

@@ -17,7 +17,7 @@ const chatUpload = multer({
     limits: { fileSize: 25 * 1024 * 1024 },
 });
 
-// All routes are protected
+
 router.post('/send', protect, chatUpload.single('media'), sendMessage);
 router.get('/conversations', protect, getConversations);
 router.get('/conversation/:userId', protect, getConversation);

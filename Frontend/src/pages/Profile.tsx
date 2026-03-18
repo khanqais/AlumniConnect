@@ -166,7 +166,7 @@ const Profile = () => {
             workExperience: [...formData.workExperience, experienceToAdd]
         });
 
-        // Reset new experience form
+
         setNewExperience({
             id: '',
             company: '',

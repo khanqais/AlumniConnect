@@ -32,13 +32,13 @@ const AdminLogin = () => {
             console.log('✅ Admin Login Response:', res.data);
             
             if (res.data.success) {
-                // Store admin session
+
                 localStorage.setItem('adminAuth', 'true');
                 localStorage.setItem('adminEmail', email);
                 
                 console.log('✅ Redirecting to /admin/dashboard');
                 
-                // Navigate to admin dashboard
+
                 navigate('/admin/dashboard', { replace: true });
             }
         } catch (err: unknown) {

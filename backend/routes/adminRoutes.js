@@ -26,10 +26,10 @@ const {
     updateAnnouncement,
 } = require('../controllers/adminController');
 
-// Admin login route (no authentication needed)
+
 router.post('/login', adminLogin);
 
-// All other routes - remove auth middleware temporarily for testing
+
 router.get('/pending', getPendingUsers);
 router.get('/approved', getApprovedUsers);
 router.get('/user/:id', getUserById);
@@ -48,14 +48,14 @@ router.delete('/blogs/:id', deleteBlogAdmin);
 
 router.get('/alumni/search', searchAlumni);
 
-// CGPA & Ban management
+
 router.put('/user/:id/cgpa', updateStudentCGPA);
 router.put('/user/:id/ban', toggleUserBan);
 
-// Referral stats
+
 router.get('/referral-stats', getReferralStats);
 
-// College Announcements
+
 router.post('/announcements', createAnnouncement);
 router.get('/announcements', getAnnouncements);
 router.get('/announcements/:category', getAnnouncementsByCategory);

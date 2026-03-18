@@ -1,14 +1,7 @@
 const cloudinary = require('../config/cloudinary');
 const stream = require('stream');
 
-/**
- * Upload a file buffer to Cloudinary using upload_stream
- * @param {Buffer} buffer - File buffer
- * @param {string} folder - Cloudinary folder
- * @param {string} filename - Desired filename (without extension)
- * @param {string} resourceType - 'image', 'raw', or 'auto'
- * @returns {Promise<Object>} Cloudinary upload result
- */
+
 const uploadToCloudinary = (buffer, folder, filename, resourceType = 'auto') => {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(

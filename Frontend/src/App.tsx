@@ -26,7 +26,6 @@ import Referrals from './pages/Referrals';
 import GroupInvites from './pages/GroupInvites';
 
 
-// Admin Route Protection
 const AdminRoute = ({ children }: { children: ReactElement }) => {
   const isAdmin = localStorage.getItem('adminAuth') === 'true';
   
@@ -37,7 +36,7 @@ const AdminRoute = ({ children }: { children: ReactElement }) => {
   return children;
 };
 
-// User Route Protection
+
 const ProtectedRoute = ({ children }: { children: ReactElement }) => {
   const { user, loading } = useAuth();
   
@@ -59,7 +58,7 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
   return children;
 };
 
-// Public Route (redirect if already logged in)
+
 const PublicRoute = ({ children }: { children: ReactElement }) => {
   const { user } = useAuth();
   

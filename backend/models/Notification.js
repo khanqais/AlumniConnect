@@ -48,7 +48,7 @@ const notificationSchema = mongoose.Schema(
     }
 );
 
-// Indexes for fast queries
+
 notificationSchema.index({ recipient: 1, createdAt: -1 });
 notificationSchema.index({ recipient: 1, read: 1 });
 

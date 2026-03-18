@@ -1,4 +1,4 @@
-// Blogs.tsx — Full Tailwind Version (Blogs.css removed)
+
 import { useState, useEffect, useCallback } from 'react';
 import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
@@ -116,7 +116,7 @@ const Blogs = () => {
         cat === 'all' ? 'All' : cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     return (
-        // .blogs-container
+
         <div className="blogs-theme min-h-screen bg-[#0A0D14] text-gray-200 relative overflow-x-hidden">
             <style>
                 {`
@@ -214,7 +214,7 @@ const Blogs = () => {
                         </button>
 
                         {user?.role === 'alumni' && (
-                            // .write-blog-btn
+
                             <button
                                 onClick={() => setShowCreateModal(true)}
                                 className="rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-medium text-[#0A0D14] cursor-pointer transition-all hover:from-amber-400 hover:to-amber-500 border-none"
@@ -258,7 +258,7 @@ const Blogs = () => {
                         {/* .category-filters */}
                         <div className="flex gap-2 overflow-x-auto pb-2">
                             {categories.map((cat) => (
-                                // .category-btn / .category-btn.active
+
                                 <button
                                     key={cat}
                                     onClick={() => setCategory(cat)}
@@ -286,7 +286,7 @@ const Blogs = () => {
 
                 {/* Blog Grid / Loading / Empty */}
                 {loading ? (
-                    // .loading-container
+
                     <div className="flex justify-center py-20">
                         {/* .loading-spinner */}
                         <div className="h-12 w-12 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
@@ -296,7 +296,7 @@ const Blogs = () => {
                         {activeTab === 'my' ? (
                             user?.role === 'alumni' ? (
                                 myBlogs.length === 0 ? (
-                                    // .empty-state
+
                                     <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
                                         <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -310,7 +310,7 @@ const Blogs = () => {
                                         </button>
                                     </div>
                                 ) : (
-                                    // .blogs-grid
+
                                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                         {myBlogs.map((blog) => (
                                             <BlogCard key={blog._id} blog={blog} onLike={handleLike} onDelete={handleDelete} />
@@ -352,9 +352,7 @@ const Blogs = () => {
     );
 };
 
-// ─────────────────────────────────────────────
-// Blog Card Component
-// ─────────────────────────────────────────────
+
 const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string) => void; onDelete: (id: string) => void }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -370,7 +368,7 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
         cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     return (
-        // .blog-card — group added for cover image hover scale
+
         <div className="blog-card group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-blue-600 hover:shadow-md text-gray-900">
 
             {/* .cover-image-container */}
@@ -412,13 +410,13 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
             {blog.tags.length > 0 && (
                 <div className="mb-4 flex flex-wrap gap-2">
                     {blog.tags.slice(0, 3).map((tag, idx) => (
-                        // .tag
+
                         <span key={idx} className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
                             {tag}
                         </span>
                     ))}
                     {blog.tags.length > 3 && (
-                        // .tag-more
+
                         <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-500">
                             +{blog.tags.length - 3}
                         </span>
@@ -435,7 +433,7 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
                     onClick={() => navigate(`/profile/${blog.author._id}`)}
                 >
                     {blog.author.avatar ? (
-                        // .author-avatar
+
                         <img
                             src={resolveImageUrl(blog.author.avatar)}
                             alt={blog.authorName}
@@ -447,7 +445,7 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
                             className="h-10 w-10 rounded-full object-cover border-2 border-blue-200 transition-colors group-hover/author:border-blue-600 flex-shrink-0"
                         />
                     ) : (
-                        // .author-avatar-placeholder
+
                         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-bold text-white border-2 border-blue-200 transition-colors group-hover/author:border-blue-600">
                             {blog.authorName.charAt(0).toUpperCase()}
                         </div>
@@ -517,9 +515,7 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
     );
 };
 
-// ─────────────────────────────────────────────
-// Create Blog Modal Component
-// ─────────────────────────────────────────────
+
 const CreateBlogModal = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) => {
     const [formData, setFormData] = useState({
         title: '',
@@ -561,11 +557,11 @@ const CreateBlogModal = ({ onClose, onSuccess }: { onClose: () => void; onSucces
         }
     };
 
-    // Shared input/textarea/select base classes
+
     const fieldBase = "w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 transition-all focus:outline-none focus:border-blue-600 focus:bg-white";
 
     return (
-        // .modal-overlay
+
         <div className="blogs-modal fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4">
             {/* .modal */}
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-8">

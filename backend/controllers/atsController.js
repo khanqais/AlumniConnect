@@ -1,36 +1,21 @@
 const multer = require('multer');
 
-/* ============================================================
-   ATS SCORING ENGINE v2.0
-   ─────────────────────────────────────────────────────────────
-   Resume Worded–level analysis with:
-   • Bullet-level scoring (not just keyword presence)
-   • Contextual matching (numbers next to verbs, not in isolation)
-   • Dynamic thresholds based on resume length
-   • Granular, non-generic fix generation
-   • Structure, formatting, and repetition analysis
-   ============================================================ */
 
-// ═══════════════════════════════════════════════════════════════
-// UTILITY HELPERS
-// ═══════════════════════════════════════════════════════════════
-
-/** Split resume text into individual bullet / line items */
 function extractBullets(text) {
     return text
         .split(/\n/)
         .map(l => l.replace(/^[\s•\-–—▪▸►◦‣⁃·*]+/, '').trim())
-        .filter(l => l.length > 15); // skip tiny lines (headers, names, etc.)
+        .filter(l => l.length > 15); 
 }
 
-/** Count regex match occurrences (not just boolean) */
+
 function countRegex(text, regex) {
     const g = new RegExp(regex.source, (regex.flags.includes('g') ? '' : 'g') + regex.flags.replace('g', ''));
     const m = text.match(g);
     return m ? m.length : 0;
 }
 
-/** Check if a bullet starts with a strong action verb (past tense preferred) */
+
 const STRONG_VERBS_PAST = new Set([
     'achieved', 'accelerated', 'accomplished', 'administered', 'analyzed', 'architected',
     'automated', 'boosted', 'built', 'centralized', 'championed', 'collaborated',
@@ -61,9 +46,6 @@ function getFirstWord(bullet) {
     return w || '';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SECTION DETECTION
-// ═══════════════════════════════════════════════════════════════
 
 const SECTION_PATTERNS = {
     contact:        /\b(phone|email|linkedin|github|portfolio|website|@|\.com)\b/i,
@@ -84,16 +66,12 @@ function detectSections(text) {
     return found;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 1. QUANTIFY IMPACT SCORING (25%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreQuantifyImpact(text, bullets) {
     let score = 0;
     const details = { bulletsWithNumbers: 0, totalBullets: bullets.length, metrics: [], missing: [] };
 
-    // Count bullets that contain actual quantified results
-    // A "quantified bullet" = has a number AND a result/context word nearby
+
     const quantifiedBulletRegex = /\d+[\s,]*(%|percent|users?|customers?|clients?|revenue|reduction|increase|decrease|improvement|growth|projects?|applications?|endpoints?|requests?|transactions?|hours?|minutes?|days?|weeks?|months?|team\s*members?|engineers?|developers?|people|stakeholders?|million|billion|thousand|M\b|K\b|k\b|\$|€|£|x\s|x$)/i;
 
     bullets.forEach(b => {
@@ -102,10 +80,10 @@ function scoreQuantifyImpact(text, bullets) {
         }
     });
 
-    // What ratio of bullets have numbers?
+
     const ratio = bullets.length > 0 ? details.bulletsWithNumbers / bullets.length : 0;
 
-    // Specific metric checks
+
     const hasPercentage = /\d+\s*(%|percent)/i.test(text);
     const hasDollar = /\$\s*[\d,.]+|\d+\s*(million|billion|M\b|K\b)/i.test(text);
     const hasUserScale = /\d+[\s,]*(users?|customers?|clients?|daily\s+active|DAU|MAU)/i.test(text);
@@ -115,7 +93,7 @@ function scoreQuantifyImpact(text, bullets) {
     const hasMultiplier = /\d+x\b|x\d+\b/i.test(text);
     const hasRevenue = /revenue|profit|cost\s+savings?|budget|ROI|ARR|MRR/i.test(text);
 
-    // Score based on ratio of quantified bullets (0-55 points)
+
     if (ratio >= 0.6) score += 55;
     else if (ratio >= 0.4) score += 45;
     else if (ratio >= 0.25) score += 35;
@@ -124,7 +102,7 @@ function scoreQuantifyImpact(text, bullets) {
     else if (details.bulletsWithNumbers > 0) score += 10;
     else score += 3;
 
-    // Bonus for specific metric types (0-55 points)
+
     if (hasPercentage) score += 12;
     if (hasDollar) score += 14;
     if (hasUserScale) score += 10;
@@ -134,7 +112,7 @@ function scoreQuantifyImpact(text, bullets) {
 
     score = Math.min(100, score);
 
-    // Dynamic fixes based on what's actually missing
+
     if (details.bulletsWithNumbers < bullets.length * 0.3) {
         details.missing.push(`Only ${details.bulletsWithNumbers} of ${bullets.length} bullet points include numbers. Aim for 50%+ quantified bullets — e.g., "Reduced API latency by 40%" instead of "Improved API performance".`);
     }
@@ -146,61 +124,58 @@ function scoreQuantifyImpact(text, bullets) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 2. LEADERSHIP SCORING (20%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreLeadership(text, bullets) {
     let score = 0;
     const details = { signals: [], missing: [] };
 
-    // Contextual leadership: verb + team/people/reports
+
     const ledTeamPattern = /(led|managed|directed|supervised|oversaw|headed)\s+.{0,30}(team|engineers?|developers?|designers?|analysts?|people|reports?|staff|interns?|members?)/gi;
     const ledTeamMatches = text.match(ledTeamPattern) || [];
 
-    // Mentorship signals
+
     const mentorPattern = /(mentor|coach|train|onboard|guide|develop)\w*\s+.{0,30}(junior|intern|new\s+hire|team\s+member|engineer|developer|colleague)/gi;
     const mentorMatches = text.match(mentorPattern) || [];
 
-    // Strategic signals — driving decisions, not just executing
+
     const strategyPattern = /(spearheaded|championed|pioneered|established|founded|proposed|drove|defined|shaped|influenced)\s+/gi;
     const strategyMatches = text.match(strategyPattern) || [];
 
-    // Title signals
+
     const hasLeaderTitle = /(senior|lead|principal|staff|head\s+of|director|manager|chief|vp|founder|co-founder)\b/i.test(text);
 
-    // Cross-functional leadership
+
     const crossFuncLead = /(led|drove|coordinated)\s+.{0,30}(cross-functional|cross-team|interdepartmental|company-wide|org-wide)/gi;
     const crossFuncMatches = text.match(crossFuncLead) || [];
 
-    // Delegation / ownership
+
     const ownershipPattern = /(owned|accountable|responsible\s+for\s+(?:leading|driving|managing))\b/gi;
     const ownershipMatches = text.match(ownershipPattern) || [];
 
-    // Soft leadership signals (verb-only, without requiring team context)
+
     const softLeadVerbs = /(led|managed|directed|supervised|oversaw|headed|coordinated|organized|delegated|mentored)\b/gi;
     const softLeadCount = countRegex(text, softLeadVerbs);
 
-    // Score based on evidence weight
+
     score += Math.min(35, ledTeamMatches.length * 18);
     score += Math.min(20, mentorMatches.length * 12);
     score += Math.min(25, strategyMatches.length * 7);
     score += Math.min(10, crossFuncMatches.length * 10);
     score += Math.min(10, ownershipMatches.length * 7);
-    score += Math.min(15, softLeadCount * 4); // soft signal tier
+    score += Math.min(15, softLeadCount * 4); 
     if (hasLeaderTitle) score += 15;
 
-    // Minimum floor: if any leadership signal found, at least 15
+
     if (score > 0 && score < 15) score = 15;
 
     score = Math.min(100, score);
 
-    // Log what was found
+
     if (ledTeamMatches.length > 0) details.signals.push(`${ledTeamMatches.length} team leadership instance(s)`);
     if (mentorMatches.length > 0) details.signals.push(`${mentorMatches.length} mentorship instance(s)`);
     if (strategyMatches.length > 0) details.signals.push(`${strategyMatches.length} strategic initiative(s)`);
 
-    // Dynamic fixes
+
     if (ledTeamMatches.length === 0)
         details.missing.push('Add specific team leadership examples: "Led a team of 5 engineers to deliver..." or "Managed 3 direct reports across 2 time zones".');
     if (mentorMatches.length === 0)
@@ -215,37 +190,34 @@ function scoreLeadership(text, bullets) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 3. COMMUNICATION SCORING (15%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreCommunication(text, bullets) {
     let score = 0;
     const details = { signals: [], missing: [] };
 
-    // Presentation / public speaking
+
     const presentPattern = /(presented?|presentation|demo|demoed|pitched|spoke\s+at|keynote|talk\s+at|conference|workshop|webinar|seminar)\s+.{0,40}(to|at|for|during)/gi;
     const presentMatches = text.match(presentPattern) || [];
     const presentSimple = /(presented?|presentation|demo|pitch)/gi;
     const presentSimpleCount = countRegex(text, presentSimple);
 
-    // Written communication
+
     const writtenPattern = /(authored?|published?|wrote|drafted?|documented|technical\s+writing|RFC|design\s+doc|specification|proposal|blog\s+post|article|whitepaper)/gi;
     const writtenMatches = text.match(writtenPattern) || [];
 
-    // Stakeholder / cross-functional communication
+
     const stakeholderPattern = /(stakeholder|cross-functional|executive|leadership|C-suite|VP|director|client|customer)\s*.{0,30}(communicat|present|report|brief|updat|align|collaborat)/gi;
     const stakeholderMatches = text.match(stakeholderPattern) || [];
-    // Reverse pattern
+
     const stakeholderPattern2 = /(communicat|present|report|brief|updat|collaborat)\w*\s+.{0,30}(stakeholder|cross-functional|executive|leadership|client|customer)/gi;
     const stakeholderMatches2 = text.match(stakeholderPattern2) || [];
     const totalStakeholder = (stakeholderMatches?.length || 0) + (stakeholderMatches2?.length || 0);
 
-    // Documentation
+
     const docPattern = /(documentation|documented|runbook|playbook|wiki|confluence|README|onboarding\s+guide|knowledge\s+base)/gi;
     const docMatches = text.match(docPattern) || [];
 
-    // Soft communication signals (simpler patterns)
+
     const softCommPattern = /(communicated|explained|reported|discussed|articulated|clarified|briefed|informed|shared|conveyed|translated)\b/gi;
     const softCommCount = countRegex(text, softCommPattern);
 
@@ -256,7 +228,7 @@ function scoreCommunication(text, bullets) {
     score += Math.min(12, softCommCount * 4); // soft signal tier
     if (presentMatches.length > 0) score += 10;
 
-    // Minimum floor: if any communication signal found, at least 15
+
     const commSignalCount = presentSimpleCount + writtenMatches.length + totalStakeholder + docMatches.length + softCommCount;
     if (commSignalCount > 0 && score < 15) score = 15;
 
@@ -278,35 +250,32 @@ function scoreCommunication(text, bullets) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 4. TEAMWORK SCORING (15%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreTeamwork(text, bullets) {
     let score = 0;
     const details = { signals: [], missing: [] };
 
-    // Collaboration with context
+
     const collabPattern = /(collaborated?|partnered?|worked\s+(?:closely\s+)?with|alongside)\s+.{0,40}(team|engineers?|developers?|designers?|product|QA|DevOps|data|marketing|sales|operations|stakeholder)/gi;
     const collabMatches = text.match(collabPattern) || [];
 
-    // Agile / methodology
+
     const agilePattern = /\b(agile|scrum|sprint|standup|stand-up|retrospective|kanban|jira|backlog\s+grooming|sprint\s+planning|story\s+points?|velocity)\b/gi;
     const agileCount = countRegex(text, agilePattern);
 
-    // Code review / peer review
+
     const reviewPattern = /(code\s+review|pull\s+request|PR\s+review|peer\s+review|pair\s+programm)/gi;
     const reviewCount = countRegex(text, reviewPattern);
 
-    // Open source / community
+
     const ossPattern = /(open[\s-]source|github|contributor|contribution|community|meetup|hackathon|volunteer)/gi;
     const ossCount = countRegex(text, ossPattern);
 
-    // Cross-functional / cross-team
+
     const crossPattern = /(cross-functional|cross-team|interdisciplinary|multidisciplinary|inter-?departmental)/gi;
     const crossCount = countRegex(text, crossPattern);
 
-    // Soft teamwork signals
+
     const softTeamPattern = /(together|jointly|co-developed|co-authored|co-designed|paired|group|collective)\b/gi;
     const softTeamCount = countRegex(text, softTeamPattern);
 
@@ -317,7 +286,7 @@ function scoreTeamwork(text, bullets) {
     score += Math.min(15, crossCount * 12);
     score += Math.min(10, softTeamCount * 4); // soft signal tier
 
-    // Minimum floor: if any teamwork signal found, at least 15
+
     const teamSignalCount = collabMatches.length + agileCount + reviewCount + ossCount + crossCount + softTeamCount;
     if (teamSignalCount > 0 && score < 15) score = 15;
 
@@ -339,39 +308,36 @@ function scoreTeamwork(text, bullets) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 5. DRIVE & INITIATIVE SCORING (15%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreDrive(text, bullets) {
     let score = 0;
     const details = { signals: [], missing: [] };
 
-    // Self-initiated work (verb + "from scratch" / "ground up" / "independently" / "self-")
+
     const initiativePattern = /(initiated?|launch|built\s+from|from\s+scratch|ground\s+up|independently|self-directed|proactively?|took\s+(?:the\s+)?initiative|identified?\s+(?:and|an?\s+)?\s*(?:fix|resolv|address|solv|implement|built))/gi;
     const initiativeCount = countRegex(text, initiativePattern);
 
-    // Going above & beyond / ownership
+
     const ownershipPattern = /(owned|end-to-end|full[\s-]stack\s+ownership|sole\s+(?:developer|engineer|contributor)|single-handedly|above\s+and\s+beyond|exceeded\s+expectations?|outperformed)/gi;
     const ownershipCount = countRegex(text, ownershipPattern);
 
-    // Continuous learning
+
     const learningPattern = /(certification|certified|AWS\s+(?:certified|solutions)|GCP|Azure\s+certified|PMP|Coursera|Udemy|edX|self-taught|continuous\s+learning|upskill|professional\s+development)/gi;
     const learningCount = countRegex(text, learningPattern);
 
-    // Side projects / open source
+
     const sidePattern = /(side\s+project|personal\s+project|open[\s-]source|hackathon|hobby\s+project|weekend\s+project|passion\s+project|contributed?\s+to\s+.{0,20}on\s+GitHub)/gi;
     const sideCount = countRegex(text, sidePattern);
 
-    // Awards / promotions / recognition
+
     const awardPattern = /(award|awarded|recognized|recognition|promoted|promotion|employee\s+of|top\s+performer|honor|dean.s\s+list|scholarship|fellowship|grant\s+recipient)/gi;
     const awardCount = countRegex(text, awardPattern);
 
-    // Impact-driven verbs (exceeded, surpassed, outperformed)
+
     const impactVerbs = /(exceeded|surpassed|outperformed|broke\s+record|beat\s+target|ahead\s+of\s+schedule|under\s+budget)/gi;
     const impactCount = countRegex(text, impactVerbs);
 
-    // Soft drive signals — common verbs that imply self-direction
+
     const softDrivePattern = /(built|created|designed|developed|implemented|launched|started|introduced|set\s+up|configured|architected|resolved|solved|debugged|investigated|researched|explored)\b/gi;
     const softDriveCount = countRegex(text, softDrivePattern);
 
@@ -383,7 +349,7 @@ function scoreDrive(text, bullets) {
     score += Math.min(10, impactCount * 10);
     score += Math.min(12, softDriveCount * 3); // soft signal tier
 
-    // Minimum floor: if any drive signal found, at least 15
+
     const driveSignalCount = initiativeCount + ownershipCount + learningCount + sideCount + awardCount + impactCount + softDriveCount;
     if (driveSignalCount > 0 && score < 15) score = 15;
 
@@ -407,9 +373,6 @@ function scoreDrive(text, bullets) {
     return { score, ...details };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 6. STRUCTURE & FORMAT SCORING (10%)
-// ═══════════════════════════════════════════════════════════════
 
 function scoreStructure(text, sections, bullets) {
     let score = 0;
@@ -419,18 +382,18 @@ function scoreStructure(text, sections, bullets) {
     const foundSections = Object.entries(sections).filter(([, v]) => v).map(([k]) => k);
     const missingSections = Object.entries(sections).filter(([, v]) => !v).map(([k]) => k);
 
-    // Section coverage (0-35 points)
+
     const sectionRatio = foundSections.length / Object.keys(SECTION_PATTERNS).length;
     score += Math.round(sectionRatio * 35);
 
-    // Must-have sections bonus/penalty
+
     const hasCritical = sections.experience && sections.education && sections.skills && sections.contact;
     if (hasCritical) score += 12;
     else if (!sections.experience) details.missing.push('Critical: Add a clear "Experience" or "Work Experience" section heading — ATS looks for this first.');
     if (!sections.education) details.missing.push('Add an "Education" section — most ATS systems require it.');
     if (!sections.skills) details.missing.push('Add a "Skills" or "Technical Skills" section — ATS keyword matching depends on it.');
 
-    // Word count analysis (0-18 points)
+
     if (wordCount >= 300 && wordCount <= 900) score += 18;
     else if (wordCount >= 200 && wordCount <= 1100) score += 12;
     else if (wordCount < 200) {
@@ -441,7 +404,7 @@ function scoreStructure(text, sections, bullets) {
         details.missing.push(`Resume has ${wordCount} words — consider trimming to under 900 for readability. ATS and recruiters prefer concise resumes.`);
     }
 
-    // Action verb quality (0-15 points)
+
     let strongVerbCount = 0;
     let weakVerbCount = 0;
     const verbsUsed = new Set();
@@ -469,7 +432,7 @@ function scoreStructure(text, sections, bullets) {
         details.missing.push(`Only ${verbVariety} unique action verbs used — vary your language. Don't repeat "Developed" 6 times; use "Architected", "Built", "Engineered", "Designed".`);
     }
 
-    // Bullet point length analysis (0-10 points)
+
     const tooShort = bullets.filter(b => b.split(/\s+/).length < 6).length;
     const tooLong = bullets.filter(b => b.split(/\s+/).length > 35).length;
     if (tooShort === 0 && tooLong === 0) score += 10;
@@ -478,7 +441,7 @@ function scoreStructure(text, sections, bullets) {
     if (tooShort > 2) details.missing.push(`${tooShort} bullets are too short (under 6 words). Each bullet should describe a specific action, context, and result.`);
     if (tooLong > 2) details.missing.push(`${tooLong} bullets are too long (35+ words). Split long bullets or trim filler words for scannability.`);
 
-    // Contact info check (0-5 points)
+
     const hasEmail = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text);
     const hasPhone = /(\+?\d{1,3}[\s-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(text);
     const hasLinkedIn = /linkedin\.com|linkedin/i.test(text);
@@ -503,15 +466,12 @@ function scoreStructure(text, sections, bullets) {
     };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// REPETITION / FILLER ANALYSIS (penalty applied to overall)
-// ═══════════════════════════════════════════════════════════════
 
 function analyzeRepetition(bullets) {
     const penalties = [];
     let penaltyPoints = 0;
 
-    // Check for repeated first words
+
     const firstWords = {};
     bullets.forEach(b => {
         const w = getFirstWord(b);
@@ -525,7 +485,7 @@ function analyzeRepetition(bullets) {
         });
     }
 
-    // Filler phrases
+
     const fillers = [
         /responsible for/gi,
         /duties included/gi,
@@ -542,7 +502,7 @@ function analyzeRepetition(bullets) {
         penaltyPoints += fillerCount * 2;
     }
 
-    // Buzzword abuse
+
     const buzzwords = /\b(synergy|paradigm|leverage\s+(?!code|tool|framework)|best[\s-]in[\s-]class|think\s+outside|game[\s-]changer|guru|ninja|rockstar|wizard)\b/gi;
     const buzzCount = countRegex(bullets.join(' '), buzzwords);
     if (buzzCount > 0) {
@@ -553,9 +513,6 @@ function analyzeRepetition(bullets) {
     return { penalties, penaltyPoints: Math.min(15, penaltyPoints) };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TOP FIXES GENERATOR
-// ═══════════════════════════════════════════════════════════════
 
 function generateTopFixes(scores, structureResult, repetition) {
     const fixes = [];
@@ -578,16 +535,16 @@ function generateTopFixes(scores, structureResult, repetition) {
     addFixes('drive', '🚀', scores.drive.score, scores.drive.missing);
     addFixes('structure', '📋', structureResult.score, structureResult.missing);
 
-    // Add repetition penalties as fixes
+
     repetition.penalties.forEach(fix => {
         fixes.push({ category: 'structure', priority: 'medium', fix, icon: '📋' });
     });
 
-    // Sort: high → medium → low, then by category importance
+
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     fixes.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
-    // Deduplicate
+
     const seen = new Set();
     return fixes.filter(f => {
         if (seen.has(f.fix)) return false;
@@ -596,9 +553,6 @@ function generateTopFixes(scores, structureResult, repetition) {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MAIN SCORING FUNCTION
-// ═══════════════════════════════════════════════════════════════
 
 function scoreResume(text) {
     const bullets = extractBullets(text);
@@ -612,7 +566,7 @@ function scoreResume(text) {
     const structure = scoreStructure(text, sections, bullets);
     const repetition = analyzeRepetition(bullets);
 
-    // Weighted overall score
+
     let overall = Math.round(
         qi.score * 0.25 +
         lead.score * 0.20 +
@@ -622,13 +576,13 @@ function scoreResume(text) {
         structure.score * 0.10
     );
 
-    // Base credit for having a well-structured resume with real content
+
     const hasBasicStructure = structure.foundSections.length >= 3 && structure.wordCount >= 150;
     const hasSubstantiveContent = bullets.length >= 5;
     if (hasBasicStructure && hasSubstantiveContent) overall += 8;
     else if (hasBasicStructure || hasSubstantiveContent) overall += 4;
 
-    // Apply repetition penalty
+
     overall = Math.max(0, Math.min(100, overall - repetition.penaltyPoints));
 
     const allScores = {
@@ -662,9 +616,6 @@ function scoreResume(text) {
     };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MULTER — memory storage (no disk write for temp analysis)
-// ═══════════════════════════════════════════════════════════════
 
 const atsUpload = multer({
     storage: multer.memoryStorage(),
@@ -680,9 +631,6 @@ const atsUpload = multer({
     },
 });
 
-// ═══════════════════════════════════════════════════════════════
-// CONTROLLER
-// ═══════════════════════════════════════════════════════════════
 
 const checkATS = async (req, res) => {
     try {

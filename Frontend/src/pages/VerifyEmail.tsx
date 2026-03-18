@@ -18,7 +18,7 @@ const VerifyEmail = () => {
                 setMessage(response.data.message);
                 setUserName(response.data.user?.name || '');
                 
-                // Redirect to login after 5 seconds
+
                 setTimeout(() => {
                     navigate('/login');
                 }, 5000);

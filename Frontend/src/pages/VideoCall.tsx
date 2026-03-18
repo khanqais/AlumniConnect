@@ -262,23 +262,6 @@ const { startTime } = location.state || {};
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
-//     useEffect(() => {
-//   return () => {
-//     if (!roomId) return;
-
-//     fetch(
-//       `/webinars/attendance/leave/${roomId}`,
-//       {
-//         method: "POST",
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("token")}`,
-//         },
-//       }
-//     ).then(() => {
-//       console.log("👋 Attendance marked (LEAVE)");
-//     });
-//   };
-// }, [roomId]);
 
 
     return (

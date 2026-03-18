@@ -8,7 +8,7 @@ const {
 } = require('../controllers/followController');
 const { protect } = require('../middleware/authMiddleware');
 
-// All routes are protected
+
 router.post('/:userId', protect, followUser);
 router.get('/:userId/followers', protect, getFollowers);
 router.get('/:userId/following', protect, getFollowing);

@@ -4,9 +4,7 @@ const Question = require('../models/Question');
 const Event = require('../models/Event');
 const Announcement = require('../models/Announcement');
 
-// @desc    Get aggregated activity feed
-// @route   GET /api/feed
-// @access  Private
+
 const getFeed = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 20;
@@ -167,7 +165,7 @@ const getFeed = async (req, res) => {
 
         const results = await Promise.all(promises);
 
-        // Flatten, sort by createdAt desc, paginate
+
         const allItems = results
             .flat()
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

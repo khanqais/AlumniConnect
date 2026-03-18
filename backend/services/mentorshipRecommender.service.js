@@ -1,4 +1,4 @@
-// Mentorship: match student target skills with alumni skills
+
 const mentorshipRecommend = (student, alumniList) => {
   return alumniList
     .map(alumni => {

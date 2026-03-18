@@ -1,7 +1,6 @@
 import { createContext, useState, useEffect, useContext, type ReactNode } from 'react';
 import api from '../config/api';
 
-/* eslint-disable react-refresh/only-export-components */
 
 interface User {
     _id: string;
@@ -26,7 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    // Initialize state from localStorage
+
     const [user, setUser] = useState<User | null>(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -82,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     localStorage.setItem('user', JSON.stringify(updatedUser));
                 }
             } catch {
-                // ignore avatar hydration failures
+
             }
         };
 
@@ -96,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-// Export useAuth hook separately to satisfy Fast Refresh
+
 export function useAuth() {
     const context = useContext(AuthContext);
     if (!context) {

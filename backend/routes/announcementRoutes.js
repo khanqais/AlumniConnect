@@ -3,9 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const Announcement = require('../models/Announcement');
 
-// @desc Get all announcements (public)
-// @route GET /api/announcements
-// @access Public
+
 router.get('/', async (req, res) => {
     try {
         const announcements = await Announcement.find({ isPublished: true })
@@ -19,9 +17,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// @desc Get announcements by category (public)
-// @route GET /api/announcements/category/:category
-// @access Public
+
 router.get('/category/:category', async (req, res) => {
     try {
         const { category } = req.params;
@@ -36,9 +32,7 @@ router.get('/category/:category', async (req, res) => {
     }
 });
 
-// @desc Get single announcement (public)
-// @route GET /api/announcements/:id
-// @access Public
+
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;

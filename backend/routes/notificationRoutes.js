@@ -9,7 +9,7 @@ const {
 } = require('../controllers/notificationController');
 const { protect } = require('../middleware/authMiddleware');
 
-// All routes are protected
+
 router.get('/', protect, getNotifications);
 router.get('/unread-count', protect, getUnreadCount);
 router.patch('/read-all', protect, markAllAsRead);

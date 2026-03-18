@@ -16,7 +16,7 @@ const { checkATS, atsUpload } = require('../controllers/atsController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
-// Specific routes first (before generic :id route)
+
 router.get('/', getResources);
 router.post('/upload', protect, upload.single('file'), uploadResource);
 router.get('/my-resources', protect, getMyResources);
@@ -27,10 +27,10 @@ router.post('/comment/:id', protect, addComment);
 router.delete('/comment/:id/:commentId', protect, deleteComment);
 router.delete('/:id', protect, deleteResource);
 
-// ATS Resume Checker — no auth required (public tool)
+
 router.post('/ats-check', atsUpload.single('resume'), checkATS);
 
-// Generic :id route last
+
 router.get('/:id', getResourceById);
 
 module.exports = router;

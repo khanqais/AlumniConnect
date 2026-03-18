@@ -82,7 +82,7 @@ const AdminDashboard = () => {
     const [cgpaInputs, setCgpaInputs] = useState<Record<string, string>>({});
     const [banReasons, setBanReasons] = useState<Record<string, string>>({});
     
-    // Announcement state
+
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [announcementTitle, setAnnouncementTitle] = useState('');
     const [announcementContent, setAnnouncementContent] = useState('');

@@ -210,7 +210,7 @@ const Resources = () => {
             await fetchResources();
             await fetchMyResources();
             
-            // Update selected resource with new comments
+
             const updatedResource = await api.get(
                 `/resources/${selectedResource._id}`
             );
@@ -236,7 +236,7 @@ const Resources = () => {
             await fetchResources();
             await fetchMyResources();
             
-            // Update selected resource
+
             const updatedResource = await api.get(
                 `/resources/${selectedResource._id}`
             );
@@ -458,7 +458,7 @@ const Resources = () => {
                 ) : activeTab !== 'ats' ? (
                     <>
                         {activeTab === 'my' && user?.role === 'alumni' ? (
-                            // My Resources
+
                             myResources.length === 0 ? (
                                 <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
                                     <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -532,7 +532,7 @@ const Resources = () => {
                                 </div>
                             )
                         ) : (
-                            // All Resources
+
                             resources.length === 0 ? (
                                 <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
                                     <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,10 +1,10 @@
-// Recommendation.tsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Users, TrendingUp,
     RefreshCw, Star, Zap, Target, Award
 } from 'lucide-react';
-// ✅ CSS import removed — all styles are now inline Tailwind
+
 import { useAuth } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
 
@@ -20,14 +20,14 @@ interface AlumniRecommendation {
 
 type SortType = 'match' | 'experience' | 'skills';
 
-// Returns hex color for inline style (match bar fill — dynamic, can't use Tailwind)
+
 const getMatchColor = (pct: number): string => {
     if (pct >= 80) return '#16a34a';
     if (pct >= 50) return '#d97706';
     return '#dc2626';
 };
 
-// Returns Tailwind text color class (replaces .match-high / .match-medium / .match-low)
+
 const getMatchTextClass = (pct: number): string => {
     if (pct >= 80) return 'text-green-600';
     if (pct >= 50) return 'text-amber-600';
@@ -47,10 +47,8 @@ const Recommendation: React.FC = () => {
         const fetchAlumni = async () => {
             setLoading(true);
             try {
-                // Replace with your actual API call:
-                // const res = await fetch('/api/alumni-recommendations');
-                // const data = await res.json();
-                // setAlumniList(data);
+
+
                 setAlumniList([]);
             } catch (err) {
                 console.error('Failed to fetch alumni recommendations:', err);
@@ -91,7 +89,7 @@ const Recommendation: React.FC = () => {
         : 0;
 
     return (
-        // .recommendation-page
+
         <div className="min-h-screen bg-[#0A0D14] text-gray-200 relative overflow-x-hidden">
             <Navigation />
 
@@ -118,7 +116,7 @@ const Recommendation: React.FC = () => {
                             Alumni matched to your target skills using collaborative filtering
                         </p>
                         {user?.skills && user.skills.length > 0 && (
-                            // .user-skills
+
                             <div className="flex items-center gap-4">
                                 {/* .skills-label */}
                                 <span className="text-gray-600 font-semibold text-sm whitespace-nowrap">
@@ -127,7 +125,7 @@ const Recommendation: React.FC = () => {
                                 {/* .skills-tags */}
                                 <div className="flex gap-2 flex-wrap">
                                     {user.skills.map((s, i) => (
-                                        // .skill-tag
+
                                         <span
                                             key={i}
                                             className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-medium border border-blue-200"
@@ -221,7 +219,7 @@ const Recommendation: React.FC = () => {
                                 <button
                                     key={type}
                                     onClick={() => setSortBy(type)}
-                                    // .filter-button + .filter-button.active
+
                                     className={`flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium cursor-pointer transition-all duration-300 border
                                         ${sortBy === type
                                             ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-600'
@@ -258,7 +256,7 @@ const Recommendation: React.FC = () => {
 
                 {/* Content States */}
                 {loading ? (
-                    // .loading-container
+
                     <div className="bg-white rounded-2xl py-16 px-8 text-center shadow-md">
                         {/* .loading-spinner */}
                         <div className="w-[60px] h-[60px] border-4 border-indigo-100 border-t-blue-600 rounded-full mx-auto mb-6 animate-spin" />
@@ -276,7 +274,7 @@ const Recommendation: React.FC = () => {
                     </div>
 
                 ) : (
-                    // .recommendations-table-container
+
                     <div className="bg-white rounded-2xl overflow-hidden shadow-md mb-6 overflow-x-auto">
                         {/* .recommendations-table */}
                         <table className="w-full border-collapse">
@@ -297,7 +295,7 @@ const Recommendation: React.FC = () => {
                             </thead>
                             <tbody>
                                 {filteredAlumni.map((alumni, idx) => (
-                                    // .table-row
+
                                     <tr key={idx} className="border-b border-gray-100 transition-colors duration-300 hover:bg-gray-50">
 
                                         {/* Alumni Info — .table-cell .alumni-info-cell */}
@@ -328,13 +326,13 @@ const Recommendation: React.FC = () => {
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-1.5 flex-wrap">
                                                 {alumni.skills?.slice(0, 3).map((s, i) => (
-                                                    // .skill-badge
+
                                                     <span key={i} className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-md text-xs font-medium">
                                                         {s}
                                                     </span>
                                                 ))}
                                                 {(alumni.skills?.length || 0) > 3 && (
-                                                    // .more-skills
+
                                                     <span className="text-gray-400 text-xs font-medium">
                                                         +{alumni.skills.length - 3}
                                                     </span>
@@ -411,7 +409,7 @@ const Recommendation: React.FC = () => {
                                 { n: 3, title: 'Ranked Results', desc: 'Alumni are ranked by match percentage so the best mentors appear first.' },
                                 { n: 4, title: 'Connect & Grow', desc: 'Reach out to matched alumni for mentorship, guidance, and career advice.' },
                             ].map(({ n, title, desc }) => (
-                                // .step-card
+
                                 <div key={n} className="bg-gray-50 rounded-xl p-6 text-center transition-transform duration-300 hover:-translate-y-1">
                                     {/* .step-number */}
                                     <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
@@ -430,7 +428,7 @@ const Recommendation: React.FC = () => {
 
             {/* ── Alumni Detail Modal ── */}
             {selectedAlumni && (
-                // .profile-modal-overlay
+
                 <div
                     className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-[1000] p-4"
                     onClick={() => setSelectedAlumni(null)}
@@ -439,7 +437,7 @@ const Recommendation: React.FC = () => {
                     <div
                         className="bg-white rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl animate-[modalSlideIn_0.3s_ease]"
                         onClick={e => e.stopPropagation()}
-                        // Note: add @keyframes modalSlideIn to your global CSS / tailwind.config.js if needed
+
                         style={{ animation: 'modalSlideIn 0.3s ease' }}
                     >
                         {/* .profile-modal-header */}
@@ -528,7 +526,7 @@ const Recommendation: React.FC = () => {
                                         { label: 'Total Skills', value: String(selectedAlumni.skills?.length ?? 0) },
                                         { label: 'Role', value: selectedAlumni.jobTitle || '—' },
                                     ].map(({ label, value }) => (
-                                        // .detail-item
+
                                         <div key={label} className="flex justify-between items-center px-4 py-3 bg-gray-50 rounded-lg">
                                             {/* .detail-label */}
                                             <span className="text-gray-500 text-sm font-medium">{label}</span>
@@ -545,7 +543,7 @@ const Recommendation: React.FC = () => {
                                 {/* .skills-list */}
                                 <div className="flex flex-wrap gap-2">
                                     {selectedAlumni.skills?.map((s, i) => (
-                                        // .skill-tag-large
+
                                         <span
                                             key={i}
                                             className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 px-5 py-2.5 rounded-lg text-sm font-medium border border-blue-200"

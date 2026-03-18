@@ -20,13 +20,13 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Dropdown state
+
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [notificationOpen, setNotificationOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const notificationRef = useRef<HTMLDivElement>(null);
 
-    // Notification state (API-backed)
+
     const [notifications, setNotifications] = useState<Array<{
         _id: string;
         type: string;
@@ -39,7 +39,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
     }>>([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
-    // Unread message count (separate quick-access badge)
+
     const [unreadCount, setUnreadCount] = useState(0);
 
     const fetchNotifications = useCallback(async () => {
@@ -50,7 +50,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
             });
             setNotifications(data.data || []);
         } catch {
-            // silently ignore
+
         }
     }, [user?.token]);
 
@@ -62,7 +62,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
             });
             setUnreadNotifCount(data.count || 0);
         } catch {
-            // silently ignore
+
         }
     }, [user?.token]);
 
@@ -74,7 +74,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
             });
             setUnreadCount(data.count || 0);
         } catch {
-            // silently ignore
+
         }
     }, [user?.token]);
 
@@ -87,7 +87,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
             setUnreadNotifCount(prev => Math.max(0, prev - 1));
         } catch {
-            // silently ignore
+
         }
     };
 
@@ -100,11 +100,11 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             setUnreadNotifCount(0);
         } catch {
-            // silently ignore
+
         }
     }, [user?.token]);
 
-    // Poll every 30 seconds
+
     useEffect(() => {
         fetchNotifications();
         fetchUnreadNotifCount();
@@ -117,15 +117,15 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
         return () => clearInterval(interval);
     }, [fetchNotifications, fetchUnreadNotifCount, fetchUnreadMsgCount]);
 
-    // Mark all as read when dropdown opens
+
     useEffect(() => {
         if (notificationOpen && unreadNotifCount > 0) {
             markAllNotificationsRead();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [notificationOpen]);
 
-    // Clear message badge when navigating to /chat
+
     useEffect(() => {
         if (location.pathname === '/chat') {
             setUnreadCount(0);
@@ -141,13 +141,13 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
         return location.pathname === path || location.pathname.startsWith(path + '/');
     };
 
-    // ✅ Chat removed from here
+
     const navItems = [
         { name: 'Dashboard',       path: '/dashboard',      icon: Home },
         { name: 'Resources',       path: '/resources',      icon: FileText },
         { name: 'Referrals',       path: '/referrals',      icon: Briefcase },
         { name: 'Recommendation',     path: '/career-path',    icon: Map },
-        // { name: 'Blogs',           path: '/blogs',          icon: FileText },
+
         { name: 'Events',          path: '/webinars',       icon: Calendar },
     ];
 
@@ -155,7 +155,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
         { name: 'Profile', path: '/profile', icon: User },
     ];
 
-    // Close dropdown when clicking outside
+
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -169,7 +169,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Close dropdown on route change
+
     useEffect(() => {
         setDropdownOpen(false);
         setNotificationOpen(false);

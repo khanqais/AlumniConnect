@@ -1,31 +1,11 @@
-// routes/availabilityRoutes.js
+
 const express = require("express");
 const router = express.Router();
 const Availability = require("../models/Availability");
-// const Availability = require("../models/Availability");
+
 const { protect } = require("../middleware/authMiddleware");
 const createCalendarEvent = require("../utils/googleCalendar");
 const { notifyAllStudents } = require("../utils/notifications");
-
-
-// router.post("/create", protect, async (req, res) => {
-//   const { startTime, endTime } = req.body;
-
-//   const slot = await Availability.create({
-//     mentorId: req.user._id,
-//     startTime,
-//     endTime,
-//     roomId: `room-${Date.now()}`, // unique room
-//   });
-
-//   res.status(201).json(slot);
-// });
-
-// await createCalendarEvent({
-//   startTime,
-//   endTime,
-//   summary: "Mentor Availability Slot"
-// });
 
 
 router.post("/create", protect, async (req, res) => {
@@ -46,7 +26,7 @@ router.post("/create", protect, async (req, res) => {
     roomId: `room-${Date.now()}`
   });
 
-  // 🔔 Notify students
+
   await notifyAllStudents(slot);
 
   res.status(201).json(slot);

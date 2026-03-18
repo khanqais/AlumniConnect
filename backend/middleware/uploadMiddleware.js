@@ -1,11 +1,10 @@
 const multer = require('multer');
 const path = require('path');
 
-// Set storage engine to memory storage for Vercel compatibility
-// Files will be available as req.file.buffer
+
 const storage = multer.memoryStorage();
 
-// Check file type
+
 function checkFileType(file, cb) {
     const filetypes = /jpeg|jpg|png|pdf|doc|docx/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -18,7 +17,7 @@ function checkFileType(file, cb) {
     }
 }
 
-// Initialize upload
+
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10000000 }, // 10MB limit

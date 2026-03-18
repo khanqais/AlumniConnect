@@ -2,9 +2,7 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 const pusher = require('../config/pusher');
 
-/**
- * Trigger Pusher event for real-time notification
- */
+
 async function triggerPusherNotification(recipientId, notification) {
     if (!pusher) return;
     
@@ -16,12 +14,10 @@ async function triggerPusherNotification(recipientId, notification) {
     }
 }
 
-/**
- * Create a single notification for one user.
- */
+
 async function createNotification({ recipient, sender, type, title, message, link, relatedId }) {
     try {
-        // Don't notify yourself
+
         if (sender && recipient.toString() === sender.toString()) return null;
 
         const notification = await Notification.create({
@@ -34,7 +30,7 @@ async function createNotification({ recipient, sender, type, title, message, lin
             relatedId: relatedId || null,
         });
 
-        // Trigger real-time notification via Pusher
+
         await triggerPusherNotification(recipient, notification);
 
         return notification;
@@ -44,16 +40,12 @@ async function createNotification({ recipient, sender, type, title, message, lin
     }
 }
 
-/**
- * Notify a specific user.
- */
+
 async function notifyUser(recipientId, { sender, type, title, message, link, relatedId }) {
     return createNotification({ recipient: recipientId, sender, type, title, message, link, relatedId });
 }
 
-/**
- * Notify all users (broadcast). Optionally exclude a user (e.g. the sender).
- */
+
 async function notifyAllUsers({ sender, type, title, message, link, relatedId, excludeUserId }) {
     try {
         const filter = {};
@@ -83,9 +75,7 @@ async function notifyAllUsers({ sender, type, title, message, link, relatedId, e
     }
 }
 
-/**
- * Notify users by role (e.g. all students).
- */
+
 async function notifyUsersByRole(role, { sender, type, title, message, link, relatedId, excludeUserId }) {
     try {
         const filter = { role };

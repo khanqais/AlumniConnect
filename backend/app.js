@@ -7,14 +7,14 @@ const connectDB = require("./config/db");
 const jwt = require("jsonwebtoken");
 const http = require("http");
 
-// ✅ IMPORT USER MODEL
+
 const User = require("./models/User");
 
 dotenv.config();
 
 connectDB();
 
-// Only run these if NOT on Vercel serverless
+
 if (!process.env.VERCEL) {
     const { Server } = require("socket.io");
     require("./corn/webinarReminder");
@@ -35,7 +35,7 @@ const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...envAllowedOrigi
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow non-browser tools (Postman/curl) and approved browser origins.
+
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -45,20 +45,15 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization", "admin-id", "admin-email"],
 };
 
-/* ============================
-   MIDDLEWARE
-============================ */
-// app.use(cors({ origin: "*" }));
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-/* ============================
-   HTTP + SOCKET SERVER
- ============================ */
+
 const server = http.createServer(app);
 
-// Only initialize Socket.IO if NOT on Vercel
+
 let io;
 if (!process.env.VERCEL) {
     const { Server } = require("socket.io");
@@ -70,12 +65,10 @@ if (!process.env.VERCEL) {
       },
     });
     
-    // Socket.IO logic here if needed
+
 }
 
-/* ============================
-   UPLOADS (skip on Vercel - files are in Cloudinary)
- ============================ */
+
 if (!process.env.VERCEL) {
     const uploadsDir = path.join(__dirname, "uploads");
     if (!fs.existsSync(uploadsDir)) {
@@ -84,9 +77,7 @@ if (!process.env.VERCEL) {
     app.use("/uploads", express.static(uploadsDir));
 }
 
-/* ============================
-   ROUTES
-============================ */
+
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/profile", require("./routes/profileRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
@@ -102,18 +93,13 @@ app.use("/api/referrals", require("./routes/referralRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/announcements", require("./routes/announcementRoutes"));
 app.use('/api/groups', require('./routes/groupRoutes'));
-// app.use("/api/webinars", require('./routes/webinarRoutes'));
 
-/* ============================
-   HEALTH CHECK
-============================ */
+
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });
 });
 
-/* ============================
-   SOCKET AUTH MIDDLEWARE (only if not Vercel)
- ============================ */
+
 if (io) {
   io.use(async (socket, next) => {
     try {
@@ -137,9 +123,7 @@ if (io) {
     }
   });
 
-  /* ============================
-     SOCKET EVENTS
-  ============================ */
+
   io.on("connection", (socket) => {
     console.log("✅ Socket connected:", socket.user.name);
 
@@ -203,9 +187,6 @@ if (io) {
 } // ✅ closes if (io)
 
 
-/* ============================
-   ROOT ROUTE
-============================ */
 app.get("/", (req, res) => {
   res.send("hii mom");
 });
@@ -213,7 +194,7 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Vercel / Module export
+
 module.exports = app;
 
 if (require.main === module) {

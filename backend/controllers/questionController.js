@@ -1,6 +1,6 @@
 const Question = require('../models/Question');
 
-// Ask a question
+
 const askQuestion = async (req, res) => {
     try {
         const { title, description, category, tags } = req.body;
@@ -27,7 +27,7 @@ const askQuestion = async (req, res) => {
     }
 };
 
-// Create a poll
+
 const createPoll = async (req, res) => {
     try {
         const { title, options, category, tags } = req.body;
@@ -69,7 +69,7 @@ const createPoll = async (req, res) => {
     }
 };
 
-// Get all questions
+
 const getQuestions = async (req, res) => {
     try {
         const { category, search, filter } = req.query;
@@ -103,7 +103,7 @@ const getQuestions = async (req, res) => {
     }
 };
 
-// Get single question
+
 const getQuestionById = async (req, res) => {
     try {
         const question = await Question.findById(req.params.id)
@@ -124,7 +124,7 @@ const getQuestionById = async (req, res) => {
     }
 };
 
-// Post answer
+
 const postAnswer = async (req, res) => {
     try {
         const { answer } = req.body;
@@ -153,7 +153,7 @@ const postAnswer = async (req, res) => {
     }
 };
 
-// Accept answer
+
 const acceptAnswer = async (req, res) => {
     try {
         const { answerId } = req.body;
@@ -163,17 +163,17 @@ const acceptAnswer = async (req, res) => {
             return res.status(404).json({ message: 'Question not found' });
         }
 
-        // Only question asker can accept answer
+
         if (question.askedBy.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Only question asker can accept answer' });
         }
 
-        // Mark all as not accepted first
+
         question.answers.forEach(ans => {
             ans.isAccepted = false;
         });
 
-        // Mark selected answer as accepted
+
         const answer = question.answers.id(answerId);
         if (answer) {
             answer.isAccepted = true;
@@ -192,7 +192,7 @@ const acceptAnswer = async (req, res) => {
     }
 };
 
-// Upvote answer
+
 const upvoteAnswer = async (req, res) => {
     try {
         const { answerId } = req.body;
@@ -231,7 +231,7 @@ const upvoteAnswer = async (req, res) => {
     }
 };
 
-// Toggle question solved status
+
 const toggleSolved = async (req, res) => {
     try {
         const question = await Question.findById(req.params.id);
@@ -240,7 +240,7 @@ const toggleSolved = async (req, res) => {
             return res.status(404).json({ message: 'Question not found' });
         }
 
-        // Only question asker can mark as solved
+
         if (question.askedBy.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Only question asker can mark as solved' });
         }
@@ -259,7 +259,7 @@ const toggleSolved = async (req, res) => {
     }
 };
 
-// Vote in a poll
+
 const votePoll = async (req, res) => {
     try {
         const { optionIndex } = req.body;
