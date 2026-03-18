@@ -4,7 +4,7 @@ AlumniConnect is a full-stack mentorship and career support platform that connec
 
 ## Live Application
 
-- Frontend: https://alumniconnect-alpha.vercel.app
+- Live Demo: https://alumniconnect-alpha.vercel.app
 
 ## Monorepo Structure
 
