@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const User = require('../models/User');
 const Resource = require('../models/Resource');
+const mongoose = require('mongoose'); 
 const Blog = require('../models/Blog');
 const { uploadToCloudinary } = require('../services/uploadService');
 const { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, convertToOutlookEmail } = require('../utils/emailService');
