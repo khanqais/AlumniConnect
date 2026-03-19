@@ -4,7 +4,7 @@ import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
-import { RefreshCw, BookOpen, Eye, Heart, X, Trash2 } from 'lucide-react';
+import { RefreshCw, BookOpen, Eye, Heart, X } from 'lucide-react';
 
 interface Blog {
     _id: string;

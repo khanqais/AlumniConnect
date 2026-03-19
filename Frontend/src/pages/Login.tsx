@@ -2,7 +2,7 @@ import { useState } from 'react';
 import api from '../config/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, AlertCircle, Loader2, Shield } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2, Shield, X } from 'lucide-react';
 
 const Login = () => {
     const [formData, setFormData] = useState({

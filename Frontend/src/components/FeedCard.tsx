@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, MessageSquare, Calendar, Megaphone, Heart, Download, Clock, Users, Eye } from 'lucide-react';
+import { FileText, BookOpen, MessageSquare, Calendar, Megaphone, Heart, Download, Eye } from 'lucide-react';
 
 type FeedItemMeta = {
     likes?: number;

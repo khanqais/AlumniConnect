@@ -1,29 +1,39 @@
+import { Suspense, lazy, type ReactElement } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VerifyEmail from './pages/VerifyEmail';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import Dashboard from './pages/Dashboard';
-import Resources from './pages/Resources';
-import Blogs from './pages/Blogs';
-import BlogDetail from './pages/BlogDetail';
-import Profile from './pages/Profile';
-import VideoCall from "./pages/VideoCall";
-import WebinarScheduler from './pages/WebinarScheduler';
-import WebinarList from './pages/WebinarList';
-import Community from './pages/Community';
-import QuestionDetail from './pages/QuestionDetail';
-import Chat from './pages/Chat';
-import type { ReactElement } from 'react';
 import './App.css';
-import CareerPathVisualizer from './pages/CareerPathVisualizer';
-import Recommendation from './pages/Recommendation';
-import Quiz from './pages/Quiz';
-import Referrals from './pages/Referrals';
-import GroupInvites from './pages/GroupInvites';
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Resources = lazy(() => import('./pages/Resources'));
+const Blogs = lazy(() => import('./pages/Blogs'));
+const BlogDetail = lazy(() => import('./pages/BlogDetail'));
+const Profile = lazy(() => import('./pages/Profile'));
+const VideoCall = lazy(() => import('./pages/VideoCall'));
+const WebinarScheduler = lazy(() => import('./pages/WebinarScheduler'));
+const WebinarList = lazy(() => import('./pages/WebinarList'));
+const Community = lazy(() => import('./pages/Community'));
+const QuestionDetail = lazy(() => import('./pages/QuestionDetail'));
+const Chat = lazy(() => import('./pages/Chat'));
+const CareerPathVisualizer = lazy(() => import('./pages/CareerPathVisualizer'));
+const Recommendation = lazy(() => import('./pages/Recommendation'));
+const Quiz = lazy(() => import('./pages/Quiz'));
+const Referrals = lazy(() => import('./pages/Referrals'));
+const GroupInvites = lazy(() => import('./pages/GroupInvites'));
+
+const RouteLoader = () => (
+  <div className="flex h-screen items-center justify-center bg-gray-100">
+    <div className="text-center">
+      <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
+      <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
+    </div>
+  </div>
+);
 
 
 const AdminRoute = ({ children }: { children: ReactElement }) => {
@@ -74,7 +84,8 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
+        <Suspense fallback={<RouteLoader />}>
+          <Routes>
           {/* Home Page (Landing) */}
           <Route path="/" element={<Home />} />
           
@@ -280,7 +291,8 @@ function App() {
 
           {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </Router>
   );
