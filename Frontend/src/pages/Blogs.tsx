@@ -4,6 +4,7 @@ import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import { RefreshCw, BookOpen, Eye, Heart, X, Trash2 } from 'lucide-react';
 
 interface Blog {
     _id: string;
@@ -208,9 +209,7 @@ const Blogs = () => {
                             className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm font-medium text-gray-200 cursor-pointer transition-all hover:bg-white/10"
                         >
                             {/* .refresh-icon */}
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
+                            <RefreshCw className="h-5 w-5" />
                         </button>
 
                         {user?.role === 'alumni' && (
@@ -298,9 +297,7 @@ const Blogs = () => {
                                 myBlogs.length === 0 ? (
 
                                     <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-                                        <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                        </svg>
+                                        <BookOpen className="mx-auto h-16 w-16 text-gray-400" />
                                         <p className="mt-4 text-gray-900">You haven't written any blogs yet</p>
                                         <button
                                             onClick={() => setShowCreateModal(true)}
@@ -476,13 +473,10 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
                 {/* .blog-stats */}
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                     {/* .view-count */}
-                    <span className="flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        {blog.views}
-                    </span>
+                        <span className="flex items-center gap-1">
+                            <Eye className="h-4 w-4" />
+                            {blog.views}
+                        </span>
 
                     {/* .like-btn / .like-btn.liked */}
                     <button
@@ -491,9 +485,7 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
                             ${isLiked ? 'text-pink-500' : 'text-gray-500 hover:text-pink-500'}`}
                     >
                         {/* .like-icon */}
-                        <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
+                        <Heart className="h-4 w-4 fill-current" />
                         {blog.likes}
                     </button>
 
@@ -504,9 +496,7 @@ const BlogCard = ({ blog, onLike, onDelete }: { blog: Blog; onLike: (id: string)
                             className="flex items-center gap-1 transition-colors bg-transparent border-none cursor-pointer p-0 text-gray-500 hover:text-red-500"
                             title="Delete blog"
                         >
-                            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                            </svg>
+                            <X className="h-4 w-4" />
                         </button>
                     )}
                 </div>
@@ -575,9 +565,7 @@ const CreateBlogModal = ({ onClose, onSuccess }: { onClose: () => void; onSucces
                         onClick={onClose}
                         className="bg-transparent border-none cursor-pointer p-0 text-gray-400 hover:text-gray-900 transition-colors"
                     >
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                            <X className="h-6 w-6" />
                     </button>
                 </div>
 

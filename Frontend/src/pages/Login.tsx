@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../config/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Mail, Lock, AlertCircle, Loader2, Shield } from 'lucide-react';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -70,9 +71,7 @@ const Login = () => {
                         {/* Error Message */}
                         {error && (
                             <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-                                <svg className="h-5 w-5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-500" />
                                 <p className="text-sm text-red-700">{error}</p>
                             </div>
                         )}
@@ -84,9 +83,7 @@ const Login = () => {
                                 <label className="mb-2 block text-sm font-medium text-gray-700">Email Address</label>
                                 <div className="relative">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                        </svg>
+                                        <Mail className="h-5 w-5 text-gray-500" />
                                     </div>
                                     <input
                                         type="email"
@@ -105,9 +102,7 @@ const Login = () => {
                                 <label className="mb-2 block text-sm font-medium text-gray-700">Password</label>
                                 <div className="relative">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
+                                        <Lock className="h-5 w-5 text-gray-500" />
                                     </div>
                                     <input
                                         type="password"
@@ -127,24 +122,19 @@ const Login = () => {
                                 disabled={loading}
                                 className="group relative w-full overflow-hidden rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 font-semibold text-[#111827] transition-all hover:from-amber-400 hover:to-orange-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-[#121620] disabled:opacity-50"
                             >
-                                <span className="relative flex items-center justify-center gap-2">
-                                    {loading ? (
-                                        <>
-                                            <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Signing in...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Sign In
-                                            <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                            </svg>
-                                        </>
-                                    )}
-                                </span>
+                                    <span className="relative flex items-center justify-center gap-2">
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                                Signing in...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Sign In
+                                                <X className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                                            </>
+                                        )}
+                                    </span>
                             </button>
                         </form>
 
@@ -163,9 +153,7 @@ const Login = () => {
                 {/* Admin Login Link */}
                 <div className="mt-6 rounded-lg border border-blue-400/25 bg-blue-500/10 p-4 backdrop-blur-sm">
                     <div className="flex items-start gap-3">
-                        <svg className="h-5 w-5 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <Shield className="h-5 w-5 flex-shrink-0 text-blue-600" />
                         <div>
                             <h3 className="text-sm font-semibold text-blue-300">Admin Access</h3>
                             <p className="mt-1 text-xs text-blue-200">

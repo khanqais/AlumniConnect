@@ -13,6 +13,8 @@ import {
     ChevronDown,
     Briefcase,
     Bell,
+    Menu,
+    X,
 } from 'lucide-react';
 
 const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => void; sidebarOpen?: boolean } = {}) => {
@@ -205,13 +207,7 @@ const Navigation = ({ onToggleSidebar, sidebarOpen }: { onToggleSidebar?: () => 
                             title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                             className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-300 transition hover:bg-white/10 hover:text-white"
                         >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                {sidebarOpen ? (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                ) : (
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                )}
-                            </svg>
+                            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                         </button>
                     )}
 
