@@ -79,10 +79,48 @@ const Home = () => {
             transform-origin: center;
           }
 
-          .hero-pulse {
-            animation: glowPulse 3.8s ease-in-out infinite;
-          }
-        `}
+           .hero-pulse {
+             animation: glowPulse 3.8s ease-in-out infinite;
+           }
+
+           @keyframes float-3d {
+             0%, 100% { transform: translate3d(0, 0, 0) rotate3d(1, 1, 1, 0deg); }
+             25% { transform: translate3d(5px, -10px, 5px) rotate3d(1, 0.5, 0.5, 5deg); }
+             50% { transform: translate3d(-8px, 5px, -3px) rotate3d(0.5, 1, 0.5, -3deg); }
+             75% { transform: translate3d(3px, 8px, 8px) rotate3d(0.5, 0.5, 1, 2deg); }
+           }
+
+           @keyframes particle-float {
+             0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+             50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+           }
+
+           @keyframes shimmer {
+             0% { transform: translateX(-100%) skewX(-15deg); }
+             100% { transform: translateX(200%) skewX(-15deg); }
+           }
+
+           .particle-float {
+             animation: particle-float 4s ease-in-out infinite;
+           }
+
+           .shimmer-overlay {
+             position: relative;
+             overflow: hidden;
+           }
+
+           .shimmer-overlay::after {
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 50%;
+             height: 100%;
+             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+             animation: shimmer 2s infinite;
+             transform: skewX(-15deg);
+           }
+         `}
       </style>
 
       <div className="min-h-screen bg-[#0A0D14] text-gray-200 font-dm overflow-x-hidden selection:bg-amber-500/30 selection:text-amber-200 relative">
@@ -178,50 +216,158 @@ const Home = () => {
               </motion.div>
             </motion.div>
 
-            {/* Hero Visual - Asymmetric Abstract UI */}
-            <motion.div 
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="relative hidden lg:block h-[500px]"
-            >
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="hero-pulse absolute top-6 right-8 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl"></div>
-                <div className="hero-pulse absolute bottom-10 left-10 h-20 w-20 rounded-full bg-blue-500/10 blur-2xl"></div>
+             {/* Hero Visual - Modern Animated System */}
+             <motion.div 
+               initial={{ opacity: 0, x: 40 }}
+               animate={{ opacity: 1, x: 0 }}
+               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+               className="relative hidden lg:block h-[500px]"
+             >
+               {/* Animated Background Particles */}
+               <div className="absolute inset-0 pointer-events-none">
+                 {/* Floating Particles */}
+                 {Array.from({ length: 12 }).map((_, i) => (
+                   <motion.div
+                     key={i}
+                     className={`absolute w-2 h-2 rounded-full ${
+                       i % 3 === 0 ? 'bg-amber-400/40' : 
+                       i % 3 === 1 ? 'bg-blue-400/40' : 
+                       'bg-white/30'
+                     }`}
+                     style={{
+                       top: `${15 + (i * 7) % 70}%`,
+                       left: `${10 + (i * 11) % 80}%`,
+                     }}
+                     animate={{
+                       y: [0, -20, 0],
+                       scale: [1, 1.2, 1],
+                       opacity: [0.3, 0.8, 0.3]
+                     }}
+                     transition={{
+                       duration: 4 + Math.random() * 2,
+                       repeat: Infinity,
+                       delay: i * 0.3
+                     }}
+                   />
+                 ))}
+                 
+                 {/* Animated Orbits */}
+                 <motion.div
+                   className="absolute left-1/2 top-1/2 w-96 h-96 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5"
+                   animate={{ rotate: 360 }}
+                   transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                 >
+                   <motion.div
+                     className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 rounded-full bg-amber-400/80"
+                     animate={{ scale: [1, 1.5, 1] }}
+                     transition={{ duration: 2, repeat: Infinity }}
+                   />
+                   <motion.div
+                     className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 rounded-full bg-blue-400/80"
+                     animate={{ scale: [1, 1.8, 1] }}
+                     transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                   />
+                 </motion.div>
 
-                <div className="hero-orbit absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10">
-                  <div className="absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-amber-400/70"></div>
-                  <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 rounded-full bg-blue-400/70"></div>
-                </div>
-              </div>
+                 {/* Ambient Glow Effects */}
+                 <motion.div
+                   className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-amber-500/10 blur-[100px]"
+                   animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                   transition={{ duration: 8, repeat: Infinity }}
+                 />
+                 <motion.div
+                   className="absolute bottom-1/3 left-1/3 w-48 h-48 rounded-full bg-blue-500/10 blur-[80px]"
+                   animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.5, 0.2] }}
+                   transition={{ duration: 6, repeat: Infinity, delay: 2 }}
+                 />
+               </div>
 
-              <motion.div style={{ y: y1 }} className="hero-float absolute top-10 right-10 w-64 h-80 rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent backdrop-blur-md p-6 shadow-2xl flex flex-col gap-4">
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center mb-2">
-                  <Briefcase className="text-amber-500" size={20} />
-                </div>
-                <div className="h-4 w-3/4 rounded bg-white/10"></div>
-                <div className="h-4 w-1/2 rounded bg-white/10"></div>
-                <div className="mt-auto h-10 w-full rounded-lg border border-amber-500/30 bg-amber-500/10"></div>
-              </motion.div>
+               {/* Interactive Floating Cards */}
+               <motion.div
+                 style={{ y: y1 }}
+                 className="absolute top-12 right-8 w-72 h-80 rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-md p-6 shadow-2xl flex flex-col gap-4 group hover:border-amber-500/30 transition-all duration-300"
+                 whileHover={{ scale: 1.05, y: -5 }}
+                 animate={{ 
+                   rotateZ: [0, -1, 0, 1, 0],
+                   rotateX: [0, -0.5, 0, 0.5, 0],
+                   rotateY: [0, 0.5, 0, -0.5, 0]
+                 }}
+                 transition={{ 
+                   duration: 8, 
+                   repeat: Infinity,
+                   ease: "easeInOut"
+                 }}
+               >
+                 <div className="shimmer-overlay absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                 <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center mb-3 group-hover:bg-amber-500/30 transition-colors">
+                   <Briefcase className="text-amber-500 group-hover:scale-110 transition-transform" size={22} />
+                 </div>
+                 <div className="h-4 w-3/4 rounded bg-gradient-to-r from-white/10 to-white/5"></div>
+                 <div className="h-4 w-1/2 rounded bg-gradient-to-r from-white/5 to-transparent"></div>
+                 <div className="mt-auto h-12 w-full rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent flex items-center justify-center text-sm font-medium text-amber-400 group-hover:from-amber-500/10 transition-all">
+                   Connect with Mentors
+                 </div>
+               </motion.div>
 
-              <motion.div style={{ y: y2 }} className="hero-float-reverse absolute bottom-10 left-0 w-72 h-64 rounded-2xl border border-white/10 bg-[#121620] p-6 shadow-2xl z-10 flex flex-col gap-4">
+               {/* Floating Profile Card */}
+               <motion.div
+                 style={{ y: y2 }}
+                 className="absolute bottom-8 left-4 w-80 h-72 rounded-2xl border border-white/10 bg-gradient-to-br from-[#121620] to-[#1A1F2E] p-6 shadow-2xl z-10 flex flex-col gap-4 group hover:border-blue-500/30 transition-all duration-300"
+                 whileHover={{ scale: 1.03, y: -3 }}
+                 animate={{ 
+                   rotateZ: [0, 1, 0, -1, 0],
+                   rotateX: [0, 0.5, 0, -0.5, 0]
+                 }}
+                 transition={{ 
+                   duration: 10, 
+                   repeat: Infinity,
+                   ease: "easeInOut",
+                   delay: 1
+                 }}
+               >
+                 <div className="shimmer-overlay absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                  <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-                   <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                     <Users className="text-blue-400" size={18} />
+                   <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                     <Users className="text-blue-400 group-hover:scale-110 transition-transform" size={20} />
                    </div>
                    <div>
-                     <div className="h-3 w-24 rounded bg-white/20 mb-2"></div>
-                     <div className="h-2 w-16 rounded bg-white/10"></div>
+                     <div className="h-3 w-24 rounded bg-gradient-to-r from-white/20 to-white/10 mb-2"></div>
+                     <div className="h-2 w-16 rounded bg-gradient-to-r from-white/10 to-transparent"></div>
                    </div>
                  </div>
                  <div className="flex -space-x-3 mt-4">
-                    {[1,2,3,4].map(i => (
-                      <div key={i} className={`w-8 h-8 rounded-full border-2 border-[#121620] bg-gray-800 z-[${10-i}]`}></div>
-                    ))}
-                    <div className="w-8 h-8 rounded-full border-2 border-[#121620] bg-white/5 flex items-center justify-center text-[10px] text-gray-400 z-0">+42</div>
+                   {[1,2,3,4].map(i => (
+                     <motion.div 
+                       key={i}
+                       className={`w-8 h-8 rounded-full border-2 border-[#121620] bg-gradient-to-br from-gray-700 to-gray-800 z-[${10-i}]`}
+                       whileHover={{ scale: 1.2, y: -2 }}
+                       transition={{ type: "spring", stiffness: 300 }}
+                     />
+                   ))}
+                   <div className="w-8 h-8 rounded-full border-2 border-[#121620] bg-gradient-to-br from-white/5 to-transparent flex items-center justify-center text-[10px] text-gray-400 z-0">+42</div>
                  </div>
-              </motion.div>
-            </motion.div>
+               </motion.div>
+
+               {/* Floating Stats Bubble */}
+               <motion.div
+                 className="absolute top-1/2 right-4 w-24 h-24 rounded-full border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-md flex items-center justify-center shadow-2xl"
+                 animate={{ 
+                   y: [0, -15, 0],
+                   scale: [1, 1.1, 1]
+                 }}
+                 transition={{ 
+                   duration: 6, 
+                   repeat: Infinity,
+                   ease: "easeInOut"
+                 }}
+                 whileHover={{ scale: 1.2, rotate: 180 }}
+               >
+                 <div className="text-center">
+                   <div className="text-lg font-bold text-white">85%</div>
+                   <div className="text-[10px] text-gray-400">Success</div>
+                 </div>
+               </motion.div>
+             </motion.div>
 
           </div>
         </section>
