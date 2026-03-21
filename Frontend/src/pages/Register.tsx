@@ -174,7 +174,7 @@ const Register = () => {
     };
 
     return (
-        <div className="register-theme flex min-h-screen items-center justify-center bg-[#0A0D14] px-4 py-4 relative overflow-hidden">
+        <div className="register-theme flex min-h-screen items-center justify-center bg-black px-4 py-4 relative overflow-hidden">
             <style>
                 {`
                     .register-theme .register-card,
@@ -189,6 +189,11 @@ const Register = () => {
                     .register-theme .register-card textarea {
                         background-color: rgba(255, 255, 255, 0.05) !important;
                         border-color: rgba(255, 255, 255, 0.18) !important;
+                        color: #f9fafb !important;
+                    }
+
+                    .register-theme .register-card select option {
+                        background-color: #121620 !important;
                         color: #f9fafb !important;
                     }
 
