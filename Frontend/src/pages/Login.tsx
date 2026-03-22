@@ -6,8 +6,8 @@ import { Mail, Lock, AlertCircle, Loader2, Shield, X } from 'lucide-react';
 
 const Login = () => {
     const [formData, setFormData] = useState({
-        email: '',
-        password: '',
+        email: 'ash123@tsecedu.org',
+        password: 'khanqais',
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -92,7 +92,7 @@ const Login = () => {
                                         onChange={onChange}
                                         required
                                         className="block w-full rounded-lg border border-white/15 bg-white/5 py-3 pl-10 pr-3 text-gray-100 placeholder-gray-400 transition-all focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
-                                        placeholder="you@example.com"
+                                        placeholder="ash123@tsecedu.org"
                                     />
                                 </div>
                             </div>
@@ -111,7 +111,7 @@ const Login = () => {
                                         onChange={onChange}
                                         required
                                         className="block w-full rounded-lg border border-white/15 bg-white/5 py-3 pl-10 pr-3 text-gray-100 placeholder-gray-400 transition-all focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
-                                        placeholder="••••••••"
+                                        placeholder="khanqais"
                                     />
                                 </div>
                             </div>

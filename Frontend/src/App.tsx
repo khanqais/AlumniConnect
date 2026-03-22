@@ -25,6 +25,7 @@ const Recommendation = lazy(() => import('./pages/Recommendation'));
 const Quiz = lazy(() => import('./pages/Quiz'));
 const Referrals = lazy(() => import('./pages/Referrals'));
 const GroupInvites = lazy(() => import('./pages/GroupInvites'));
+const AlumniSupport = lazy(() => import('./pages/AlumniSupport'));
 
 const RouteLoader = () => (
   <div className="flex h-screen items-center justify-center bg-gray-100">
@@ -95,6 +96,14 @@ function App() {
             element={
               <PublicRoute>
                 <Register />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/alumni-support" 
+            element={
+              <PublicRoute>
+                <AlumniSupport />
               </PublicRoute>
             } 
           />

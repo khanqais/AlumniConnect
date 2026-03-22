@@ -3,6 +3,8 @@ const Resource = require('../models/Resource');
 const Blog = require('../models/Blog');
 const Announcement = require('../models/Announcement');
 const Notification = require('../models/Notification');
+const VerificationQueue = require('../models/VerificationQueue');
+const { getRiskIndicator } = require('../utils/riskScoring');
 
 
 const adminLogin = async (req, res) => {
@@ -659,6 +661,175 @@ const updateAnnouncement = async (req, res) => {
     }
 };
 
+
+const getVerificationQueue = async (req, res) => {
+    try {
+        const { status = 'pending', department, dateFrom, dateTo, riskLevel } = req.query;
+        
+        // Build query object
+        const query = {};
+        
+        // Filter by status
+        if (status) {
+            query.status = status;
+        }
+        
+        // Filter by risk level
+        if (riskLevel) {
+            query.riskLevel = riskLevel;
+        }
+        
+        // Filter by department/branch
+        if (department) {
+            query.branch = { $regex: new RegExp(department, 'i') };
+        }
+        
+        // Filter by date range
+        if (dateFrom || dateTo) {
+            query.createdAt = {};
+            if (dateFrom) {
+                query.createdAt.$gte = new Date(dateFrom);
+            }
+            if (dateTo) {
+                query.createdAt.$lte = new Date(dateTo);
+            }
+        }
+        
+        // Fetch verification requests with populated user info if available
+        const verificationRequests = await VerificationQueue.find(query)
+            .sort({ createdAt: -1 })
+            .populate('approvedBy', 'name email');
+            
+        // Enhance requests with risk indicators for frontend display
+        const enhancedRequests = verificationRequests.map(request => ({
+            ...request.toObject(),
+            riskIndicator: getRiskIndicator(request.riskScore)
+        }));
+            
+        res.json({
+            success: true,
+            verificationRequests: enhancedRequests,
+            total: enhancedRequests.length,
+            filters: { status, department, dateFrom, dateTo, riskLevel }
+        });
+        
+    } catch (error) {
+        console.error('Get verification queue error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+const validateAlumniDocumentMatch = async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { adminDecision, reasonNote } = req.body;
+        const adminId = req.user ? req.user.id : null; // Assuming admin is authenticated
+        
+        // Validate input
+        if (!requestId) {
+            return res.status(400).json({ message: 'Request ID is required' });
+        }
+        
+        if (!adminDecision || !['approved', 'rejected'].includes(adminDecision)) {
+            return res.status(400).json({ message: 'Valid admin decision (approved/rejected) is required' });
+        }
+        
+        // Find the verification request
+        const verificationRequest = await VerificationQueue.findById(requestId);
+        
+        if (!verificationRequest) {
+            return res.status(404).json({ message: 'Verification request not found' });
+        }
+        
+        if (verificationRequest.status !== 'pending') {
+            return res.status(400).json({ message: 'Verification request is already processed' });
+        }
+        
+        // Update the verification request
+        verificationRequest.status = adminDecision;
+        verificationRequest.rejectionReason = adminDecision === 'rejected' ? reasonNote || '' : '';
+        verificationRequest.approvedBy = adminId ? adminId : null;
+        verificationRequest.processedAt = new Date();
+        
+        await verificationRequest.save();
+        
+        // If approved, create the actual user record and send verification token
+        if (adminDecision === 'approved') {
+            // This will be handled by the frontend calling the appropriate auth controller functions
+            console.log(`✅ Alumni verification request ${requestId} approved`);
+        } else {
+            console.log(`❌ Alumni verification request ${requestId} rejected: ${reasonNote || 'No reason provided'}`);
+        }
+        
+        res.json({
+            success: true,
+            message: `Verification request ${adminDecision} successfully`,
+            verificationRequest: {
+                id: verificationRequest._id,
+                status: verificationRequest.status,
+                rejectionReason: verificationRequest.rejectionReason
+            }
+        });
+        
+    } catch (error) {
+        console.error('Validate alumni document match error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+const bulkRejectHighRiskRequests = async (req, res) => {
+    try {
+        // Find all pending high-risk requests (riskScore > 70)
+        const highRiskRequests = await VerificationQueue.find({
+            status: 'pending',
+            riskScore: { $gt: 70 }
+        });
+        
+        if (highRiskRequests.length === 0) {
+            return res.json({
+                success: true,
+                message: 'No high-risk requests found to reject',
+                rejectedCount: 0
+            });
+        }
+        
+        // Bulk update all high-risk requests to rejected
+        const adminId = req.user ? req.user.id : null;
+        const rejectionReason = 'Automatically rejected due to high risk score';
+        const processedAt = new Date();
+        
+        const bulkOperations = highRiskRequests.map(request => ({
+            updateOne: {
+                filter: { _id: request._id },
+                update: {
+                    $set: {
+                        status: 'auto-rejected',
+                        rejectionReason: rejectionReason,
+                        approvedBy: adminId,
+                        processedAt: processedAt
+                    }
+                }
+            }
+        }));
+        
+        await VerificationQueue.bulkWrite(bulkOperations);
+        
+        console.log(`🗑️ Bulk rejected ${highRiskRequests.length} high-risk verification requests`);
+        
+        res.json({
+            success: true,
+            message: `Successfully rejected ${highRiskRequests.length} high-risk requests`,
+            rejectedCount: highRiskRequests.length
+        });
+        
+    } catch (error) {
+        console.error('Bulk reject high-risk requests error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     adminLogin,
     getPendingUsers,
@@ -683,4 +854,7 @@ module.exports = {
     getAnnouncementsByCategory,
     deleteAnnouncement,
     updateAnnouncement,
+    getVerificationQueue,
+    validateAlumniDocumentMatch,
+    bulkRejectHighRiskRequests,
 };

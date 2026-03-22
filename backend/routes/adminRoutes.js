@@ -24,6 +24,8 @@ const {
     getAnnouncementsByCategory,
     deleteAnnouncement,
     updateAnnouncement,
+    getVerificationQueue,
+    validateAlumniDocumentMatch,
 } = require('../controllers/adminController');
 
 
@@ -61,5 +63,10 @@ router.get('/announcements', getAnnouncements);
 router.get('/announcements/:category', getAnnouncementsByCategory);
 router.put('/announcements/:id', updateAnnouncement);
 router.delete('/announcements/:id', deleteAnnouncement);
+
+// Verification queue routes
+router.get('/verification-queue', getVerificationQueue);
+router.post('/verify-alumni/:requestId', validateAlumniDocumentMatch);
+router.post('/bulk-reject-high-risk', bulkRejectHighRiskRequests);
 
 module.exports = router;

@@ -48,6 +48,31 @@ interface AlumniResult {
     experience: string;
 }
 
+interface VerificationQueueItem {
+    _id: string;
+    name: string;
+    email: string;
+    collegeName: string;
+    graduationYear: number;
+    branch: string;
+    enrollmentNumber: string;
+    dateOfBirth: string;
+    experience: string;
+    skills: string[];
+    linkedin: string;
+    alternateEmail: string;
+    contactNumber: string;
+    status: 'pending' | 'approved' | 'rejected' | 'auto-rejected';
+    rejectionReason: string;
+    createdAt: string;
+    confidenceScore: number;
+    matchedRecords: any[];
+    riskScore: number;
+    riskSignals: string[];
+    riskLevel: 'low' | 'medium' | 'high';
+    riskIndicator: string;
+}
+
 interface Announcement {
     _id: string;
     title: string;
@@ -65,22 +90,25 @@ const AdminDashboard = () => {
     const [approvedUsers, setApprovedUsers] = useState<User[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'commandCenter' | 'referralOps' | 'announcements'>('pending');
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [showModal, setShowModal] = useState(false);
+    const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'commandCenter' | 'referralOps' | 'announcements' | 'verificationQueue'>('pending');
+    const [userToReject, setUserToReject] = useState<User | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
-    const [userToReject, setUserToReject] = useState<User | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const [alumniResults, setAlumniResults] = useState<AlumniResult[]>([]);
-    const [alumniTotal, setAlumniTotal] = useState(0);
     const [alumniPage, setAlumniPage] = useState(1);
+    const [alumniTotal, setAlumniTotal] = useState(0);
     const [alumniPages, setAlumniPages] = useState(1);
+    const [verificationQueue, setVerificationQueue] = useState<VerificationQueueItem[]>([]);
+    const [riskFilter, setRiskFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all');
     const [isSearching, setIsSearching] = useState(false);
     const [searchFilters, setSearchFilters] = useState({ name: '', graduationYear: '', branch: '', company: '', skills: '' });
     const [hasSearched, setHasSearched] = useState(false);
     const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
     const [cgpaInputs, setCgpaInputs] = useState<Record<string, string>>({});
     const [banReasons, setBanReasons] = useState<Record<string, string>>({});
+    const [showModal, setShowModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     
 
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -109,12 +137,22 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [pendingRes, approvedRes, statsRes, referralStatsRes, announcementsRes] = await Promise.all([
+            
+            // Build verification queue query params
+            const verificationQueueParams = new URLSearchParams();
+            if (riskFilter !== 'all') {
+                verificationQueueParams.append('riskLevel', riskFilter);
+            }
+            
+            const verificationQueueUrl = `/admin/verification-queue${verificationQueueParams.toString() ? `?${verificationQueueParams.toString()}` : ''}`;
+            
+            const [pendingRes, approvedRes, statsRes, referralStatsRes, announcementsRes, verificationQueueRes] = await Promise.all([
                 api.get('/admin/pending'),
                 api.get('/admin/approved'),
                 api.get('/admin/stats'),
                 api.get('/admin/referral-stats'),
                 api.get('/admin/announcements'),
+                api.get(verificationQueueUrl),
             ]);
             
             setPendingUsers(pendingRes.data);
@@ -122,6 +160,7 @@ const AdminDashboard = () => {
             setStats(statsRes.data);
             setReferralStats(referralStatsRes.data?.stats || null);
             setAnnouncements(announcementsRes.data);
+            setVerificationQueue(verificationQueueRes.data.verificationRequests || []);
         } catch (err) {
             console.error(err);
             alert('Failed to fetch data');
@@ -165,6 +204,57 @@ const AdminDashboard = () => {
             alert('Rejection failed. Please try again.');
         }
     };
+
+    const handleApproveVerification = async (requestId: string, requestName: string) => {
+        if (!window.confirm(`Are you sure you want to approve ${requestName}'s verification request?`)) return;
+
+        try {
+            await api.post(`/admin/verify-alumni/${requestId}`, { 
+                adminDecision: 'approved' 
+            });
+            
+            alert(`${requestName}'s verification request has been approved successfully!`);
+            fetchData();
+        } catch (err) {
+            console.error(err);
+            alert('Approval failed. Please try again.');
+        }
+    };
+
+    const openRejectVerificationModal = (request: VerificationQueueItem) => {
+        setUserToReject({ 
+            _id: request._id, 
+            name: request.name, 
+            email: request.email,
+            role: 'alumni',
+            university: request.collegeName,
+            graduationYear: request.graduationYear,
+            skills: request.skills || [],
+            createdAt: request.createdAt
+        });
+        setShowRejectModal(true);
+        setRejectionReason('');
+    };
+
+    const handleBulkRejectHighRisk = async () => {
+        if (!window.confirm('Are you sure you want to bulk reject all high-risk verification requests? This action cannot be undone.')) return;
+
+        try {
+            await api.post('/admin/bulk-reject-high-risk');
+            alert('Successfully rejected all high-risk verification requests!');
+            fetchData();
+        } catch (err) {
+            console.error(err);
+            alert('Bulk rejection failed. Please try again.');
+        }
+    };
+
+    // Handle risk filter changes
+    useEffect(() => {
+        if (activeTab === 'verificationQueue') {
+            fetchData();
+        }
+    }, [riskFilter]);
 
     const openRejectModal = (user: User) => {
         setUserToReject(user);
@@ -520,6 +610,16 @@ const AdminDashboard = () => {
                         }`}
                     >
                         College Announcements
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('verificationQueue')}
+                        className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                            activeTab === 'verificationQueue'
+                                ? 'bg-amber-500 text-[#0A0D14] shadow-sm'
+                                : 'bg-white/5 border border-white/15 text-gray-300 hover:bg-white/10'
+                        }`}
+                    >
+                        Verification Queue ({verificationQueue.length})
                     </button>
                 </div>
 
@@ -1217,6 +1317,141 @@ const AdminDashboard = () => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Verification Queue Table */}
+            {activeTab === 'verificationQueue' && (
+                <div className="space-y-4">
+                    {/* Risk Filter Controls */}
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-300">Filter by Risk:</label>
+                            <select 
+                                value={riskFilter}
+                                onChange={(e) => setRiskFilter(e.target.value as any)}
+                                className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-gray-300 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
+                            >
+                                <option value="all">All Requests</option>
+                                <option value="low">🟢 Low Risk</option>
+                                <option value="medium">🟡 Medium Risk</option>
+                                <option value="high">🔴 High Risk</option>
+                            </select>
+                        </div>
+                        
+                        {/* Bulk Actions */}
+                        {riskFilter === 'high' || riskFilter === 'all' ? (
+                            <button
+                                onClick={handleBulkRejectHighRisk}
+                                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                            >
+                                🗑️ Bulk Reject High-Risk
+                            </button>
+                        ) : null}
+                    </div>
+
+                    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#121620]/85 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+                    {verificationQueue.length === 0 ? (
+                        <div className="px-6 py-16 text-center">
+                            <svg className="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="mt-4 text-lg font-medium text-gray-300">
+                                No pending verification requests
+                            </p>
+                            <p className="mt-2 text-sm text-gray-400">
+                                Manual verification requests will appear here
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-white/10">
+                                <thead className="bg-white/5">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Applicant</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Contact Info</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Details</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Status</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-400">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/10">
+                                    {verificationQueue.map((request) => (
+                                        <tr key={request._id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center">
+                                                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+                                                        {request.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-white">{request.name}</div>
+                                                        <div className="text-sm text-gray-400">{request.email}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-300">
+                                                    <div>Alternate Email: {request.alternateEmail}</div>
+                                                    {request.contactNumber && (
+                                                        <div>Contact: {request.contactNumber}</div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-300">
+                                                    <div>Graduation Year: {request.graduationYear}</div>
+                                                    {request.branch && <div>Branch: {request.branch}</div>}
+                                                    {request.enrollmentNumber && <div>Enrollment: {request.enrollmentNumber}</div>}
+                                                    <div>Confidence Score: {request.confidenceScore}%</div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="space-y-1">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        request.status === 'pending' 
+                                                            ? 'bg-yellow-100 text-yellow-800' 
+                                                            : request.status === 'approved' 
+                                                                ? 'bg-green-100 text-green-800' 
+                                                                : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                                    </span>
+                                                    {request.riskIndicator && (
+                                                        <div className="text-xs text-gray-400">
+                                                            {request.riskIndicator}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-sm font-medium">
+                                                {request.status === 'pending' ? (
+                                                    <div className="flex gap-2 justify-end">
+                                                        <button
+                                                            onClick={() => handleApproveVerification(request._id, request.name)}
+                                                            className="rounded-md bg-green-600 px-3 py-1 text-white hover:bg-green-700 text-sm"
+                                                        >
+                                                            Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => openRejectVerificationModal(request)}
+                                                            className="rounded-md bg-red-600 px-3 py-1 text-white hover:bg-red-700 text-sm"
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-gray-400">
+                                                        {request.status === 'approved' ? 'Approved' : 'Rejected'}
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
             )}
 
             {/* Reject Modal */}

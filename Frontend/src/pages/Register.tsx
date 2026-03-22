@@ -561,6 +561,27 @@ const Register = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Alumni Support Link */}
+                <div className="register-info mt-6 rounded-lg border border-amber-200 bg-amber-50/10 p-4 backdrop-blur-sm">
+                    <div className="flex items-start gap-3">
+                        <svg className="h-5 w-5 flex-shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        <div>
+                            <h3 className="text-sm font-semibold text-amber-300">Can't access your institute email?</h3>
+                            <p className="mt-1 text-xs text-amber-200">
+                                If you're an alumni but don't have access to your institute email, or facing issues with registration, 
+                                we offer alternative verification methods through our dedicated support page.
+                            </p>
+                            <p className="mt-2 text-xs text-amber-200">
+                                <Link to="/alumni-support" className="font-semibold text-amber-400 hover:text-amber-300">
+                                    → Get Alumni Verification Support
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
