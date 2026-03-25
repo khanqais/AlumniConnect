@@ -26,6 +26,7 @@ const {
     updateAnnouncement,
     getVerificationQueue,
     validateAlumniDocumentMatch,
+    bulkRejectHighRiskRequests,
 } = require('../controllers/adminController');
 
 

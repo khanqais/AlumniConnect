@@ -40,12 +40,15 @@ const rateLimitMiddleware = async (req, res, next) => {
             }
         }
         
+        const normalizedEmail = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+        const normalizedName = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+
         // Store this request in logs
         const logEntry = new VerificationRequestLog({
             ipAddress: ipAddress,
             deviceFingerprint: deviceFingerprint,
-            email: req.body.email || '',
-            name: req.body.name || '',
+            email: normalizedEmail || `unknown-${deviceFingerprint.slice(0, 8)}@unknown.local`,
+            name: normalizedName || `Unknown ${deviceFingerprint.slice(0, 8)}`,
             enrollmentNumber: req.body.enrollmentNumber || '',
             timestamp: now
         });

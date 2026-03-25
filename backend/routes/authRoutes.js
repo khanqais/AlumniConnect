@@ -13,6 +13,6 @@ router.get('/alumni', getAllAlumni);
 
 // Fallback authentication routes
 router.post('/find-alumni', findAlumniByAlternateIdentifiers);
-router.post('/manual-verification', rateLimitMiddleware, upload.single('alumniProof'), createManualVerificationRequest);
+router.post('/manual-verification', upload.single('alumniProof'), rateLimitMiddleware, createManualVerificationRequest);
 
 module.exports = router;
