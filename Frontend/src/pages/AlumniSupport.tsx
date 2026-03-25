@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../config/api';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, Loader2, Shield, Upload, User, Calendar, Building2, GraduationCap, LinkIcon, Phone } from 'lucide-react';
+
+import { Mail, AlertCircle, Loader2, Shield, Upload, User, LinkIcon } from 'lucide-react';
 
 const AlumniSupport = () => {
     useEffect(() => {
@@ -26,7 +26,6 @@ const AlumniSupport = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
 
     const techSkills = [
         "Java", "Python", "C", "C++", "JavaScript", "TypeScript", "Go", "Rust", 

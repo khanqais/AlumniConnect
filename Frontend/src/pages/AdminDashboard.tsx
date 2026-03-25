@@ -94,7 +94,6 @@ const AdminDashboard = () => {
     const [userToReject, setUserToReject] = useState<User | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
     const [alumniResults, setAlumniResults] = useState<AlumniResult[]>([]);
     const [alumniPage, setAlumniPage] = useState(1);
     const [alumniTotal, setAlumniTotal] = useState(0);
